@@ -46,6 +46,10 @@ read. No external reconciliation is performed.
 September 2025 terms never appear in an earlier observation. Draft stage labels,
 Reference content and generated opaque identifiers are not participant input.
 
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
+
 ## 4. Temporal structure and exogenous inputs
 
 - Coordinate 1: initial executive-order record (2020-08-06; `S1/E1`).

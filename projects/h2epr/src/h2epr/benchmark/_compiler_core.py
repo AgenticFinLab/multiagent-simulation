@@ -457,6 +457,8 @@ def _validate_semantic_closure(
     _require(settings["exposure_mode"] == assets.source_profile["exposure_mode"], "configuration_exposure_mode_mismatch")
     _require(settings["observation_contract"].get("schema_version") == "h2epr.participant-observation.v3",
              "configuration_observation_contract_mismatch")
+    _require(settings["observation_contract"].get("vocabulary_exposure") == "declared_event_vocabulary",
+             "configuration_vocabulary_exposure_unsupported")
 
     observations = _unique(
         values["observation_registry"]["observations"],
@@ -570,6 +572,12 @@ def _validate_semantic_closure(
     for kind, row in message_kinds.items():
         _require(set(row["eligible_senders"]) <= set(active_ids), f"message_sender_unknown:{kind}")
         _require(set(row["eligible_recipients"]) <= set(active_ids), f"message_recipient_unknown:{kind}")
+    for intent_id, handler in handlers.items():
+        for requirement in handler.get("information_requirements", []):
+            _validate_receipt_requirement(requirement, message_kinds, handler["eligible_actors"], intent_id)
+            for actor in handler["eligible_actors"]:
+                _require((requirement["sender_id"], actor) in route_pairs,
+                         f"information_requirement_route_missing:{intent_id}")
     for annotation in mechanism["annotations"]:
         _require(set(annotation["participant_ids"]) <= set(active_ids), f"annotation_participant_unknown:{annotation['annotation_id']}")
         for condition in annotation["when_all"]:
@@ -591,6 +599,19 @@ def _validate_semantic_closure(
         draft=assets.source_documents["draft_epg"],
     )
     _require(receipt == derived, "configuration_admission_receipt_not_independently_derived")
+
+
+def _validate_receipt_requirement(requirement, message_kinds, actors, label):
+    kind = message_kinds.get(requirement["message_kind"])
+    _require(kind is not None, f"information_requirement_kind_unknown:{label}")
+    _require(requirement["sender_id"] in kind["eligible_senders"],
+             f"information_requirement_sender_ineligible:{label}")
+    _require(set(actors) <= set(kind["eligible_recipients"]),
+             f"information_requirement_recipient_ineligible:{label}")
+    fields = kind.get("payload_fields", {})
+    for field, value in requirement["payload_equals"].items():
+        _require(field in fields, f"information_requirement_field_untyped:{label}:{field}")
+        _validate_value_domain(value, fields[field], f"information_requirement:{label}:{field}")
 
 
 def _validate_rule_release(
@@ -701,6 +722,8 @@ def _validate_rule_release(
                 _require(actor_id in kind["eligible_recipients"], f"rule_guard_recipient_ineligible:{rule_id}")
                 if "sender_id" in guard:
                     _require(guard["sender_id"] in kind["eligible_senders"], f"rule_guard_sender_ineligible:{rule_id}")
+                if "payload_equals" in guard:
+                    _validate_receipt_requirement(guard, message_kinds, [actor_id], rule_id)
         for message in rule["messages"]:
             kind = message["message_type"]
             recipient = message["recipient_id"]
@@ -709,6 +732,10 @@ def _validate_rule_release(
             _require(actor_id in declaration["eligible_senders"], f"rule_message_sender_ineligible:{rule_id}")
             _require(recipient in declaration["eligible_recipients"], f"rule_message_recipient_ineligible:{rule_id}")
             _require((actor_id, recipient) in route_pairs, f"rule_message_route_missing:{rule_id}")
+            from h2epr.runtime.information import payload_error
+
+            error = payload_error(message["payload"], declaration)
+            _require(error is None, f"rule_message_payload_invalid:{rule_id}:{error}")
     declared_non_noop = {row["intent_id"] for row in mechanism["intent_handlers"]} - {"no_op"}
     _require(used_intents - {"no_op"} == declared_non_noop, "rule_intent_coverage_mismatch")
 

@@ -63,7 +63,7 @@ identifiers are never participant observations.
 
 | Intent | Activation / reopening | Permitted response and boundary |
 | --- | --- | --- |
-| `decline_knickerbocker_aid_request` | known `knickerbocker_aid_request` from `knickerbocker_trust_company` | Record Morgan's represented declined request after the bounded review failed to resolve financial condition; no insolvency truth is asserted. |
+| `decline_knickerbocker_aid_request` | known `knickerbocker_aid_request` from `knickerbocker_trust_company` | Select a bounded refusal after the received request. SRC007 provides historical review rationale; no audit finding or solvency determination is simulated. |
 | `coordinate_private_trust_support` | known `trust_run_notice` from `general_depositor_population` | Record the bounded private support continuum for distressed trusts without conserved funds, guaranteed stabilization or counterfactual collapse claims. |
 | `record_nyse_liquidity_support` | known `call_loan_liquidity_notice` from `new_york_trust_company_population` | Record the separately triggered NYSE liquidity support account without simulating lending balances, brokers, rates or exchange closure. |
 
@@ -102,8 +102,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A denial has no state effect beyond its record/message. Trust support and NYSE support are distinct; neither creates cash conservation or a recovery outcome.
 - Perturbation: Without trust contagion, later support rows remain open even though the earlier request disposition can still close.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

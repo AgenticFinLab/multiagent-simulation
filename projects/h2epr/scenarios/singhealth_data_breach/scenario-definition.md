@@ -39,8 +39,13 @@ reconciliation is performed.
 | E6 relation descriptions swap penalty recipients | P_8 issues IHiS SGD 750,000 and SingHealth SGD 250,000 order records; no payment |
 | E7 says reforms were implemented | current intents record announced programs and oversight only |
 
-No earlier observation contains COI findings, penalty outcomes or the later
-attribution report. Structural participant identity is not a delivered fact.
+Generated COI findings, penalty outcomes and attribution-report values follow
+their admitted actions. Their capability and field names are visible earlier;
+structural identity is not evidence of report delivery or attribution truth.
+
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
 
 ## 4. Temporal structure and exogenous inputs
 
@@ -90,12 +95,15 @@ than executing a technical attack.
 
 No actor absorbs another institution. P_4 context records no individual or
 aggregate response. P_1 and P_9 remain separate so a later published attribution
-cannot leak backwards through the incident representation.
+does not become an earlier generated publication result. The actor and capability
+names themselves remain vocabulary-exposed.
 
 ## 6. World, institutions, relationships, and resources
 
-The reducer owns 17 one-time fields under incident, response, disclosure, review,
-inquiry, enforcement, remediation and attribution entities. `unrecorded` means
+The reducer owns 17 one-time fields under incident, response, IHiS, disclosure,
+review, inquiry, enforcement, remediation and attribution entities. IHiS alone
+observes `ihis_system_operator.scope_verification`, whose report may be qualified
+or unresolved. This is an assessment record, not a forensic truth state. `unrecorded` means
 that no modeled record has been accepted yet. Every transition has one authorized
 handler and cannot be written by a message or foreign actor.
 
@@ -117,12 +125,29 @@ organizational program notices and public attribution. Guards require actual
 delivery. The one-tick routes are explicit structural assumptions, not recovered
 organizational latency.
 
+IHiS additionally receives its own private assessment. The ministry cannot read
+that field; it learns the statement through `breach_scope_summary`. This typed
+message carries `assessment_status` and `scale`. A latest unresolved or withdrawn
+summary does not satisfy the disclosure predicate, and a pending summary is absent
+from ministry memory. Concurrent conflicting latest summaries fail the predicate.
+
+COI findings also have a typed status: qualified findings and recommendations,
+unresolved, or withdrawn. PDPC's selected Rule rows inspect that latest status;
+the message kind alone does not demonstrate usable findings. Other notification
+payloads remain untyped and their contents are not validated as decision evidence.
+
 ## 8. Intent, adjudication, lifecycle, and result
 
 Seventeen event intents plus `no_op` project from eight parents. The backend
 selects an intent; the environment validates actor, target, parameters and
-preconditions against one sealed prestate. Only an accepted intent reaches the
-reducer. Messages have their own admitted/delivered/rejected lifecycle.
+preconditions against one sealed prestate. Only accepted intents produce world
+deltas. Messages have their own admitted/delivered/rejected lifecycle.
+
+For disclosure, shared admission also requires the latest qualifying scope
+receipt and a qualified internal assessment record. Both remain necessary when
+the backend bypasses its Rule guards. This is a structural information contract
+selected for the pilot, not a recovered institutional disclosure rule. Other
+receipt dependencies and time windows remain Rule policy selections.
 
 Detection does not force verification. Scope verification does not itself make a
 public disclosure. Direction does not implement a review; inquiry does not equal
@@ -153,8 +178,13 @@ changes remain configuration successors.
   and PDPC cannot publish the Symantec attribution.
 - Result boundary: an accepted order cannot create payment; an announced
   program cannot create implemented controls or effectiveness.
-- Temporal firewall: Whitefly attribution in an earlier actor observation
-  falsifies the package even if terminal fields later match.
+- Result availability: attribution-report values before the publication action,
+  or a scope receipt before delivery, falsify the package. Earlier Whitefly-related
+  vocabulary remains exposed and excludes a historically prefix-clean claim.
+- Scope content: unresolved assessment, a latest withdrawn summary or no delivered
+  summary prevents disclosure. Delayed qualifying receipt can activate Rule within
+  its window; expiry may leave a valid open endpoint. No internal forensic method,
+  measured accuracy or mandatory historical timetable is inferred.
 
 This full-Draft, logical-time construction supports dataset-conditioned
 engineering and simulation-only description. It does not support historical

@@ -101,8 +101,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: Support is a qualified record without tactical or casualty effects. A negotiation position does not secure an exemption; the later status row requires delivered enforcement context.
 - Perturbation: Delaying PLO-to-Hezbollah delivery beyond the support window suppresses the camp-support and mediation-dependent resolution chain while closing transport normally.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

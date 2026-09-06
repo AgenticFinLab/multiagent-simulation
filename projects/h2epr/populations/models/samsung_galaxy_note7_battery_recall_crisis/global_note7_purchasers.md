@@ -96,8 +96,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: The cohort cannot issue a Samsung statement or change a recall field. Its report may be received without forcing a particular manufacturer response.
 - Perturbation: Withholding this report leaves the early response chain open while later independent institutional rows can still be tested separately.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

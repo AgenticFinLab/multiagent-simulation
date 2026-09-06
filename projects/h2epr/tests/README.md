@@ -12,6 +12,11 @@ executable in the current offline environment.
 | `experiments` | Plan identity, package/binding admission, custody uniqueness, model-control parity, scheduling, failures, analysis, and claim limits |
 | `standards` | Schema catalog, Skill inventory, current-only repository shape, local links, and publication surface |
 
+[Information-contract tests](runtime/test_information_contracts.py) distinguish
+vocabulary exposure, policy guards, common receipt admission and typed message
+content. They exercise backend bypass, negative/withdrawn/latest updates,
+malformed payloads, valid open outcomes and independently rederived dispositions.
+
 Run everything from the repository root:
 
 ```bash

@@ -9,16 +9,16 @@ verification and reproduction instructions. Model and network access are denied.
 
 | Item | Identity |
 |---|---|
-| Package | `h2epr.event-package.0196.v2`; `2dfca76550db4a9d68db3cb7e03336e39bbddafe15f575ec9109d1096014330e` |
-| Rule binding | `78f974583e36330d9cde19ff5f5133e7cbd42bbc1d279958f74b7baed4e711d8` |
-| Rule configuration | `h2epr.0196.rule.v2`; `64238263abacf223c3bd1d895830496d4d4d270126fee96a0cecf90e233aa5d5` |
-| Run | `run.293a2a817e42f1ea0578dc45` |
-| Run manifest | `fff11a9e17f5392ff66ea08f0e0812e8ac6c89980658876c20cfac53a9766a78` |
-| Trace | `71d715fd6272d5d7d89a9b487f443125a124c0a66ba2fdf3920ca7e58906c1e8` |
+| Package | `h2epr.event-package.0196.v2`; `897f82abe5197dab4e32c6de9e477d77ff74b6709292d096c83c8eebe6534684` |
+| Rule binding | `3071f54542ee566dff373276abac87e832d1b756a0f280fe55a55fb2a8f0cd2c` |
+| Rule configuration | `h2epr.0196.rule.v2`; `98dffac626cbe4900aff1852e498641a35f3421ba6dadb4cc6e5119982655ff5` |
+| Run | `run.c81b945d591680e9f1fbaf03` |
+| Run manifest | `d19e1dec7b58e76427cf62ca6db7533d0584fd6982ee26f29158dc39e4297d72` |
+| Trace | `bed17c556d05b24d37317f58838fe28d601574b890166e00d3d4af4c9e137c45` |
 | Terminal state | `79ed8e7961b316ff111e8add369f9de2cbfedd10f47cb45682343c27bc8cb140` |
-| Run seal | `a3a0b6fb18c602982c51c2a293d0be62c0490150c290ab38260cae78cd9c4484` |
-| Generated EPG seal | `3d3101e92c31c36ba3dee05583bf77d6a8642f49aed226ff600290bdaa3ee13f` |
-| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-passive-admission/a` |
+| Run seal | `a427eaae17e9505faab43fdcd53e62ff478f0330040e49346d046f3af62c98e4` |
+| Generated EPG seal | `a4eae255bc5b9924c12915dc5c4fec687ca791331ffd3219da14cb3b761f9be1` |
+| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-06-semantic-contracts/materialization-a` |
 
 Fresh A/B materializations are byte-identical across the eight output roles and
 run receipt. A generated-ID probe changes opaque identities while preserving
@@ -61,8 +61,8 @@ provenance includes the contributing coordinate batch, not a minimal causal set.
 ## Generated trajectory
 
 The table lists every coordinate and every non-default action and state change.
-Trace suffixes abbreviate `trace.run.293a2a817e42f1ea0578dc45.`; corresponding graph
-record nodes use `record.trace.run.293a2a817e42f1ea0578dc45.` with the same suffix.
+Trace suffixes abbreviate `trace.run.c81b945d591680e9f1fbaf03.`; corresponding graph
+record nodes use `record.trace.run.c81b945d591680e9f1fbaf03.` with the same suffix.
 
 | Coordinate | Accepted choices | Recorded effects and delivery |
 |---|---|---|
@@ -133,6 +133,13 @@ dependencies. They are inspectable and falsifiable within this simulation,
 but are not recovered institutional protocols or historical causal claims.
 
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 - Construction uses the full exposed Draft; resemblance cannot be held-out prediction evidence.
 - Frozen evidence was read as the sealed dataset context, without external reconciliation. Defective Draft relations and transaction directions do not define authority.

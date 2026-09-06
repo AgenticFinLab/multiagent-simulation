@@ -4,21 +4,21 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0288`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-05-stage-d/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-06-semantic-contracts/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.1b16d1949b2a609181e1d06d` |
-| Package SHA-256 | `cc5229cd7f77b93305450a50a068817e7d8ac786c2f2d2cde9a132749808e030` |
-| Rule binding SHA-256 | `f1feac44d4b537f5154da23809af950eb55be1869fc46d98814e8714095c123b` |
-| Run manifest SHA-256 | `1dc66598d77d691612ebd227f7c80fe68be6585dbb1abbf0787b5ade3653f2c7` |
-| Trace SHA-256 | `0d87bb00c4ae36ed60c987af05fe254f3819747b7661b65667f707846beb1f26` |
-| Run seal SHA-256 | `4aabd930c2a33fb4eaef5f3c5d188ae044e378131c6fc3850542308b908e786e` |
+| Run | `run.ae8aa2842bfd4d33c481fc78` |
+| Package SHA-256 | `f657f2857d9e4d56cc18b882990f98f0fe12dccbd609252dd3d6858bf87c648f` |
+| Rule binding SHA-256 | `4f46b295b13ad1d4c1e779ded1f9c0be4055e12ab84afbf46442d80f0fa60339` |
+| Run manifest SHA-256 | `5bd389e910586acc715a4a8cb13194a85ed2f03dc5f3414b399616d650db726b` |
+| Trace SHA-256 | `c55af03ad713bd9426f7fa15e7c2f5bb4b2f3e677114fe3336d46cf066a7688b` |
+| Run seal SHA-256 | `514b7bb4a2ced7374967d84a8aee43663bb7270735dfc0c629c2a8b0f0e18331` |
 | Final state SHA-256 | `76ef0853824b1f9c6205d1ecccad42eec1a43759b7c607800d5fdd1e9a1a7515` |
-| Generated EPG seal | `b82fdc940f91db4d578689a3b74cdcb0895b2c9a0833ba2f5488147a7b73c526` |
+| Generated EPG seal | `f34dc9527ead73cf341c65ff4b0d91e114ae5c2c168e18babe8ffda7be391700` |
 
 The run covers 11 action-bearing representations over
 20 logical coordinates. Its sealed trace contains
@@ -44,11 +44,11 @@ Run from the repository root with an absent output directory.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/panic_of_1907/package \
+  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
+  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/panic_of_1907/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-05-stage-d/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-05-stage-d/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-06-semantic-contracts/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-06-semantic-contracts/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/panic_of_1907/rule/simulation-reading.md) describes the

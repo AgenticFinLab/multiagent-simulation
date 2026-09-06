@@ -101,8 +101,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A ruling record does not itself alter ownership or platform service. Each later court record requires its own delivered filing or enacted-law context.
 - Perturbation: Delaying the Supreme appeal beyond its window leaves the final ruling and dependent service/negotiation chain open.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

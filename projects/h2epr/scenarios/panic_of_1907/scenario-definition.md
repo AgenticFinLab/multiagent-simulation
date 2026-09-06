@@ -43,11 +43,15 @@ exposed. No external reconciliation is performed.
 | E2 transactions reverse or mislabel withdrawal/support endpoints | actor-local withdrawal and NYCH rows own meaning; no transaction execution |
 | E4 relations make depositors an aid requester/denier | P_7 requests; P_6 and P_9 decide after actual receipt |
 | E6/E8 relations and transactions reverse funder/recipient roles | qualified P_9/P_10 records only; no money ledger or receipt claim |
-| the Draft joins 1907 panic and 1913 institutional outcome | logical horizon discloses the long gap; later reform never leaks into crisis observations |
+| the Draft joins 1907 panic and 1913 institutional outcome | logical horizon discloses the long gap; later reform result values are distinct from already-visible reform vocabulary |
 
-No actor observes a future reform label, later recommendation, Reference content
-or generated opaque identifier. Structural roster presence is not delivered
-knowledge.
+Actors see declared reform field and capability names before those choices occur.
+Recommendation and passage result values follow their generated actions; Reference
+content and opaque generated identifiers are excluded from decision evidence.
+
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
 
 ## 4. Temporal structure and exogenous inputs
 

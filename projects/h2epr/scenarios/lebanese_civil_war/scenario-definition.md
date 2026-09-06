@@ -42,9 +42,13 @@ were read. No external reconciliation is performed.
 | five civilian/refugee harm rows | explicit context, never victim-authored intents |
 | duplicated Litani and exemption wording | consolidated records with all appearances retained |
 
-Future Taif, exemption and post-war claims never appear in a 1975–1988
-observation. Draft stage labels, Reference content and opaque generated IDs are
-not participant input.
+Taif and post-war result values remain unrecorded until their generated actions;
+their field and capability names are visible earlier. Draft stage descriptions,
+Reference content and opaque generated IDs are not participant evidence.
+
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
 
 ## 4. Temporal structure and exogenous inputs
 
@@ -158,8 +162,9 @@ route/timing changes require admitted configuration successors.
   Lebanese Front camp operation; a victim context cannot emit an action.
 - Result boundary: no accepted action changes casualty, territory, weapon,
   finance, responsibility, peace or constitutional-effect state.
-- Temporal firewall: a Taif or post-war term in an earlier actor observation
-  falsifies the package regardless of final labels.
+- Result availability: a Taif or post-war result asserted before its admitted
+  transition, or a received report without actual delivery, falsifies the package.
+  Earlier vocabulary exposure is declared and excludes prefix-clean claims.
 
 This full-Draft logical-time construction supports dataset-conditioned
 engineering, behavior-mechanism inspection and simulation-only description. It

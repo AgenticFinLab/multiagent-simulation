@@ -115,7 +115,12 @@
           "type": "array",
           "items": {"$ref": "#/$defs/route"}
         },
-        "observation_contract": {"type": "object", "minProperties": 1},
+        "observation_contract": {
+          "type": "object", "minProperties": 1,
+          "required": ["vocabulary_exposure"],
+          "properties": {"vocabulary_exposure": {"const": "declared_event_vocabulary"}},
+          "description": "Current projection exposes declared event field and capability vocabulary; a prefix-clean vocabulary mode is not implemented."
+        },
         "termination": {
           "type": "object",
           "required": ["require_all_ticks", "require_no_unresolved_messages"],
@@ -154,8 +159,11 @@
             "kind": {"enum": ["message_received", "message_known"]},
             "message_kind": {"type": "string", "minLength": 1},
             "sender_id": {"type": "string", "minLength": 1},
-            "max_age_ticks": {"type": "integer", "minimum": 0}
-          }
+            "max_age_ticks": {"type": "integer", "minimum": 0},
+            "selection": {"const": "latest"},
+            "payload_equals": {"type": "object", "minProperties": 1}
+          },
+          "dependentRequired": {"payload_equals": ["sender_id", "selection"]}
         }
       ]
     },

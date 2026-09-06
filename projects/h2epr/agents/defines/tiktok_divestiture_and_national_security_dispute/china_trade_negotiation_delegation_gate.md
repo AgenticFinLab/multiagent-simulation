@@ -95,8 +95,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: One side's position is not bilateral agreement or implementation and creates no ownership or operational effect.
 - Perturbation: Withholding the corporate proposal leaves both delegation positions and the downstream resolution open.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

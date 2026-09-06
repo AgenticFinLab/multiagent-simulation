@@ -46,6 +46,10 @@ Final slate, board outcome and future stage descriptions never appear in early
 backend observations. Source dates stay trace navigation metadata, not a field
 the Rule backend receives or a source of hidden future state updates.
 
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
+
 ## 4. Temporal structure and exogenous inputs
 
 | Coordinates | Coverage | Timing qualification |

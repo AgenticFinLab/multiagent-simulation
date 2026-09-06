@@ -35,6 +35,7 @@ IMPLEMENTATION_PATHS = (
     "src/h2epr/backends/_rule_core.py",
     "src/h2epr/backends/rule.py",
     "src/h2epr/backends/registry.py",
+    "src/h2epr/runtime/information.py",
 )
 CLAIM_EXCLUSIONS = (
     "held-out evaluation",
@@ -1040,6 +1041,7 @@ def build_synthetic_event(
             }
         ],
         "observation_contract": {
+            "vocabulary_exposure": "declared_event_vocabulary",
             "schema_version": "h2epr.participant-observation.v3",
             "sealed_prestate_per_coordinate": True,
             "message_delivery_phase": "before_decision_collection",

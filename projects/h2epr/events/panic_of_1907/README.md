@@ -45,7 +45,7 @@ entries provide no execution authority or fallback.
 
 ## Current result
 
-The canonical seed-0 run is `run.1b16d1949b2a609181e1d06d`: eleven actors, 20 coordinates,
+The canonical seed-0 run is `run.ae8aa2842bfd4d33c481fc78`: eleven actors, 20 coordinates,
 1,043 trace records,
 1,084 graph nodes and
 3,111 edges. Fresh A/B, generated-ID perturbation,

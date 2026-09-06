@@ -19,6 +19,7 @@ from h2epr.conformance import (
 )
 from h2epr.masim_kernel import (
     ActionIntent,
+    AuthoritativeReducer,
     MessageIntent,
     replay_trace,
     source_inventory as masim_source_inventory,
@@ -30,7 +31,8 @@ from h2epr.runtime.benchmark_runner import (
     h2epr_runtime_source_inventory,
     materialize_run,
 )
-from h2epr.runtime.environment import apply_delta
+from h2epr.runtime.environment import apply_delta, build_environment
+from h2epr.runtime.information import message_contract_error
 from h2epr.runtime._environment_core import condition_matches
 from h2epr.runtime.generated_epg import (
     GeneratedEPGError,
@@ -264,6 +266,8 @@ def _verify_trace_semantics(
               for actor in expected_actors}
     latest_transport: dict[str, Mapping[str, Any]] = {}
     prestate = copy.deepcopy(package.scenario["initial_state"])
+    environment = build_environment(package.scenario)
+    verifier_reducer = AuthoritativeReducer(prestate, environment.apply_batch)
 
     try:
         for coordinate in package.scenario["timeline"]:
@@ -336,11 +340,13 @@ def _verify_trace_semantics(
             messages_by_action: dict[str, list[Mapping[str, Any]]] = {}
             for message in messages:
                 try:
-                    MessageIntent(**message)
+                    message_intent = MessageIntent(**message)
                 except (TypeError, ValueError) as exc:
                     raise _PublicationCoreError(
                         f"run_message_intent_invalid:{logical_tick}"
                     ) from exc
+                error = message_contract_error(message_intent, package.scenario["mechanism"])
+                _require(error is None, f"run_message_contract_invalid:{error}")
                 message_id = message["message_intent_id"]
                 _require(
                     message_id not in message_intents,
@@ -449,6 +455,27 @@ def _verify_trace_semantics(
                     decision["messages"] == expected_messages,
                     f"run_decision_message_mismatch:{logical_tick}:{actor_id}",
                 )
+                record = decision["decision_record"]
+                _require(record.get("reason_kind") == "configured_policy_rationale"
+                         and record.get("observation_sha256") == canonical_sha256(contract),
+                         f"run_decision_evidence_identity_mismatch:{logical_tick}:{actor_id}")
+
+            # Reconstruct common admission from verified projections, not from
+            # the backend's rationale or the producer's accepted flag.
+            environment.bind_observations(observation_by_actor)
+            expected = verifier_reducer.reduce(
+                [ActionIntent(**action) for action in actions],
+                logical_tick=logical_tick, run_seed=0,
+            )
+            expected_dispositions = {item.intent_id: item.to_dict() for item in expected.dispositions}
+            for disposition in dispositions:
+                derived = expected_dispositions.get(disposition["intent_id"])
+                _require(derived is not None and all(canonical_sha256(disposition.get(key)) == canonical_sha256(value)
+                                                     for key, value in derived.items()),
+                         f"run_shared_admission_not_reproduced:{logical_tick}")
+            _require({item.delta_id: item.to_dict() for item in expected.deltas}
+                     == {item["delta_id"]: item for item in deltas},
+                     f"run_environment_effects_not_reproduced:{logical_tick}")
 
             disposition_by_intent = {
                 row["intent_id"]: row for row in dispositions

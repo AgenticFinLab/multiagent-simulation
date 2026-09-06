@@ -72,6 +72,13 @@ For each decision situation, define:
 Definitions constrain the choice set. Rule code, an LLM, or RuleLLM admission
 selects within that set.
 
+Classify each prerequisite as world feasibility, mandatory actor information,
+or policy selection under [Architecture](../ARCHITECTURE.md#participant-semantic-contract).
+Name the shared handler projection for every mandatory constraint and test a
+backend that attempts to bypass it. Label a policy-only window or receipt guard
+as a selected assumption. Separately disclose event-specific vocabulary visible
+before its associated result; an unrecorded value does not hide the field name.
+
 ## 7. Intent and environment-result boundary
 
 | Intent | Meaning | Eligible target | Required content/lifecycle | Environment-owned result |

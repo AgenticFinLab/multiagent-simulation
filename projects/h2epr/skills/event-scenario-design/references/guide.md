@@ -49,6 +49,13 @@ expectations, never in integrity invariants.
 
 ## Interface-closure cases
 
+Apply the [participant semantic contract](../../../ARCHITECTURE.md#participant-semantic-contract).
+Record vocabulary exposure separately from future result values. For a mandatory
+receipt, project `information_requirements`; for material message content, project
+typed `payload_fields`. Check latest negative/withdrawn and same-tick conflicting
+reports. A missing shared projection is a contract gap, not something a successful
+Rule run can prove away. Other Rule guards remain policy-selected assumptions.
+
 Exercise a normal action, invalid actor, invalid target, out-of-domain payload,
 failed precondition, missing route, delayed delivery, terminal delivery,
 distinct concurrent writes, idempotent same-value writes, resource

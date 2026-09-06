@@ -142,6 +142,49 @@ invariants remain mandatory; named outcome expectations are descriptive and
 can be unmet in a valid release. Runtime failures preserve partial custody and
 a failed-attempt receipt without claiming a complete run or exact resume.
 
+### Participant semantic contract
+
+Three constraint classes have different owners:
+
+| Class | Executable authority | A failure means |
+|---|---|---|
+| World feasibility | Mechanism actor/target/parameter domains, state preconditions and effects | A typed environment rejection with no corresponding effect |
+| Mandatory actor information | Explicit handler `information_requirements`, checked against runtime-bound received history | No receipt, nonqualifying latest content or stale observation prevents admission across backends |
+| Policy selection | Backend configuration guards, activation windows and priorities | This policy waits or chooses another row; it is not a universal prohibition |
+
+Human Definitions label an information dependency as mandatory or policy-selected.
+Only an explicit shared projection makes it a cross-backend admission condition.
+The eight Rule baselines' existing windows and other receipt guards are selected
+policy assumptions. They do not establish historical necessity, legal duties or
+general institutional availability. A mandatory calendar boundary would need a
+shared-clock projection and bypass tests; a Rule window alone does not enforce it.
+
+Exposure has four distinct surfaces: full-Draft author access, generic capability
+vocabulary, event-specific future names, and generated result values. Current
+baselines expose the declared event vocabulary from the first coordinate,
+including names of later reforms, agreements and attribution-related capabilities.
+An `unrecorded` value is not an early result, but its field/action name can still
+reveal a future topic. These baselines are **vocabulary-exposed**, not historically
+prefix-clean. Excluding future stage descriptions or undelivered payloads does not
+remove that exposure. A strict historical-information successor requires reviewed
+time-appropriate vocabularies and observation/menu projection, with explicit tests.
+
+For content-bearing messages, `payload_fields` declares a closed set of required,
+typed top-level fields. Omission denotes an untyped notification; the prose
+`payload_contract` is not executable validation. `payload_equals` predicates use
+the latest received report from a declared sender and kind. A newer negative or
+withdrawn report supersedes a positive one; conflicting reports received together
+fail the predicate rather than winning by list order. Receipt proves availability
+of a statement, not its truth. World-state preconditions remain independent.
+
+Rule decision records label `reason` as configured policy rationale and retain the
+matched guard declarations plus a hash of the exact observation. Source narratives
+and this rationale are not generated findings. The trace-linked observation,
+actual message content, shared disposition and delta support a generated claim.
+The publisher reconstructs shared admission and effects from verified actor-local
+observations before trusting a disposition; independent Rule materialization
+additionally verifies policy selection and diagnostic records.
+
 ### MASim boundary
 
 H2EPR uses the tracked MASim event-process implementation for action and

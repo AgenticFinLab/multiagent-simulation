@@ -18,6 +18,10 @@ per-event research question.
 Record allowed dataset files, stable anchors, known conflicts, Draft exposure,
 and information that may never enter runtime observations.
 
+Distinguish author access, capability vocabulary, event-specific future terms
+and generated result values. Declare vocabulary-exposed baselines explicitly;
+claim a strict temporal firewall only for the surfaces actually projected and tested.
+
 ## 4. Temporal structure and exogenous inputs
 
 Define logical time, tick semantics, ordering, scheduled inputs, latency,

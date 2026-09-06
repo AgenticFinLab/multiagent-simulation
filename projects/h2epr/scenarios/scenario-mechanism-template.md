@@ -16,11 +16,24 @@ parameter domains, preconditions over declared state, and deterministic
 effects. Include a typed `no_op` handler for every active actor. Effects may
 set, increment, or append uniquely; messages have no direct write authority.
 
+Use `information_requirements` only for a reviewed, backend-neutral receipt
+prerequisite. Each entry names sender, kind, `selection: latest` and a nonempty
+`payload_equals` predicate over typed fields. Runtime binds the actor's actual
+received history before calling any backend. Missing or nonqualifying information
+produces a typed rejection even when world preconditions are satisfied. Policy
+preferences and Rule activation windows stay in backend configuration.
+
 ## Messages and routes
 
 Declare message kinds, eligible senders/recipients, and payload meaning here.
 Declare concrete directed routes and latency in shared configuration. Every
 emitted message needs one route and a terminal lifecycle before closeout.
+
+When content changes a decision, define `payload_fields` as a closed map of
+required fields to value domains. Prose alone leaves a message untyped. Exercise
+empty, malformed, unresolved, withdrawn and updated reports; a latest negative
+report must not fall back to an older positive. Do not treat an eligible sender's
+assertion as world truth. Define any independent world-state check separately.
 
 ## Conflict, annotations, and termination
 

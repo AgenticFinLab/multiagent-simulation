@@ -6,14 +6,14 @@ inventory.
 
 | Event release | Package SHA-256 | Run | Trace | Nodes | Edges |
 |---|---|---|---:|---:|---:|
-| [H2EPR-0196](../../east_palestine_train_derailment/rule/) | `2dfca76550db4a9d68db3cb7e03336e39bbddafe15f575ec9109d1096014330e` | `run.293a2a817e42f1ea0578dc45` | 405 | 432 | 1210 |
-| [H2EPR-0551](../../angola_yellow_fever_outbreak/rule/) | `938f441d834a8c928fb64ec12eb6e3692ef6e00c91d06016ba681f8d6f540e3d` | `run.b21a925f5048915d999d5433` | 826 | 866 | 2481 |
-| [H2EPR-1031](../../baoneng_vanke_takeover_battle/rule/) | `f1b68baa1d90045eb87a8309eb4a2ad606a00ee1d00bb2b53709abe82062b83f` | `run.6f6408d11b70b472f33444ae` | 823 | 861 | 2465 |
-| [H2EPR-0481](../../samsung_galaxy_note7_battery_recall_crisis/rule/) | `cbcb8e37e6b3cfa8c9ffe83055dced7ed948146c60bb35046070c157f3733d5c` | `run.88051af3adbca475637d35ec` | 1101 | 1152 | 3262 |
-| [H2EPR-0616](../../singhealth_data_breach/rule/) | `9d17581f17e994b2aba4252c8a7457c7b03ecd8f3e9003c83268bf954664a16c` | `run.5db9a323beb010817c521f46` | 782 | 819 | 2317 |
-| [H2EPR-0288](../../panic_of_1907/rule/) | `cc5229cd7f77b93305450a50a068817e7d8ac786c2f2d2cde9a132749808e030` | `run.1b16d1949b2a609181e1d06d` | 1043 | 1084 | 3111 |
-| [H2EPR-0170](../../tiktok_divestiture_and_national_security_dispute/rule/) | `667de386997afde4f415f0b6ea491138acce8bfa081150bcfb88f156f67aa7fd` | `run.2cb97929423c768bbd0cf72d` | 1101 | 1142 | 3297 |
-| [H2EPR-0892](../../lebanese_civil_war/rule/) | `c806337186f2d7b51c5d1183b4ece5f28b2b2282b12f3521d5c2c86a9ecd475e` | `run.108a8c5193199df3dc7e5fa8` | 922 | 963 | 2789 |
+| [H2EPR-0196](../../east_palestine_train_derailment/rule/) | `897f82abe5197dab4e32c6de9e477d77ff74b6709292d096c83c8eebe6534684` | `run.c81b945d591680e9f1fbaf03` | 405 | 432 | 1210 |
+| [H2EPR-0551](../../angola_yellow_fever_outbreak/rule/) | `40dd6cf24ad8c162f861e476cc5665ab8260738a11d4d4dd2157bac46b9e22e7` | `run.8fca27c569b81c55eab3a256` | 826 | 866 | 2481 |
+| [H2EPR-1031](../../baoneng_vanke_takeover_battle/rule/) | `06cdd22424efcb091e4b9850f38b5965ea222e652e3e7cec31ecf2282a7bb976` | `run.f53d0be85dbb76fc46dcdde4` | 823 | 861 | 2465 |
+| [H2EPR-0481](../../samsung_galaxy_note7_battery_recall_crisis/rule/) | `6b37fcffdb633d9696cc757d71e0fe60d62c7cd6e9ac074862f8281f346a48fe` | `run.9120d67d5fe0c22266400e21` | 1101 | 1152 | 3262 |
+| [H2EPR-0616](../../singhealth_data_breach/rule/) | `52dbf7578a745e66cf8066f8743ac91f129deafb849b9fc92d6802fa32b0b5a5` | `run.26b57124e29d077af3150e02` | 782 | 820 | 2318 |
+| [H2EPR-0288](../../panic_of_1907/rule/) | `f657f2857d9e4d56cc18b882990f98f0fe12dccbd609252dd3d6858bf87c648f` | `run.ae8aa2842bfd4d33c481fc78` | 1043 | 1084 | 3111 |
+| [H2EPR-0170](../../tiktok_divestiture_and_national_security_dispute/rule/) | `13ea21a15889014555de7f3c8c6603325a3fb42525fd538492f2e996fc768a05` | `run.2a983fc27557518b15624c54` | 1101 | 1142 | 3297 |
+| [H2EPR-0892](../../lebanese_civil_war/rule/) | `3c47bb0d6f91b5c5d716c2fb509c44d6cb543b5ef83c8e38333dd3e4533bfac4` | `run.391644c9adfa091e6d2109e9` | 922 | 963 | 2789 |
 
 `conformance-receipt.json` records distinct event identities, the shared
 package and backend-status contracts, equal H2EPR and MASim inventories, equal

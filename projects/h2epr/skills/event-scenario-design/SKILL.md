@@ -21,6 +21,8 @@ routing, and release evidence.
    information.
 5. Define action/message admission, concurrency, allocation, failure routing,
    state deltas, annotations, and replay semantics.
+   Classify world feasibility, mandatory information and policy-selected
+   prerequisites. Test shared constraints by bypassing the Rule selector.
 6. Publish `scenario-mechanism.json`: typed state fields, one handler for every
    registry intent including `no_op`, parameter domains, preconditions,
    deterministic effects, message kinds, conflict policy, annotation rules,

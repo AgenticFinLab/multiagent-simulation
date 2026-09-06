@@ -14,6 +14,7 @@ from h2epr.benchmark.package import EventPackage
 from h2epr.canonical import canonical_sha256
 from h2epr.masim_kernel import ActionIntent, MessageIntent
 from h2epr.runtime._environment_core import condition_matches
+from h2epr.runtime.information import matching_receipts
 
 from .interface import DecisionResult
 
@@ -99,17 +100,7 @@ class _DeclarativeRuleBackendBase:
                 if guard["kind"] == "message_received"
                 else contract["memory"]["received_messages"]
             )
-            return any(
-                message["message_kind"] == guard["message_kind"]
-                and (
-                    "sender_id" not in guard
-                    or message["sender_id"] == guard["sender_id"]
-                )
-                and ("max_age_ticks" not in guard or
-                     contract["logical_tick"] - message["first_consumable_tick"]
-                     <= guard["max_age_ticks"])
-                for message in messages
-            )
+            return bool(matching_receipts(guard, messages, contract["logical_tick"]))
         raise _RuleBackendCoreError(f"rule_guard_kind_unknown:{guard['kind']}")
 
     @staticmethod
@@ -258,6 +249,9 @@ class _DeclarativeRuleBackendBase:
                 "policy_id": self.policy_id,
                 "rule_id": rule_id,
                 "reason": reason,
+                "reason_kind": "configured_policy_rationale",
+                "matched_guards": copy.deepcopy(rule["guards"]) if rule else [],
+                "observation_sha256": canonical_sha256(contract),
                 "guard_count": guard_count,
                 "deterministic": True,
             },

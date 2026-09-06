@@ -67,6 +67,13 @@ identifiers are never participant observations.
 Rule selects exposed bounded meanings; it is not a fitted preference model.
 Broader alternatives require a reviewed semantic successor before backend work.
 
+The two penalty rows select only the latest COI report whose typed `status` is
+`qualified findings and recommendations`. An unresolved or withdrawn report does
+not activate those rows; an empty or undeclared status fails message validation.
+This remains a selected Rule information dependency, not a claim that law requires
+this specific COI notice before PDPC can act. Shared receipt admission in the
+current pilot applies to the ministry's disclosure handler only.
+
 ## 7. Intent and environment-result boundary
 
 | Intent | Eligible target | Environment-owned record |
@@ -97,8 +104,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A penalty order may be delivered without organizational acceptance or remediation. Each order affects only its authorized recipient field.
 - Perturbation: Delayed findings beyond the bounded order windows leaves both penalties and their dependent responses open while the run can still close correctly.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

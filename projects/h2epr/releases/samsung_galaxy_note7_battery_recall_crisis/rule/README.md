@@ -4,21 +4,21 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0481`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-05-stage-d-current/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-06-semantic-contracts/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.88051af3adbca475637d35ec` |
-| Package SHA-256 | `cbcb8e37e6b3cfa8c9ffe83055dced7ed948146c60bb35046070c157f3733d5c` |
-| Rule binding SHA-256 | `997e4ecb84ff70a2551bc6a10d6aeb428979d9a20a7036f5e50fac89119f4ff0` |
-| Run manifest SHA-256 | `720a5a2560eacde5bb90130bb64c597f66655ba57edde9452485d704118523fb` |
-| Trace SHA-256 | `9c974e99b0c97ce869e477c966a9c985967f3a11857b7acdc389c08ad9d32575` |
-| Run seal SHA-256 | `76080e6b5a240ae925920b5eb12ca6c0ed484d01d5ac9e764ad8c9bea4398ff2` |
+| Run | `run.9120d67d5fe0c22266400e21` |
+| Package SHA-256 | `6b37fcffdb633d9696cc757d71e0fe60d62c7cd6e9ac074862f8281f346a48fe` |
+| Rule binding SHA-256 | `34f80fc27a8ce458777a94234f4178fbb8cd7ab7a44adec06462d7ed010c5419` |
+| Run manifest SHA-256 | `2a5ee513c4271b40510b501cb3d3e46509c1f983e8f546f79ef8c1aa97181d14` |
+| Trace SHA-256 | `8696796a7002226e83c62272d8f078ddbe9d8d8b181b75809180f7611f301825` |
+| Run seal SHA-256 | `797a72f31f2415c7a9b56e4098fb21c9f33141915bbb07f91737f4c3e3f5adc4` |
 | Final state SHA-256 | `ed367bf27f6c59a047b0ac40b07957dbc8f7a3d5a17752b4be522eb829970c32` |
-| Generated EPG seal | `21f63fada2e1a44be5568940af012705b4a485e57046dfa55a20debf48c53629` |
+| Generated EPG seal | `daf947cb36ba655f70e76577f0b6d3801be46c63d2166733a0e28abfb818600a` |
 
 The run covers 8 action-bearing representations over
 29 logical coordinates. Its sealed trace contains
@@ -44,11 +44,11 @@ Run from the repository root with an absent output directory.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/samsung_galaxy_note7_battery_recall_crisis/package \
+  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
+  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/samsung_galaxy_note7_battery_recall_crisis/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-05-stage-d-current/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-05-stage-d-current/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-06-semantic-contracts/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-06-semantic-contracts/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/samsung_galaxy_note7_battery_recall_crisis/rule/simulation-reading.md) describes the

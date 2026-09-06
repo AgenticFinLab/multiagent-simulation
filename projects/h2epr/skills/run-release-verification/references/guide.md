@@ -52,6 +52,12 @@ flag is acceptable evidence.
 
 Outer checksums or producer `passed` fields never replace these derivations.
 
+Reapply the common reducer to the recorded intents using verified actor-local
+observations. Require exact dispositions and deltas, including receipt-based
+rejections, independently of Rule rationale. Verify typed message payloads before
+using their delivery as evidence. Deterministic rematerialization additionally
+checks matched-guard diagnostics and configured policy rationale.
+
 ## Tamper cases
 
 Rewrap each mutation with valid outer self-hashes and confirm failure: run

@@ -39,6 +39,14 @@ Construction admits exactly three files for a selected event:
 EPG, held-out material, evaluation-only content, external research, and
 network retrieval are excluded from construction.
 
+Current baselines expose declared event vocabulary, including names associated
+with later events. They do not provide historically prefix-clean observations.
+The [participant semantic contract](ARCHITECTURE.md#participant-semantic-contract)
+separates world feasibility, mandatory received information and policy selection.
+The [SingHealth reading](reports/singhealth_data_breach/rule/simulation-reading.md)
+demonstrates this separation through qualified, missing, delayed and withdrawn
+reports, with open outcomes assessed separately from execution integrity.
+
 The maintained Rule path establishes package admission, deterministic
 execution, trace integrity, replay, Generated EPG provenance, and compact
 release verification. It does not establish historical fit, parameter

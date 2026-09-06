@@ -46,11 +46,18 @@ statement or request; it never transfers the sender's state authority.
 
 A scope summary does not disclose the breach publicly. A review announcement does not cure a vulnerability, and a penalty notice does not implement a security control.
 
+The scope pilot admits qualified and unresolved internal assessment reports.
+The environment records the selected report in IHiS-private state. It does not
+perform forensic analysis or certify the statement as true. The qualified Rule
+selection follows the exposed S2/E3/P_3 account; unresolved is an explicit
+structural alternative used to test the information contract.
+
 ## 5. Decision situations, observations, and state
 
 | Observation | Producer / availability | Missing or stale handling |
 |---|---|---|
 | Public record fields | Reducer-derived sealed prestate | Unrecorded is valid; missing contract fails. |
+| Own scope assessment | `ihis_system_operator.scope_verification`, actor-private sealed prestate | Unrecorded permits the initial report; another actor cannot inspect it. |
 | Current delivered messages | MASim transport before decisions | Empty means no current delivery, never inferred receipt. |
 | Own outgoing pending lifecycle | Runtime projection | Await terminal accounting; incoming pending private content is invisible. |
 | Received and own-action memory | Runtime-derived actual history | Reuse delivered information; rejected attempts are not completions. |
@@ -65,7 +72,7 @@ identifiers are never participant observations.
 
 | Intent | Activation / reopening | Permitted response and boundary |
 | --- | --- | --- |
-| `verify_breach_scope` | known `breach_detection_notice` from `singhealth_data_owner` | Record a qualified internal scope assessment, not a technical forensic reconstruction. |
+| `verify_breach_scope` | policy-selected detection receipt and an unrecorded own assessment | Submit a qualified or unresolved internal assessment; no technical forensic reconstruction. |
 | `initiate_directed_security_review` | known `security_review_direction` from `singapore_ministry_of_health` | Record initiation of the directed review without treating recommendations as implemented controls. |
 | `announce_security_improvement_program` | known `ihis_penalty_notice` from `personal_data_protection_commission`; `review.ihis_review` = `initiated` | Record an announced improvement program after review and penalty notice, not completed controls or effectiveness. |
 
@@ -77,13 +84,19 @@ Broader alternatives require a reviewed semantic successor before backend work.
 
 | Intent | Eligible target | Environment-owned record |
 | --- | --- | --- |
-| `verify_breach_scope` | `response` | `response.scope_verification`: unrecorded → `qualified_scope_recorded` |
+| `verify_breach_scope` | `response` | `ihis_system_operator.scope_verification`: unrecorded → `qualified_scope_recorded` or `scope_unresolved`, from the admitted assessment parameter |
 | `initiate_directed_security_review` | `review` | `review.ihis_review`: unrecorded → `initiated` |
 | `announce_security_improvement_program` | `remediation` | `remediation.ihis_program`: unrecorded → `announced` |
 
 The environment checks actor, target, parameters and preconditions against the
 same sealed state. Rejection yields no delta. Coupled messages have independent
 transport dispositions and do not prove action acceptance or recipient uptake.
+
+Scope messages have typed status and scale. The ministry's shared disclosure
+handler requires both a qualifying latest receipt and a qualified internal record.
+A withdrawn statement cannot be replaced with an older positive receipt. The
+one-shot assessment intent does not support repeated forensic revisions; a later
+assessment cycle would require a separately reviewed lifecycle successor.
 
 ## 8. Configurable dimensions and uncertainty
 
@@ -104,8 +117,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A scope summary does not disclose the breach publicly. A review announcement does not cure a vulnerability, and a penalty notice does not implement a security control.
 - Perturbation: Withholding the scope summary blocks the dependent disclosure chain; delaying COI findings prevents timely penalties and the final remediation record.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

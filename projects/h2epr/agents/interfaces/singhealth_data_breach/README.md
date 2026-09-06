@@ -1,6 +1,6 @@
 # SingHealth Data Breach participant interfaces
 
-Eight Agent Definitions project to eight actors, four observation classes, 17
+Eight Agent Definitions project to eight actors, five observation classes, 17
 event intents plus `no_op`, and two lifecycles. The participant semantic index
 seals each parent and every Draft appearance. P_4 remains accounted context.
 

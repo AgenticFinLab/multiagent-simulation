@@ -97,8 +97,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: An aggregate restriction record proves neither universal adoption nor compliance. A proposal is not passage and has no direct platform effect.
 - Perturbation: Removing the proposal notice leaves the hearing and dependent law chain open while the state restriction record remains valid.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

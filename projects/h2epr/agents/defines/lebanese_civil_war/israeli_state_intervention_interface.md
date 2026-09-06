@@ -102,8 +102,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: An intervention or facilitation record is not a tactical simulation, a casualty effect, victory, occupation measure or responsibility judgment.
 - Perturbation: Withholding the Front support notice leaves facilitation and the dependent camp-operation record open without altering the invasion record.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

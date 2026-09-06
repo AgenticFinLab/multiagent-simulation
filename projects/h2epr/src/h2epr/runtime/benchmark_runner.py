@@ -55,6 +55,7 @@ def h2epr_runtime_source_inventory() -> list[dict[str, str]]:
         "src/h2epr/benchmark/package.py",
         "src/h2epr/runtime/_environment_core.py",
         "src/h2epr/runtime/environment.py",
+        "src/h2epr/runtime/information.py",
         "src/h2epr/runtime/generated_epg.py",
         "src/h2epr/runtime/_runner_core.py",
         "src/h2epr/runtime/benchmark_runner.py",
@@ -184,6 +185,7 @@ class BenchmarkEngine(_BenchmarkEngineBase):
             run_seed=run_seed,
         )
         environment = build_environment(package.scenario)
+        self.environment = environment
         self.reducer = AuthoritativeReducer(
             package.scenario["initial_state"],
             environment.apply_batch,

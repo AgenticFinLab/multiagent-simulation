@@ -45,7 +45,7 @@ catalog does not authorize a planned implementation or fallback.
 
 ## Current result
 
-The current canonical seed-0 run is `run.6f6408d11b70b472f33444ae`: eight actors,
+The current canonical seed-0 run is `run.f53d0be85dbb76fc46dcdde4`: eight actors,
 20 coordinates, 823 trace records, 861 graph nodes and 2,465 edges. Fresh A/B,
 generated-ID perturbation, trace and tick/run seals, authoritative replay,
 complete graph reconstruction and zero unresolved transport are verified in the
@@ -56,7 +56,7 @@ records full-output coverage, every non-default action and terminal expectation,
 and the limits of this disclosure/decision-record model. It also distinguishes
 the canonical baseline from local missing/late-information construction probes.
 Raw custody is retained under ignored
-`.local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-05-passive-admission/`.
+`.local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-06-semantic-contracts/materialization-a`.
 
 The [current registry](../current-events.json) and
 [cross-event Rule conformance](../../releases/cross-event/rule/) cover the

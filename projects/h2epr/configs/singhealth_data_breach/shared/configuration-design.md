@@ -22,6 +22,12 @@ The 20-coordinate timeline opens 17 fields as `unrecorded`. Eight active actors
 receive the common observation contract. Declared directed routes use one logical
 tick and are structural information assumptions, not measured response latency.
 
+Scope assessment is IHiS-private; the other 16 fields remain public. The explicit
+observation profile exposes declared event vocabulary from the opening coordinate.
+Shared disclosure admission requires a qualified private assessment and the latest
+qualifying typed IHiS receipt. This structural assumption is common to backends;
+Rule windows and other guards retain policy ownership.
+
 - `01` `S1/E1`: retrospectively attributed access record; affected-record cohort begins 2015-05; intrusion start unresolved.
 - `02` `S1/E2`: concentrated exfiltration account; 2018-06-27 to 2018-07-04.
 - `03` `S2/E3`: organizational detection and notice; 2018-07-04.
@@ -57,6 +63,11 @@ The selected values are record labels and qualified messages. No exploit
 probability, detection rate, disclosure utility, penalty response, remediation
 effect or attribution confidence is estimated. Alternative behavior requires a
 semantic-parent successor before backend tuning.
+
+The admitted scope domain now includes an unresolved report. Canonical Rule
+selects the qualified assessment and summary; probes may select unresolved or
+withdrawn message content, withhold delivery, or alter route delay within the
+declared domain. Those probes test contracts, not historical likelihoods.
 
 ## Variants, verification, and failure routing
 

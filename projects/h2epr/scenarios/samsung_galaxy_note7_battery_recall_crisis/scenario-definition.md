@@ -43,6 +43,10 @@ The Source Profile records full-Draft exposure. This construction is neither a
 blind event nor an unbiased forecast. Earlier work on another branch does not
 provide input payload or research questions to this current release.
 
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
+
 ## 4. Temporal structure and exogenous inputs
 
 - Coordinate 1: product launch record (2016-08-02; `S1/E1`).

@@ -97,8 +97,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: Morse cannot act for Heinze or make a joint record sufficient when Heinze's separately represented participation is absent.
 - Perturbation: Missing Morse participation has the same fail-open behavioral consequence as missing Heinze participation while preserving actor isolation.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

@@ -11,18 +11,18 @@ verification receipts and reproduction instructions. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.1031.v1; f1b68baa1d90045eb87a8309eb4a2ad606a00ee1d00bb2b53709abe82062b83f |
-| Rule binding | 085c31986dee137449ae7620b9bb60a10d81d17b848e1f7dca16a3e78c02e851 |
-| Realization | h2epr.1031.rule-realization.v1; eeb4a9d100f26b3bf5bed8609160cd21c6fd1feb744919820ecaf090168416e0 |
-| Shared configuration | h2epr.1031.comparison.v1; 1c996a35254d03eec7d18ebf64e8be5e1077c88341b7446883e33df4ef92189d |
-| Rule configuration | h2epr.1031.rule.v1; 666867048d682d2872ab1e8b0e1940abaa51f06c4cf0a51a69a99fe17fe8dba1 |
-| Run | run.6f6408d11b70b472f33444ae |
-| Run manifest | d7af484b75a2fdb513e208e57b3b3b1bc15469b2c78cc9c669abc29c13adc645 |
-| Trace | ba1be4f43c8f7fe88f48b1a4f87f9f2f07ff77c30ac9822fbaf93f7bad88dffa |
+| Package | h2epr.event-package.1031.v1; 06cdd22424efcb091e4b9850f38b5965ea222e652e3e7cec31ecf2282a7bb976 |
+| Rule binding | 89de3ff815ff6649a37df3191cf28fa0a3a191d490d47772dd75512c1a4e7452 |
+| Realization | h2epr.1031.rule-realization.v1; dbd0e032b5089214dc5e740473668637400025916da443f1a8d3cbda6f0721b9 |
+| Shared configuration | h2epr.1031.comparison.v1; 1fdd3ff487570175d387e406ff8c1fea6599548b8ce0646b7834b8ab6d4766a9 |
+| Rule configuration | h2epr.1031.rule.v1; 36e94810565faaf3e656362b95b2ae359a66ff683bae2c7cbcb451fc6cd37636 |
+| Run | run.f53d0be85dbb76fc46dcdde4 |
+| Run manifest | 4816bcfacf04000bf3b1f5512eb387dd937d90d79c7b48b6df882fe4f09d42f2 |
+| Trace | 3b6d399af0cf8247b2f284a375b1d69e347bf95ad3f10ce79390c0250423e475 |
 | Terminal state | b5c58efa2c78ab645c4eac75ff0481a2c122576551084ab6227cfe2735c8ec32 |
-| Run seal | 092602d090c50e1c629e60d84d17da4438c13f6d26e2fea5dbcbdafd8ee7f793 |
-| Generated EPG seal | 52fb60baa637ecaa195b88eb7d4f71a4a67687ed117a2ef14227d8d14200df16 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-05-passive-admission/a |
+| Run seal | 114604c982effaab1e166b1652745439eba0bb6f2d83582ae93058ad1e1fe0ae |
+| Generated EPG seal | 06d315f500d23348b3c3a888d6f1f859ca872e7b254d1f1494ef3aadcd8ba1e2 |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-06-semantic-contracts/materialization-a |
 
 Fresh A/B outputs are byte-identical across all eight output roles and the run
 receipt. The generated-ID probe preserves semantic trace/graph structure and
@@ -88,7 +88,7 @@ not a minimal set of causally influential actions.
 Opening fields mean unrecorded statements, not zero holdings. Election result
 opens at unobserved and has no action writer. The table lists every coordinate,
 all non-default actions and all state deltas. Trace suffixes abbreviate
-`trace.run.6f6408d11b70b472f33444ae.`; graph record nodes add `record.` to that exact ID.
+`trace.run.f53d0be85dbb76fc46dcdde4.`; graph record nodes add `record.` to that exact ID.
 
 | Coordinate | Accepted participant choices | Recorded effects and deliveries |
 | --- | --- | --- |
@@ -210,7 +210,18 @@ Their exact run identities are `run.d0ab1fa50cd31c66fdd2bc65` and
 compiled before execution with new selected-configuration identity, never
 created by mutating an admitted package or editing its outputs.
 
+Previously recorded probe identities refer to their original source revision;
+they were not rematerialized as part of this current canonical replacement.
+Current shared-contract behavior is covered by the maintained synthetic tests.
+
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 The frozen sources and Draft disagree about relationship/transaction endpoints,
 the December investor, the board-response date and the strength of the final

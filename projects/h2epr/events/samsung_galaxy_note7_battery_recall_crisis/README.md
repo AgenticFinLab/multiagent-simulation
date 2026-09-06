@@ -50,7 +50,7 @@ catalog entry is not executable authority and has no hidden fallback.
 
 ## Current result
 
-The canonical seed-0 run is `run.88051af3adbca475637d35ec`: eight actors, 29
+The canonical seed-0 run is `run.9120d67d5fe0c22266400e21`: eight actors, 29
 coordinates, 1,101 trace records, 1,152 graph nodes and 3,262 edges. Fresh A/B,
 generated-ID perturbation, hash-chained trace, tick/run seals, authoritative
 replay, complete graph reconstruction and zero unresolved transport are

@@ -16,6 +16,8 @@ attachment evidence.
 2. Map every active actor, decision situation, observation, state, permitted
    intent, message, and lifecycle to one implementation entry.
 3. Keep environment admission and effects outside the backend.
+   Distinguish policy-selected guards from explicit shared information
+   requirements. Configured reason text is policy rationale, not an observation.
 4. For Rule, use the generic declarative implementation, close every non-no-op
    intent with at least one decision row, use a typed no-op default, keep
    semantic actor prefixes stable under opaque ID perturbation, and deny model

@@ -19,6 +19,10 @@ outcomes are outside the world model.
 
 The only inputs are the sealed `event_spec.json`, `frozen_evidence.json`, and `draft_epg.json`. The full Draft is exposed. All 10 participant IDs and 31 appearances are rostered; P_3's scope drift and contradictory relation rows remain explicit source limitations. Reference, held-out, evaluation-only, network, and external-research content never enters observations or construction.
 
+This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
+
+World feasibility is enforced by mechanism domains and state preconditions. Only explicit handler information_requirements are mandatory receipt admission. Other message guards, activation windows and priorities are selected Rule policy assumptions, not backend-neutral historical or institutional laws.
+
 ## 4. Temporal structure and exogenous inputs
 
 Logical coordinates preserve E1 through E9 order without calibrating calendar duration. The twentieth coordinate drains the final one-tick surveillance messages. The affected and imported-case groups mapped to world state motivate reported conditions but do not become hidden scheduled actors. No undisclosed outbreak, case count, or resource feed is injected during runtime.

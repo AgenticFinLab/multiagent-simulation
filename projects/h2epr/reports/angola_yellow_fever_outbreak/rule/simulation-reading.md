@@ -9,16 +9,16 @@ verification and reproduction instructions. Model and network access are denied.
 
 | Item | Identity |
 |---|---|
-| Package | `h2epr.event-package.0551.v2`; `938f441d834a8c928fb64ec12eb6e3692ef6e00c91d06016ba681f8d6f540e3d` |
-| Rule binding | `530e0f3316aa7af6275cc5a58cf2f9e254de00de9999cdf4c6c0f28025e7890c` |
-| Rule configuration | `h2epr.0551.rule.v2`; `e3954abe461770d5872fe53ec381e28f05dff678c6ab8b270ab9b4c0b2e13ddc` |
-| Run | `run.b21a925f5048915d999d5433` |
-| Run manifest | `5e10251862bbd661410e14d83088e7f8a4aecf89f44ab48e16290084f9348b0d` |
-| Trace | `5e965a9efb553601a63c198ffb39c7272875e2cf7b276804a3b07c0888f22ead` |
+| Package | `h2epr.event-package.0551.v2`; `40dd6cf24ad8c162f861e476cc5665ab8260738a11d4d4dd2157bac46b9e22e7` |
+| Rule binding | `1292f017d4c6b01130941e5f5e5648dfd14bf51d91f0c270b3bdd2b1ced86c3d` |
+| Rule configuration | `h2epr.0551.rule.v2`; `ff0fa17ee24f6edda66d511833df5d597a7715eae127a03ee0be2a261dbe6e0c` |
+| Run | `run.8fca27c569b81c55eab3a256` |
+| Run manifest | `e306618d0370a4ce0796890ecbc2d33182e5d8b1fa329ce83895af63fd309ea3` |
+| Trace | `78028b7fca6dd0cef5cea19b02c341486e894cafafc11f42f9f97c6a207c1560` |
 | Terminal state | `6e43cbba3847a1df9b6dd5c5395932c964d8baf6f086717e7c04f375da0ea26e` |
-| Run seal | `3398b1370e68f60717977daf843ba64205c6d1edfcdd8fed93aebbaa2caa26ab` |
-| Generated EPG seal | `9d7fc08164e978db67672e71f365bca58250e9d62a151df4624be5a75741eb84` |
-| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-passive-admission/a` |
+| Run seal | `0223571c1cf4bbdebe39d653f791421a1522b4312ae23950e38c380d22e75800` |
+| Generated EPG seal | `80c6561b450686e76d2c3bfd4208bcf627ddc87bad8206065e6e978239955146` |
+| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-06-semantic-contracts/materialization-a` |
 
 Fresh A/B materializations are byte-identical across the eight output roles and
 run receipt. A generated-ID probe changes opaque identities while preserving
@@ -61,8 +61,8 @@ provenance includes the contributing coordinate batch, not a minimal causal set.
 ## Generated trajectory
 
 The table lists every coordinate and every non-default action and state change.
-Trace suffixes abbreviate `trace.run.b21a925f5048915d999d5433.`; corresponding graph
-record nodes use `record.trace.run.b21a925f5048915d999d5433.` with the same suffix.
+Trace suffixes abbreviate `trace.run.8fca27c569b81c55eab3a256.`; corresponding graph
+record nodes use `record.trace.run.8fca27c569b81c55eab3a256.` with the same suffix.
 
 | Coordinate | Accepted choices | Recorded effects and delivery |
 |---|---|---|
@@ -161,6 +161,13 @@ counterfactual clinical behavior, intervention effectiveness, or historical
 causality. Those questions would need different information and contracts.
 
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 - Construction is full-Draft-exposed and the frozen evidence is heterogeneous, including later page material. No independent historical reconciliation or held-out prediction is established.
 - P_3 changes from Luanda to Angola to Angola/DRC while keeping one source ID. Its aggregate participation intent is a structural assumption without microdata or a stable individual panel.

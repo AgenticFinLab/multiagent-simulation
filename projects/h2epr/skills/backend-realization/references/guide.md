@@ -41,6 +41,14 @@ Use `message_received` for a delivery at the current tick and `message_known`
 for received history, with `max_age_ticks` when freshness matters. A remembered
 message does not imply that the world still satisfies the action preconditions.
 
+For a content-bearing guard use `payload_equals`, a declared sender and
+`selection: latest` over typed message fields. Test negative and withdrawn
+updates, including simultaneous conflicting reports. Current event vocabularies
+are exposed in advance; do not call this a prefix-clean policy test. Cite matched
+guards and the hash-linked observation for decision evidence, keeping configured
+`reason` text distinct from generated facts. A Rule window is a policy selection
+unless a separate shared boundary is explicitly implemented.
+
 Consider a synthetic issuer and responder with one-tick transport:
 
 | Decision-time evidence | Rule response | Environment/result boundary |

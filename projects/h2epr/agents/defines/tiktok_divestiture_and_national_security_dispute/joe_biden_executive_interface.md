@@ -101,8 +101,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A review-framework record does not clear or condemn TikTok. A directive record does not prove device compliance, and a signature does not itself deliver a later court result.
 - Perturbation: Withholding the bill notice preserves passage but prevents signature and all signature-dependent judicial rows.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

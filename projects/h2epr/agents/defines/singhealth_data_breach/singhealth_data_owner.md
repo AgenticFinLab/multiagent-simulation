@@ -103,8 +103,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: Detection may be recorded without forcing scope verification or disclosure. Receiving a penalty notice does not itself create acceptance, apology, payment or completed remediation.
 - Perturbation: Blocking scope verification leaves later public-response paths open while the detection record remains accepted; delaying findings can prevent the penalty-dependent response.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

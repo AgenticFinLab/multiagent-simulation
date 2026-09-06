@@ -99,8 +99,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: No SingHealth, IHiS or government actor may impersonate this gate. An accepted attributed-activity record does not reveal Whitefly identity to other actors or force detection.
 - Perturbation: Withholding later Symantec publication leaves public attribution open while these retrospective process records remain structurally available.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

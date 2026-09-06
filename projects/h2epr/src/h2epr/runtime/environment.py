@@ -8,6 +8,7 @@ from typing import Any, Mapping
 
 from h2epr.canonical import canonical_sha256
 from h2epr.masim_kernel import ActionDisposition, ActionIntent, StateDelta
+from .information import matching_receipts
 
 from ._environment_core import (
     _DeclarativeEnvironmentBase,
@@ -53,10 +54,32 @@ class DeclarativeEnvironment(_DeclarativeEnvironmentBase):
 
     def __init__(self, scenario: Mapping[str, Any]) -> None:
         super().__init__(scenario)
+        self._observations: dict[str, Any] = {}
         _require(
             scenario["mechanism"]["conflict_policy"] == self.conflict_policy,
             "conflict_policy_mismatch",
         )
+
+    def bind_observations(self, observations: Mapping[str, Any]) -> None:
+        """Bind one sealed runtime projection, never backend-supplied memory."""
+        self._observations = copy.deepcopy(dict(observations))
+
+    def _information_error(
+        self, handler: Mapping[str, Any], intent: ActionIntent, logical_tick: int,
+    ) -> str | None:
+        requirements = handler.get("information_requirements", [])
+        if not requirements:
+            return None
+        observation = self._observations.get(intent.actor_id)
+        if observation is None:
+            return "admission_observation_missing"
+        contract = observation["contract"]
+        if contract["actor_id"] != intent.actor_id or contract["logical_tick"] != logical_tick:
+            return "admission_observation_stale"
+        if not all(matching_receipts(row, contract["memory"]["received_messages"], logical_tick)
+                   for row in requirements):
+            return "information_requirement_not_met"
+        return None
 
     def apply_batch(
         self,
@@ -95,6 +118,10 @@ class DeclarativeEnvironment(_DeclarativeEnvironmentBase):
             precondition_error = self._precondition_error(handler, prestate)
             if precondition_error:
                 rejected[intent.intent_id] = precondition_error
+                continue
+            information_error = self._information_error(handler, intent, logical_tick)
+            if information_error:
+                rejected[intent.intent_id] = information_error
                 continue
             planned = tuple(self._planned_effects(handler, parameters, prestate))
             candidates.append(_Candidate(intent, planned))

@@ -11,18 +11,18 @@ verification receipts and reproduction guidance. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.0170.v1; 667de386997afde4f415f0b6ea491138acce8bfa081150bcfb88f156f67aa7fd |
-| Rule binding | 705273c8305f79d568c90b20875fdcbbea18fdc3ed055ddd10e4f7e24f6d9339 |
-| Realization | h2epr.0170.rule-realization.v1; c98b489f32a1ab86b103a263ac8f1cc1298b8dfa3709cea407539584b9262ec1 |
-| Shared configuration | h2epr.0170.comparison.v1; ca34426154af60a3286eebb69c64ba10cb0c78ff0a7411e235c3df142a803649 |
-| Rule configuration | h2epr.0170.rule.v1; 3018e61f9fbdba01e5d945a7ebe37e8307afc3b48190f9504fbd300cb28e623c |
-| Run | run.2cb97929423c768bbd0cf72d |
-| Run manifest | 811ac05dce1d4f12420f3873421520a19b68ae688df5a2272492cdc6cd0bc055 |
-| Trace | 075a63a6862cced760b2b360d2974a89269aa4ef8da98446772fab499b6adec7 |
+| Package | h2epr.event-package.0170.v1; 13ea21a15889014555de7f3c8c6603325a3fb42525fd538492f2e996fc768a05 |
+| Rule binding | 7590f24b391353120b53ddf981c6c97c5f6003faa49b651879e6ddc89cfa3023 |
+| Realization | h2epr.0170.rule-realization.v1; 39e417866f28548f9c7b55ba422742cfdba8f8d6e9cc83f1facf15371c1a67f3 |
+| Shared configuration | h2epr.0170.comparison.v1; 80d200fab3d23cbeec1c6044500cc78e46ef07bca17f40dcff0f61b945d85815 |
+| Rule configuration | h2epr.0170.rule.v1; f38efe3f112562b0c3f1e826bc6bea7433ba8424ec881080888718ab3bdabd9d |
+| Run | run.2a983fc27557518b15624c54 |
+| Run manifest | 3c37d1a7c6992eacfedec7ce514737ab647bb04e235cb6c9254ad371e3c001f5 |
+| Trace | c0675d758934200aa78ebaa0e7ac4c2b7d56ffae56ed0dd9196112d2ab9688a8 |
 | Terminal state | 0749d3f388ca92fd77275afde9c0e5075f614b561efed216c430e9b50eda0269 |
-| Run seal | 96ca389b6b91857e50bcdd4cff63938c8c3c9f791d06f6c3e8c596f7777d30af |
-| Generated EPG seal | 0da5c0b2c32ab760711e0ed2d7c7f848e26ab5e8bce8545992da2bc9431c4828 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-05-stage-e/accepted/materialization-a |
+| Run seal | 2781db8c44b4c8a461e2d30159af1597a1980e6c1cd6316120dab446a08b2461 |
+| Generated EPG seal | c671f1e35f06899cfa83c42222a4ba8dd3e2ab7594221d5bcff3ab014d4b1dbb |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-06-semantic-contracts/materialization-a |
 
 Fresh accepted A/B materializations are byte-identical across all eight output
 roles and the run receipt. The generated-ID probe changes opaque run and record
@@ -93,7 +93,7 @@ minimal explanation of the dispute.
 An opening `unrecorded` value means that no modeled record has yet been accepted;
 it does not say that an underlying historical proposition was false. The table
 lists every coordinate, all non-default dispositions and every reducer delta.
-Trace suffixes abbreviate `trace.run.2cb97929423c768bbd0cf72d.`.
+Trace suffixes abbreviate `trace.run.2a983fc27557518b15624c54.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 | --- | --- | --- |
@@ -182,8 +182,10 @@ Ten participants use one declarative Rule implementation and one authoritative
 environment. Single-writer handlers preserve executive, corporate, witness,
 committee, legislative, judiciary, population and delegation authority. The
 reducer, not Rule, owns effects. Public prestate, actual delivery and retained
-runtime memory activate later rows; Draft stage labels, Reference content and
-future negotiation facts are absent from earlier observations. No common-code
+runtime memory activate later rows. Earlier observations contain neither Draft
+stage descriptions nor future generated negotiation results; public field names
+and capability menus still expose negotiation-related vocabulary in advance.
+Reference content is excluded throughout construction. No common-code
 TikTok branch supplies the choices.
 
 The canonical run accepts all 23 selected records and meets all 23 descriptive
@@ -200,7 +202,7 @@ aggregate Population; P_9 and P_10 retain separate negotiation authority. No
 participant can use the malformed Draft relationship directions to claim another
 participant's action.
 
-Two freshly admitted local probes test the behavioral reading without becoming
+Two previously verified local probes, retained as historical construction evidence, test the behavioral reading without becoming
 current releases or historical counterfactuals:
 
 | Changed owner/input | Observed response | Evidence boundary |
@@ -215,7 +217,18 @@ or generated output. An earlier attempt to add an ineligible future-message
 guard was rejected before package admission with the typed
 `rule_guard_recipient_ineligible` failure, confirming recipient closure.
 
+Previously recorded probe identities refer to their original source revision;
+they were not rematerialized as part of this current canonical replacement.
+Current shared-contract behavior is covered by the maintained synthetic tests.
+
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 The frozen evidence is uneven, mostly secondary and frequently truncated or
 scraper-heavy; two records repeat substantially the same material. One later

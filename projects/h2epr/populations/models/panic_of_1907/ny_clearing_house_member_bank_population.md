@@ -95,8 +95,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: Certificate receipt alone does not suspend convertibility, and a group record does not imply identical bank-level timing or behavior.
 - Perturbation: Withholding coordination preserves certificate evidence but leaves suspension, gold-flow and dependent reform rows open.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

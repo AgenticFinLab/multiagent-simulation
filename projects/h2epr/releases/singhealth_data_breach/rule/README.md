@@ -4,26 +4,26 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0616`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-05-stage-d/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.5db9a323beb010817c521f46` |
-| Package SHA-256 | `9d17581f17e994b2aba4252c8a7457c7b03ecd8f3e9003c83268bf954664a16c` |
-| Rule binding SHA-256 | `f304a0fd41650859f626ebc89f7541062ba7e0f7166a141870b68ce519da2d4f` |
-| Run manifest SHA-256 | `847b59da4f08b2583796511417ff9051ef10378b2452a61b0e1a5f19d8d1fef5` |
-| Trace SHA-256 | `3e20d90bc3ad4a15972286ac80c3acb3e5f7c029fecf37a6c9e46a34e3ebb5f8` |
-| Run seal SHA-256 | `e8393967e403da8ad215b1c81186fa6952ca324328332d0423bd25ca646d4fe0` |
-| Final state SHA-256 | `e27b32d9df9e035e2e7ad89a073f82397d4491db6ee597cd9b9efc82c649b07d` |
-| Generated EPG seal | `04429d76666f687d61eb9ad220675f348a07833390986b63611d448b20d5d8ae` |
+| Run | `run.26b57124e29d077af3150e02` |
+| Package SHA-256 | `52dbf7578a745e66cf8066f8743ac91f129deafb849b9fc92d6802fa32b0b5a5` |
+| Rule binding SHA-256 | `5b7dcacd27eee069208fa777908807db91c831c0cd8b00e1fb9330b2a07646b4` |
+| Run manifest SHA-256 | `f0002f2c2161afd255134d062898cfa0672a191509334d80d13430d9abbe4b7a` |
+| Trace SHA-256 | `c326760686ce7e9652546955bc7a2fddaa72ee5d1941af073796d1c7ed96234b` |
+| Run seal SHA-256 | `b4834493f4d893676e58f2a221376f9f6eec72ae06f3e7ec34fbd595c7a0c438` |
+| Final state SHA-256 | `5c8ecedefd2211d9f41636bdd47a144ec079ed9de97135f764e589ec5f745472` |
+| Generated EPG seal | `bf365f5d1306ead1ac0fd46f6feaddfe6e55d8b49546b3512a92f10bdf308dde` |
 
 The run covers 8 action-bearing representations over
 20 logical coordinates. Its sealed trace contains
 782 records; the trace-derived graph contains
-819 nodes and 2317 edges. Terminal
+820 nodes and 2318 edges. Terminal
 transport custody contains no unresolved message.
 
 ## Independent verification
@@ -44,11 +44,11 @@ Run from the repository root with an absent output directory.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/singhealth_data_breach/package \
+  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
+  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/singhealth_data_breach/final-package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-05-stage-d/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-05-stage-d/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/singhealth_data_breach/rule/simulation-reading.md) describes the

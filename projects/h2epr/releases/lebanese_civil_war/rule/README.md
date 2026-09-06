@@ -4,21 +4,21 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0892`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-05-stage-e/accepted/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-06-semantic-contracts/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.108a8c5193199df3dc7e5fa8` |
-| Package SHA-256 | `c806337186f2d7b51c5d1183b4ece5f28b2b2282b12f3521d5c2c86a9ecd475e` |
-| Rule binding SHA-256 | `01eacf91b148004816000b2b538fadd09381ef521c826edc8676c9b310ccfe65` |
-| Run manifest SHA-256 | `216f59cac6d183d6739476792a379265946db5eb89a1ce7553908526f45c08ff` |
-| Trace SHA-256 | `a406388abcd62c843c00747cae0d48f3d41a0cfd091847c4fd053ac5881dcf10` |
-| Run seal SHA-256 | `cf0872e69826d61f808ac7b8462d5b22acc3c1bda0ce62e84eaaa6ea858c9654` |
+| Run | `run.391644c9adfa091e6d2109e9` |
+| Package SHA-256 | `3c47bb0d6f91b5c5d716c2fb509c44d6cb543b5ef83c8e38333dd3e4533bfac4` |
+| Rule binding SHA-256 | `e85d9ea15786c3d954fb4be081c63663b7d0e453ced104154fc4ef82d2fef45a` |
+| Run manifest SHA-256 | `3980f0b5d0e063b24d0e631ed66d4be4613fc76123c038a8dd71e02cb2caffaa` |
+| Trace SHA-256 | `29fb302aa459662f3aaeb40696c7af45df2eb224b5d7d20ea9152910feeb565b` |
+| Run seal SHA-256 | `537ff58de661c7abf5926fd15a4046a0619893a15e3cab8af3b714b04805f250` |
 | Final state SHA-256 | `3aff7c57db691e4088eea06b88cb8179c1f21b78d108d437998c2fe68f5cde25` |
-| Generated EPG seal | `99dcb78ccc7966f06ace39e9e6ffb43214264a3bd766211c608c9a0441812c93` |
+| Generated EPG seal | `ed5c47ee5094f03c87a8f8d8898fcaf6a449e676294917decbd055626adccf19` |
 
 The run covers 8 action-bearing representations over
 21 logical coordinates. Its sealed trace contains
@@ -44,11 +44,11 @@ Run from the repository root with an absent output directory.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/lebanese_civil_war/package \
+  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
+  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/lebanese_civil_war/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-05-stage-e/accepted/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-05-stage-e/accepted/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-06-semantic-contracts/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-06-semantic-contracts/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/lebanese_civil_war/rule/simulation-reading.md) describes the

@@ -11,18 +11,18 @@ verification receipts and reproduction guidance. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.0892.v1; c806337186f2d7b51c5d1183b4ece5f28b2b2282b12f3521d5c2c86a9ecd475e |
-| Rule binding | 01eacf91b148004816000b2b538fadd09381ef521c826edc8676c9b310ccfe65 |
-| Realization | h2epr.0892.rule-realization.v1; d1e734cd3b28104998ecc9c3e850dfcfaf56e3416eb4311bdf7a057d4c209bad |
-| Shared configuration | h2epr.0892.comparison.v1; 70406c6521795c4fef5da4f7ffa696930e2d47c6fd39d9e008268f9d67987f62 |
-| Rule configuration | h2epr.0892.rule.v1; 67e271637b143604bd959d3f4b01c4ab700ced8fde3cc8c0f45ef2a672eb2730 |
-| Run | run.108a8c5193199df3dc7e5fa8 |
-| Run manifest | 216f59cac6d183d6739476792a379265946db5eb89a1ce7553908526f45c08ff |
-| Trace | a406388abcd62c843c00747cae0d48f3d41a0cfd091847c4fd053ac5881dcf10 |
+| Package | h2epr.event-package.0892.v1; 3c47bb0d6f91b5c5d716c2fb509c44d6cb543b5ef83c8e38333dd3e4533bfac4 |
+| Rule binding | e85d9ea15786c3d954fb4be081c63663b7d0e453ced104154fc4ef82d2fef45a |
+| Realization | h2epr.0892.rule-realization.v1; 697ea2f709c55e2c94a1358a054c636d5796951be0f988ad070a43786faa6d32 |
+| Shared configuration | h2epr.0892.comparison.v1; 4c44629bc39c37e621dd7a8b016e820a9fe951ef823d946aac8065b5ceda34be |
+| Rule configuration | h2epr.0892.rule.v1; 9cf54ce1096e4d891f1f66a5893a2b6886ccaa4bcf4b4352886f8bd04cb7fff6 |
+| Run | run.391644c9adfa091e6d2109e9 |
+| Run manifest | 3980f0b5d0e063b24d0e631ed66d4be4613fc76123c038a8dd71e02cb2caffaa |
+| Trace | 29fb302aa459662f3aaeb40696c7af45df2eb224b5d7d20ea9152910feeb565b |
 | Terminal state | 3aff7c57db691e4088eea06b88cb8179c1f21b78d108d437998c2fe68f5cde25 |
-| Run seal | cf0872e69826d61f808ac7b8462d5b22acc3c1bda0ce62e84eaaa6ea858c9654 |
-| Generated EPG seal | 99dcb78ccc7966f06ace39e9e6ffb43214264a3bd766211c608c9a0441812c93 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-05-stage-e/accepted/materialization-a |
+| Run seal | 537ff58de661c7abf5926fd15a4046a0619893a15e3cab8af3b714b04805f250 |
+| Generated EPG seal | ed5c47ee5094f03c87a8f8d8898fcaf6a449e676294917decbd055626adccf19 |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-06-semantic-contracts/materialization-a |
 
 Fresh accepted A/B materializations are byte-identical across all eight output
 roles and the run receipt. The generated-ID probe changes opaque run and record
@@ -93,7 +93,7 @@ responsibility or a minimal explanation of the war.
 An opening `unrecorded` value means that no modeled record has yet been accepted;
 it does not say that an underlying historical proposition was false. The table
 lists every coordinate, all non-default dispositions and every reducer delta.
-Trace suffixes abbreviate `trace.run.108a8c5193199df3dc7e5fa8.`.
+Trace suffixes abbreviate `trace.run.391644c9adfa091e6d2109e9.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 | --- | --- | --- |
@@ -191,8 +191,9 @@ one authoritative environment. Single-writer handlers preserve coalition,
 government, Syrian, Israeli, Amal and Hezbollah authority. Rule chooses; the
 environment admits and applies effects. Public prestate, actual delivery and
 retained runtime memory activate later rows. Draft stage labels, Reference
-content and future Taif/post-war facts are absent from earlier observations. No
-common-code Lebanon branch supplies the choices.
+content are absent from observations. Taif/post-war field and capability names
+are visible before their generated result values, so this is a vocabulary-exposed
+baseline. No common-code Lebanon branch supplies the choices.
 
 The canonical run accepts all 33 selected records and meets all 33 descriptive
 expectations. The run contains no rejected non-default action, so shared
@@ -207,7 +208,7 @@ relationships and transactions create no authority, route or resource flow.
 Repeated Litani and exemption language is consolidated while retaining its
 source anchors.
 
-Two freshly admitted local probes test the information-dependent mechanism.
+Two previously verified local probes, retained as historical construction evidence, test the information-dependent mechanism.
 They are not current releases or historical counterfactual claims:
 
 | Changed owner/input | Observed response | Evidence boundary |
@@ -220,7 +221,18 @@ variant received new configuration, realization, assembly, package and release
 identities before execution. Neither was created by editing an admitted package
 or generated output.
 
+Previously recorded probe identities refer to their original source revision;
+they were not rematerialized as part of this current canonical replacement.
+Current shared-contract behavior is covered by the maintained synthetic tests.
+
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 The frozen evidence is weak for a fifteen-year event: it is mostly secondary,
 frequently truncated and includes later retrospectives and pages about the 2008

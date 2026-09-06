@@ -114,8 +114,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: Deployment does not follow automatically from a request. Alignment, support, mediation, enforcement and post-war presence are separate records; none establishes control, compliance or war termination.
 - Perturbation: Omitting the Amal mediation invitation prevents the complete three-position bundle and therefore enforcement/post-war records while earlier Syrian records persist.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

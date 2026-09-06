@@ -11,18 +11,18 @@ verification receipts and reproduction guidance. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.0288.v1; cc5229cd7f77b93305450a50a068817e7d8ac786c2f2d2cde9a132749808e030 |
-| Rule binding | f1feac44d4b537f5154da23809af950eb55be1869fc46d98814e8714095c123b |
-| Realization | h2epr.0288.rule-realization.v1; 8128f147b6cd9f7a89e5b2bf39b1e887e3ed9f13babd9015d92065c64cbab2f9 |
-| Shared configuration | h2epr.0288.comparison.v1; 4a5ef421db0844e5059d980cc65502554a59731155a5381350c752fc4fb0c923 |
-| Rule configuration | h2epr.0288.rule.v1; b580040a580fc0a46888e790f3fe1b14ba342d15e2a6c6d515a53dcda92d665a |
-| Run | run.1b16d1949b2a609181e1d06d |
-| Run manifest | 1dc66598d77d691612ebd227f7c80fe68be6585dbb1abbf0787b5ade3653f2c7 |
-| Trace | 0d87bb00c4ae36ed60c987af05fe254f3819747b7661b65667f707846beb1f26 |
+| Package | h2epr.event-package.0288.v1; f657f2857d9e4d56cc18b882990f98f0fe12dccbd609252dd3d6858bf87c648f |
+| Rule binding | 4f46b295b13ad1d4c1e779ded1f9c0be4055e12ab84afbf46442d80f0fa60339 |
+| Realization | h2epr.0288.rule-realization.v1; dcbe6430f21c496ad6c773ed61452f4ff8e95b3a3ab3dc1b5e24fe6122ce138e |
+| Shared configuration | h2epr.0288.comparison.v1; 3d770548c9bdd7c84f6ef4d9b90110affaeee39b20fa8ee236b6f9f741b2ab7a |
+| Rule configuration | h2epr.0288.rule.v1; 19626901b7939971b70d3668f55e51d466e2447c03463442165fd9d457d3d60d |
+| Run | run.ae8aa2842bfd4d33c481fc78 |
+| Run manifest | 5bd389e910586acc715a4a8cb13194a85ed2f03dc5f3414b399616d650db726b |
+| Trace | c55af03ad713bd9426f7fa15e7c2f5bb4b2f3e677114fe3336d46cf066a7688b |
 | Terminal state | 76ef0853824b1f9c6205d1ecccad42eec1a43759b7c607800d5fdd1e9a1a7515 |
-| Run seal | 4aabd930c2a33fb4eaef5f3c5d188ae044e378131c6fc3850542308b908e786e |
-| Generated EPG seal | b82fdc940f91db4d578689a3b74cdcb0895b2c9a0833ba2f5488147a7b73c526 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-05-stage-d/materialization-a |
+| Run seal | 514b7bb4a2ced7374967d84a8aee43663bb7270735dfc0c629c2a8b0f0e18331 |
+| Generated EPG seal | f34dc9527ead73cf341c65ff4b0d91e114ae5c2c168e18babe8ffda7be391700 |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/panic_of_1907/rule/2026-09-06-semantic-contracts/materialization-a |
 
 Fresh A/B materializations are byte-identical across all eight output roles and
 the run receipt. The generated-ID probe changes opaque run and record IDs while
@@ -93,7 +93,7 @@ minimal causal explanation of the panic.
 An opening `unrecorded` value means no modeled record has yet been accepted; it
 does not assert that an underlying historical fact was false. The table lists
 every coordinate, all non-default dispositions and every reducer delta. Trace
-suffixes abbreviate `trace.run.1b16d1949b2a609181e1d06d.`.
+suffixes abbreviate `trace.run.ae8aa2842bfd4d33c481fc78.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 | --- | --- | --- |
@@ -179,8 +179,14 @@ environment. Single-writer handlers preserve separate speculator, depositor,
 clearing-house, trust, private-rescue, member-bank, aggregate-flow, legislative
 and commission authority. The reducer, not Rule, owns effects. Public prestate,
 actual delivery and retained runtime memory activate later rows; Draft labels,
-Reference content and future reform facts are absent from observations. No
-common-code Panic branch supplies choices.
+Reference content are absent from observations. Reform capability and field names
+are visible before their generated result values. No common-code Panic branch
+supplies choices.
+
+Morgan's refusal is selected after the received aid request. The configured
+rationale refers to source reporting about review; the simulation produces no
+audit finding, balance sheet or solvency determination. Decision-record rationale
+must not be read as evidence that an audit ran.
 
 The canonical run accepts all 23 selected records and meets all 23 descriptive
 expectations. It contains no rejected non-default action, so it does not alone
@@ -198,7 +204,7 @@ agent authority is invented. The three depositor/trust/member-bank group parents
 preserve aggregate records without individual probabilities or unanimity. The
 gold-flow gate records a qualified source account rather than a market process.
 
-Two freshly admitted local probes test this reading without becoming current
+Two previously verified local probes, retained as historical construction evidence, test this reading without becoming current
 event releases or historical counterfactuals:
 
 | Changed owner/input | Observed response | Evidence boundary |
@@ -211,7 +217,18 @@ The probe run IDs are `run.35a2b4ab1731bd2169a3edaf` and
 realization, assembly, package and release identities before execution; neither
 was created by editing an admitted package or generated output.
 
+Previously recorded probe identities refer to their original source revision;
+they were not rematerialized as part of this current canonical replacement.
+Current shared-contract behavior is covered by the maintained synthetic tests.
+
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 The frozen evidence is uneven. Three records are byte-identical truncated copies,
 two repeat a 2025 abstract, and several are scraper-heavy, tangential or only

@@ -95,8 +95,11 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: A public response does not itself form an inquiry, remediate systems or make an attribution. It cannot be chosen before the ministry disclosure is actually delivered.
 - Perturbation: Missing scope verification prevents the upstream disclosure and therefore this public response without invalidating earlier incident records.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

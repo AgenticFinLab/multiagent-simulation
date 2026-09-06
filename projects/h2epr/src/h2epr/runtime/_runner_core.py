@@ -24,6 +24,7 @@ from h2epr.masim_kernel import (
 
 from ._environment_core import _apply_delta, condition_matches
 from .generated_epg import compile_generated_epg
+from .information import message_contract_error
 
 
 class _BenchmarkRunCoreError(RuntimeError):
@@ -256,7 +257,8 @@ class _BenchmarkEngineBase:
         }
         for actor_id in self.actor_ids:
             self.trace.append("observation", logical_tick, observations[actor_id])
-        decisions = await self.backend.decide(observations)
+        self.environment.bind_observations(observations)
+        decisions = await self.backend.decide(copy.deepcopy(observations))
         if tuple(sorted(decisions)) != self.actor_ids:
             raise _BenchmarkRunCoreError("backend_decision_actor_universe_mismatch")
         actions: list[ActionIntent] = []
@@ -279,6 +281,9 @@ class _BenchmarkEngineBase:
             messages.extend(outbound)
             self.trace.append("action_intent", logical_tick, action.to_dict())
             for message in outbound:
+                error = message_contract_error(message, self.package.scenario["mechanism"])
+                if error:
+                    raise _BenchmarkRunCoreError(error)
                 self.trace.append(
                     "message_intent", logical_tick, message.to_dict()
                 )

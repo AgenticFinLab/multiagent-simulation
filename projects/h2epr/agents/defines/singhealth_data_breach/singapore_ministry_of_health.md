@@ -43,6 +43,13 @@ statement or request; it never transfers the sender's state authority.
 
 Disclosure does not establish investigation findings. A review direction does not implement controls, and oversight does not prove reform completion or effectiveness.
 
+Disclosure has an explicit shared prerequisite: the latest IHiS scope receipt
+must report qualified status and the admitted scale, and the environment must
+hold a qualified internal assessment record. The ministry cannot inspect that
+private record. This is a structural pilot assumption, not an independently
+established historical disclosure obligation. Other receipt guards remain
+policy-selected unless separately projected as shared requirements.
+
 ## 5. Decision situations, observations, and state
 
 | Observation | Producer / availability | Missing or stale handling |
@@ -62,7 +69,7 @@ identifiers are never participant observations.
 
 | Intent | Activation / reopening | Permitted response and boundary |
 | --- | --- | --- |
-| `issue_public_breach_disclosure` | known `breach_scope_summary` from `ihis_system_operator` | Record the ministry's represented public disclosure; public notice does not establish individual receipt. |
+| `issue_public_breach_disclosure` | latest qualifying typed `breach_scope_summary` from `ihis_system_operator` | Request disclosure; shared receipt and private-record admission apply independently of policy selection. Public notice does not establish individual uptake. |
 | `direct_public_health_security_review` | known `inquiry_and_defence_direction` from `prime_minister_response_interface` | Record the direction for a public-health system review; no review result follows automatically. |
 | `establish_committee_inquiry_path` | known `inquiry_and_defence_direction` from `prime_minister_response_interface` | Record the ministry inquiry mandate separately from the committee's work or findings. |
 | `record_reform_oversight_program` | known `singhealth_remediation_notice` from `singhealth_data_owner`; known `ihis_remediation_notice` from `ihis_system_operator` | Record bounded ministry oversight after both program notices; no completion or effectiveness is inferred. |
@@ -100,11 +107,18 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Normal: The ministry receives scope, discloses the breach, receives leadership direction, routes distinct review/inquiry messages, and later records oversight after two program notices.
 - Missing information: Disclosure waits for an actual scope summary; review and inquiry rows wait for the leadership direction; oversight waits for both organizations' announced programs.
 - Pending: Outgoing content is unknown to a recipient until transport admits delivery. The sender sees only its own pending lifecycle.
+- Scope content: unresolved, withdrawn, conflicting latest or absent scope reports
+  leave disclosure open. A qualifying delayed report may activate the Rule row
+  within its window. A backend that skips the guard still cannot bypass shared
+  admission; a window expiry is a policy limit, not a legal impossibility.
 - Authority/adverse case: Disclosure does not establish investigation findings. A review direction does not implement controls, and oversight does not prove reform completion or effectiveness.
 - Perturbation: Withheld scope closes the downstream ministry chain. Delayed findings may leave penalty-dependent program notices and oversight open.
 
-A premature choice, foreign-actor write, future-information leak or undeclared
-environment effect falsifies this contract and must fail review or admission.
+A foreign-actor write, premature generated result or undeclared environment
+effect fails this contract. Rule-only windows and receipt guards constrain the
+selected policy; mandatory shared prerequisites require an explicit handler
+projection. Event-specific capability names are vocabulary-exposed, as declared
+in the Scenario, and do not establish historically prefix-clean observation.
 
 ## 10. Limitations and successor route
 

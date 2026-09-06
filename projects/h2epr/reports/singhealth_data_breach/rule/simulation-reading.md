@@ -11,18 +11,18 @@ verification receipts and reproduction guidance. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.0616.v1; 9d17581f17e994b2aba4252c8a7457c7b03ecd8f3e9003c83268bf954664a16c |
-| Rule binding | f304a0fd41650859f626ebc89f7541062ba7e0f7166a141870b68ce519da2d4f |
-| Realization | h2epr.0616.rule-realization.v1; c537c33a4eaabfe94c09f86ce0eabb20500f918e70c73421e0e6c23d6cb54e72 |
-| Shared configuration | h2epr.0616.comparison.v1; 9086a428bdafd3060dd6c8eceebeedcdf2fe8171977808ebec6b42cead5c8ee0 |
-| Rule configuration | h2epr.0616.rule.v1; 7be960405c4409028441c4f2c97efd22e26fa995900fbafa804f7198ce2c2200 |
-| Run | run.5db9a323beb010817c521f46 |
-| Run manifest | 847b59da4f08b2583796511417ff9051ef10378b2452a61b0e1a5f19d8d1fef5 |
-| Trace | 3e20d90bc3ad4a15972286ac80c3acb3e5f7c029fecf37a6c9e46a34e3ebb5f8 |
-| Terminal state | e27b32d9df9e035e2e7ad89a073f82397d4491db6ee597cd9b9efc82c649b07d |
-| Run seal | e8393967e403da8ad215b1c81186fa6952ca324328332d0423bd25ca646d4fe0 |
-| Generated EPG seal | 04429d76666f687d61eb9ad220675f348a07833390986b63611d448b20d5d8ae |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-05-stage-d/materialization-a |
+| Package | h2epr.event-package.0616.v1; 52dbf7578a745e66cf8066f8743ac91f129deafb849b9fc92d6802fa32b0b5a5 |
+| Rule binding | 5b7dcacd27eee069208fa777908807db91c831c0cd8b00e1fb9330b2a07646b4 |
+| Realization | h2epr.0616.rule-realization.v1; 459360b6f9214ff7dd08bef5808d86d137adf828068a7bf278f2fc2f41396dae |
+| Shared configuration | h2epr.0616.comparison.v1; 0bdb117b630e2cd6f2ff12f369a66a1185698d15bf63b1dd57c164598315c424 |
+| Rule configuration | h2epr.0616.rule.v1; 20d445e58a239b63ec013b51833040b815d4a2a24c19edf8bea145708952e1ac |
+| Run | run.26b57124e29d077af3150e02 |
+| Run manifest | f0002f2c2161afd255134d062898cfa0672a191509334d80d13430d9abbe4b7a |
+| Trace | c326760686ce7e9652546955bc7a2fddaa72ee5d1941af073796d1c7ed96234b |
+| Terminal state | 5c8ecedefd2211d9f41636bdd47a144ec079ed9de97135f764e589ec5f745472 |
+| Run seal | b4834493f4d893676e58f2a221376f9f6eec72ae06f3e7ec34fbd595c7a0c438 |
+| Generated EPG seal | bf365f5d1306ead1ac0fd46f6feaddfe6e55d8b49546b3512a92f10bdf308dde |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/materialization-a |
 
 Fresh A/B materializations are byte-identical across all eight output roles and
 the run receipt. The generated-ID probe changes opaque run and record IDs while
@@ -35,8 +35,8 @@ admitted package.
 ## Complete-output coverage
 
 The complete machine scan traversed 782 trace
-records, 819 graph nodes and
-2,317 graph edges. Trace and graph IDs are unique,
+records, 820 graph nodes and
+2,318 graph edges. Trace and graph IDs are unique,
 every edge endpoint resolves, and the union of graph source-trace references
 equals all 782 records. Semantic review covered
 all 17 non-default actions, 17 deltas, 18 messages, six annotations, every
@@ -55,7 +55,7 @@ reconstruction rather than reproduced as a raw transcript.
 | run_seal | 1 | Complete evidence and terminal accounting |
 
 The graph contains one generated event, 20 coordinates, eight participants,
-782 trace-record nodes and eight state-entity
+782 trace-record nodes and nine state-entity
 nodes. Its complete edge-family ledger is:
 
 | Edge family | Count |
@@ -73,7 +73,7 @@ nodes. Its complete edge-family ledger is:
 | learns_result_from | 152 |
 | observes_for | 160 |
 | occurs_at | 782 |
-| part_of | 28 |
+| part_of | 29 |
 | participates_in | 8 |
 | projects | 160 |
 | received_from | 18 |
@@ -93,14 +93,14 @@ minimal set of influential decisions.
 An opening `unrecorded` value means no modeled record has yet been accepted; it
 does not assert that an underlying historical fact was false. This table lists
 every coordinate, every non-default disposition and all reducer deltas. Trace
-suffixes abbreviate `trace.run.5db9a323beb010817c521f46.`.
+suffixes abbreviate `trace.run.26b57124e29d077af3150e02.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 | --- | --- | --- |
 | c01 | `attributed_whitefly_activity_gate` → `record_retrospectively_attributed_access` | `incident.attributed_access=qualified_recorded` (`…00000033`); 0 delivered |
 | c02 | `attributed_whitefly_activity_gate` → `record_concentrated_exfiltration_account` | `incident.concentrated_exfiltration=reported_1_5m_identity_and_160k_medication_records` (`…00000070`); 0 delivered |
 | c03 | `singhealth_data_owner` → `record_organizational_breach_detection` | `response.detection=recorded_2018_07_04` (`…00000109`); 0 delivered |
-| c04 | `ihis_system_operator` → `verify_breach_scope` | `response.scope_verification=qualified_scope_recorded` (`…00000151`); 1 delivered |
+| c04 | `ihis_system_operator` → `verify_breach_scope` | `ihis_system_operator.scope_verification=qualified_scope_recorded` (`…00000151`); 1 delivered |
 | c05 | `singapore_ministry_of_health` → `issue_public_breach_disclosure` | `disclosure.ministry_notice=issued` (`…00000191`); 2 delivered |
 | c06 | `prime_minister_response_interface` → `publish_leadership_response` | `disclosure.leadership_response=published` (`…00000231`); 1 delivered |
 | c07 | `singapore_ministry_of_health` → `direct_public_health_security_review` | `review.ministry_direction=issued` (`…00000270`); 1 delivered |
@@ -143,7 +143,7 @@ implementation, and attribution publication is not attacker-identity truth.
 | incident.attributed_access | qualified_recorded | True |
 | incident.concentrated_exfiltration | reported_1_5m_identity_and_160k_medication_records | True |
 | response.detection | recorded_2018_07_04 | True |
-| response.scope_verification | qualified_scope_recorded | True |
+| ihis_system_operator.scope_verification | qualified_scope_recorded | True |
 | disclosure.ministry_notice | issued | True |
 | disclosure.leadership_response | published | True |
 | review.ministry_direction | issued | True |
@@ -166,10 +166,19 @@ Eight actors use one declarative Rule implementation and one authoritative
 environment. Single-writer handlers preserve the authority of SingHealth, IHiS,
 the leadership interface, ministry, inquiry committee, PDPC, Symantec and the
 retrospective attack representation. The reducer, not the backend, owns record
-effects. Public prestate, actual delivery and retained runtime memory jointly
-activate later rows; Draft stage labels, Reference content and future findings
-are absent from observations. No common-code SingHealth branch supplies the
-choices.
+effects. Public prestate, IHiS-private assessment, actual delivery and retained
+runtime memory activate the selected rows. Stage descriptions and Reference
+content are absent; event-specific vocabulary remains visible before its result.
+No common-code SingHealth branch supplies the choices.
+
+At c04, the `verify_breach_scope` disposition (`…00000142`) admits the qualified
+report and writes `ihis_system_operator.scope_verification` (`…00000151`). The
+ministry-bound summary (`…00000128`) carries typed status and scale. Its receipt
+before c05 is required for disclosure (`…00000186`, delta `…00000191`). The
+ministry never receives the private field in its state projection. Shared
+admission checks that field independently; an eligible sender's positive message
+cannot substitute for a qualified internal record. Neither record nor message
+establishes that technical forensic verification occurred.
 
 The canonical run accepts all 17 selected records and meets all 17 descriptive
 expectations. It contains no rejected non-default action, so the run alone does
@@ -186,20 +195,39 @@ findings, PDPC orders and organization responses are distinct transitions. The
 Draft's claim of implemented reforms is reduced to announced programs and
 oversight because no executable completion or effectiveness mechanism exists.
 
-Two freshly admitted local probes test this reading without becoming current
-event releases or scientific counterfactuals:
+Eight fresh Rule probes exercise the scope/disclosure and findings-content contracts. Each used admitted
+assets, A/B materialization, generated-ID perturbation and independent publication;
+all sealed, replayed and closed transport. They are local contract evidence, not
+current canonical event releases or historical counterfactuals.
 
 | Changed owner/input | Observed response | Evidence boundary |
 |---|---|---|
-| Rule scope-verification row additionally requires the later attribution report, which cannot arrive in its c04–c07 window | Only the two qualified incident records, detection and later Symantec publication occur. 720 trace records, 757 nodes, 2,100 edges; 13 downstream expectations remain open. | Fresh A/B, ID perturbation, replay, graph and independent publication pass with zero unresolved transport. This is a missing-information construction test. |
-| Shared COI→PDPC findings latency changes from 1 to 7 ticks | Inquiry findings still publish at c10 and deliver at c17, after both penalty windows. Two penalties, two organizational programs and ministry oversight remain open. 763 records, 800 nodes, 2,249 edges. | The message reaches terminal delivery. Seven ticks are a routing perturbation, not an estimated historical delay or policy counterfactual. |
+| Unresolved internal assessment and summary | No disclosure; 13 unmet expectations; 727 records / 765 nodes / 2,125 edges | `run.e25ddb70e5719796b3f84007`; a well-formed negative report permits a valid open run |
+| Qualified internal record, withdrawn summary | No disclosure; 12 unmet; 727 / 765 / 2,125 | `run.e6bd38a63b109de8f5256db2`; world feasibility does not replace qualifying information |
+| Ministry summary withheld | No disclosure; 12 unmet; 724 / 762 / 2,115 | `run.3725264d3efa8b81d99a6133`; IHiS can record assessment without making ministry receipt true |
+| IHiS→ministry route latency 1→3 ticks | Disclosure shifts c05→c07; all 17 expectations met; 782 / 820 / 2,318 | `run.b6555b325cffe11157bf70b0`; every message on that directed route is delayed, not only the scope summary |
+| Same route latency 1→9 ticks | Summary reaches c13 after the c05–c08 policy window; no disclosure; 12 unmet; 727 / 765 / 2,125 | `run.2af7299510db9f43159bb358`; window expiry is selected policy behavior, not a shared legal time lock |
+| Summary withheld and Rule receipt guard removed | c05 attempt rejected: `information_requirement_not_met`; 12 unmet; 726 / 764 / 2,121 | `run.7d3bcba393d722b962a5cefb`; bypassing policy does not bypass shared receipt admission |
+| Positive summary with unresolved internal record | c05 attempt rejected: `precondition_not_met`; 13 unmet; 729 / 767 / 2,131 | `run.6421b226f4fd6bf448c3ea34`; information and world feasibility have independent authority |
+| COI findings marked withdrawn | Disclosure remains c05; neither PDPC penalty is selected; 5 unmet; 763 / 801 / 2,250 | `run.f421d679f1e85f1c289e57af`; a message type alone does not satisfy the positive-content Rule guards; this is policy selection, not shared penalty admission |
 
-The probe run IDs are `run.5fc1d86747694ec2df5eeeb9` and
-`run.7ba987891680155e0f1c69d6`. Each variant received a new configuration,
-realization, assembly, package and release identity before execution; neither was
-created by editing an admitted package or generated output.
+Physical probe custody is retained under
+`.local-runtime/h2epr-simulation/working/2026-09-06-contracts/singhealth-probes-final/`,
+with one named case directory per row. Malformed, empty and conflicting/latest
+updates are additionally covered by the event-neutral
+[information-contract tests](../../../tests/runtime/test_information_contracts.py).
+The withdrawn case supplies a withdrawn summary as its first report; it does not
+claim that the event ran a positive-then-withdrawn cycle. Latest-update precedence
+is demonstrated by synthetic tests. The event's internal assessment is one-shot.
 
 ## Limitations
+
+The current observation profile exposes declared event vocabulary, including
+names associated with later events. It does not provide historically
+prefix-clean information. Rule windows and receipt guards are selected
+policy assumptions except where explicit shared handler requirements apply.
+Configured decision reasons are rationale; hash-linked observations, actual
+message content, dispositions and deltas provide generated evidence.
 
 The frozen set is uneven and secondary. The May 2015 date is an affected-record
 cohort boundary, not direct proof that intrusion began then. Two breach extracts
@@ -209,7 +237,8 @@ reconciling them with external material.
 
 Whitefly remains a later published attribution claim. P_1 is an explicit
 representation gate, not a technical adversary simulation, and its structural
-presence cannot leak identity into 2018 observations. There is no malware,
+presence and capability names expose attribution-related vocabulary earlier.
+This limits information-clean participant experiments. There is no malware,
 network topology, patient-level behavior, private medical data, payment ledger,
 implemented-control state, breach probability or security-effectiveness metric.
 Logical coordinates and one-tick routes are authored ordering choices.
