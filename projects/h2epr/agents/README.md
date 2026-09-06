@@ -10,6 +10,7 @@ Definitions, and backend-neutral participant interfaces.
 | `interfaces/<event>/` | Observation, intent, lifecycle, and actor capability registries |
 | [agent-definition-template.md](agent-definition-template.md) | Required human-readable Definition modules |
 | [WORKFLOW.md](WORKFLOW.md) | Participant-stage handoffs and review |
+| [agent-definition Skill](../skills/agent-definition/SKILL.md) | Representation, provenance, decision-contract, falsification, and publication method |
 
 A Definition owns identity, information, authority, admissible choices,
 uncertainty, and limitations. Exact Rule rows, model prompts, decoding

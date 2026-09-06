@@ -1,37 +1,66 @@
 ---
 name: agent-definition
-description: Write a dataset-bounded H2EPR Agent Definition for one named decision interface without fixing backend parameters or outcomes.
+description: Write or revise one dataset-bounded H2EPR Agent Definition that closes representation, information, authority, admissible decisions, and environment-result boundaries without fixing backend policy or outcomes.
 ---
 
 # Agent Definition
 
-Read [references/guide.md](references/guide.md) when producing a Definition.
-It contains the representation decision table, provenance rules, worked
-decision cases, falsifiers, and completion evidence used with the template.
+Use this Skill after roster disposition and before participant-interface
+projection. It produces one human semantic authority for one named decision
+interface.
 
-## Read first
+## Mandatory reading
 
-Read `agents/README.md`, `agents/WORKFLOW.md`, the Agent Definition template,
-the accepted Source Profile, roster candidate, shared registries, and only the
-three allowed event inputs.
+Read [references/guide.md](references/guide.md) first. Then read:
+
+- [representation-and-authority.md](references/representation-and-authority.md)
+  to decide what the Agent represents and where its authority ends;
+- [dataset-provenance-and-exposure.md](references/dataset-provenance-and-exposure.md)
+  to classify every material claim and prevent information leakage;
+- [observations-and-state.md](references/observations-and-state.md) to specify
+  what the interface can know, remember, and reconsider;
+- [decision-commitments-and-intents.md](references/decision-commitments-and-intents.md)
+  to close choice sets without scripting a backend or world outcome;
+- [worked-cases-and-falsification.md](references/worked-cases-and-falsification.md)
+  to challenge the contract; and
+- [publication-and-completion.md](references/publication-and-completion.md)
+  before handoff.
+
+For a first implementation, an unfamiliar organizational participant, or a
+failed review, also read the
+[complete synthetic example](references/complete-synthetic-example.md) and
+[annotated failure example](references/annotated-failure-example.md). Their
+event terms and choices are illustrative, not defaults.
+
+## Accepted parents
+
+Read `agents/README.md`, `agents/WORKFLOW.md`,
+`agents/agent-definition-template.md`, the accepted Source Profile and roster,
+shared registries, and only the three admitted benchmark inputs:
+`event_spec.json`, `frozen_evidence.json`, and `draft_epg.json`.
 
 ## Procedure
 
-1. Resolve source participant IDs and every Draft appearance.
-2. State the represented decision interface, included/excluded internal actors,
-   aggregation losses, and split/narrowing condition.
-3. Anchor each role, relationship, observation, authority, and admissible
-   action to a dataset record or label it an executable assumption.
-4. Close decision occasions, permitted observations, persistent state, duties,
-   prohibitions, minimum response classes, abstention and reopening.
-5. Publish intents as requests or messages and name their environment-owned
-   results and lifecycles.
+1. Resolve every source participant ID and Draft appearance.
+2. Test whether the candidate is an autonomous decision interface; record
+   inclusions, exclusions, aggregation loss, and split or narrowing triggers.
+3. Classify every role, relationship, authority, observation, and choice claim
+   as dataset material, executable structural assumption, generated run
+   material, or downstream configuration.
+4. Specify decision situations, observable inputs, persistent state, missing
+   and stale behavior, duties, prohibitions, abstention, and reopening.
+5. Define typed action requests and attached messages, then route delivery,
+   feasibility, admission, execution, and effects to the environment.
 6. Declare configurable constructs and domains without selecting values.
-7. Add worked cases for normal, missing, pending, rejected, and perturbed paths.
-8. Run structural, cross-registry, future-information, and publication checks.
+7. Run normal, missing, pending, rejected, adverse, and perturbed cases.
+8. Publish one current Definition and its completion record; do not create a
+   parallel current version.
 
 ## Stop conditions
 
-Return to roster/scenario ownership if the participant is a cohort, process,
-world-state entity, or lacks an autonomous choice. Stop on external research,
-hidden future content, unowned state, or a definition that scripts success.
+Return to roster ownership for a cohort, process, world entity, or duplicate
+interface. Return to scenario ownership for world truth, routes, resources, or
+effect semantics. Return exact values to configuration and selection logic to
+the backend. Stop on external research, Reference or held-out exposure,
+unowned state, future leakage, invented authority, or a contract that requires
+success.

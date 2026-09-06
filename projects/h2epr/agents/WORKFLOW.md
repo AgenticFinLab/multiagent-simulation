@@ -24,9 +24,12 @@ fill a missing identifier or preserve a historically prominent name.
 
 ## 3. Define each active decision unit
 
-Use the Agent Definition or Population Model template. Cite dataset anchors by
-file, stage, episode, participant, or stable record identifier. Define the
-information and authority boundary before describing possible decisions.
+Use the [agent-definition Skill](../skills/agent-definition/SKILL.md) with the
+Agent Definition template, or use the Population Model template for aggregate
+choice units. Cite dataset anchors by file, stage, episode, participant, or
+stable record identifier. Close representation, provenance, information,
+authority, decision commitments, intent/result boundaries, and falsifying
+cases before projecting a machine interface.
 
 ## 4. Close shared interfaces
 
