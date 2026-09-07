@@ -119,9 +119,12 @@ Impact:
 
 Correction:
 
-Emit typed requests and messages. Let transport admit and deliver them; let
-the scenario mechanism authorize, allocate, execute, and apply effects; expose
-results later through observations.
+Emit a typed action and, if needed, attached messages. The shared handler and
+reducer admit the action and apply its declared effects. Transport separately
+handles messages from accepted source actions. A recorded request can coexist
+with an undelivered message; a recipient's later authorization or execution is
+another owned action. Expose each result through the appropriate state or
+receipt instead of treating these steps as one successful participant act.
 
 ## Finding 6: communication scope is unlimited
 

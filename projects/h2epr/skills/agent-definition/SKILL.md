@@ -36,7 +36,8 @@ event terms and choices are illustrative, not defaults.
 
 Read `agents/README.md`, `agents/WORKFLOW.md`,
 `agents/agent-definition-template.md`, the accepted Source Profile and roster,
-shared registries, and only the three admitted benchmark inputs:
+the existing or coordinated candidate registries, and only the three admitted
+benchmark inputs:
 `event_spec.json`, `frozen_evidence.json`, and `draft_epg.json`.
 
 ## Procedure
@@ -49,12 +50,12 @@ shared registries, and only the three admitted benchmark inputs:
    material, or downstream configuration.
 4. Specify decision situations, observable inputs, persistent state, missing
    and stale behavior, duties, prohibitions, abstention, and reopening.
-5. Define typed action requests and attached messages, then route delivery,
-   feasibility, admission, execution, and effects to the environment.
+5. Define typed actions and attached messages. Separate shared action admission
+   and effects from transport delivery and any later recipient action.
 6. Declare configurable constructs and domains without selecting values.
 7. Run normal, missing, pending, rejected, adverse, and perturbed cases.
-8. Publish one current Definition and its completion record; do not create a
-   parallel current version.
+8. Hand off one candidate and an external review record with exact parent and
+   content identities. Publish the sole current Definition after acceptance.
 
 ## Stop conditions
 

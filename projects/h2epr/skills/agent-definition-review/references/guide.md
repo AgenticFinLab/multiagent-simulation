@@ -8,6 +8,13 @@ roster/actor map, interface registries, Scenario candidate, template revision,
 reviewer, date, and exposure boundary. A changed candidate invalidates the
 review record.
 
+Keep the review record separate from the Definition and its closed participant
+semantic index. The index pins the Definition bytes and source anchors; the
+review pins the candidate, template, final projections and other parents,
+findings, reviewer/date, and verdict. Ignored supervisor reviews are not runtime
+inputs. A formally published review must be sealed as an artifact in the
+owning semantic release without adding fields to closed run/index schemas.
+
 ## Severity model
 
 | Severity | Meaning | Disposition |
@@ -26,8 +33,10 @@ prevents acceptance.
 2. Erase names and ask whether authority still follows roles and state.
 3. Swap two actor IDs and check that no hidden name branch changes semantics.
 4. Remove or stale each material observation and inspect the declared response.
-5. Inject later Draft information and verify it is forbidden at the earlier
-   decision point.
+5. Inject an unrealized later result, undelivered report, or another actor's
+   private information and verify the earlier decision cannot consume it.
+   Check declared vocabulary exposure separately: current full-Draft packages
+   expose future field/action names and do not claim prefix-clean information.
 6. Submit invalid target, payload, authority, and lifecycle combinations.
 7. Make the environment deny or partially realize an admissible intent.
 8. Perturb one material observation and one aggregation choice.
@@ -48,6 +57,14 @@ bytes and record how the evidence changed.
 - `accept with recorded limitations`: the interface is executable and honest,
   while explicitly bounded dataset or aggregation limits remain.
 - `return to owning layer`: a semantic or evidence defect prevents release.
+
+These are verdicts, not product states. `REVIEW_CANDIDATE` has no verdict yet;
+`REVISE` corresponds to `return to owning layer`; `ACCEPTED` must retain either
+`accept` or `accept with recorded limitations` in the review record.
+`SUPERSEDED` records replacement by an accepted successor and does not issue a
+new verdict. Review the actual projection: document-local commitment labels,
+duties, and reopening prose do not add active-instance, scheduling, or transport
+cancellation capabilities to the current runtime.
 
 The review never promotes a backend or validates history. It certifies that
 the human semantic parent is dataset-bounded, internally coherent,

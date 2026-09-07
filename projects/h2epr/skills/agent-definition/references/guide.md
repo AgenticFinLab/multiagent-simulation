@@ -24,7 +24,8 @@ The product must be:
 
 - bounded to one accepted roster disposition and one event;
 - traceable to the admitted benchmark package;
-- complete enough for Rule, LLM, and RuleLLM projections;
+- explicit enough to project into the selected implemented backend and to
+  review future backend equivalence without implying those backends exist;
 - explicit about environment and configuration ownership;
 - falsifiable through concrete cases; and
 - publishable as the sole current Definition for that Agent.
@@ -44,19 +45,19 @@ The product must be:
 
 ## Authority stack
 
-Resolve conflicts in this order:
+Resolve conflicts by ownership. Admitted bytes, exposure rules, Source Profile,
+and roster constrain the candidate. The Definition owns participant meaning;
+registries project that meaning and own exact executable identifiers. Scenario
+owns world state, routes, feasibility, and effects. Configuration selects
+values and backend realization selects options. Run observations describe what
+happened under those parents.
 
-1. admitted benchmark bytes and their exposure boundary;
-2. accepted Source Profile and roster disposition;
-3. accepted scenario vocabulary and shared registries;
-4. the current Agent Definition;
-5. participant-interface projections;
-6. shared and backend configuration;
-7. backend realization;
-8. run observations.
-
-A downstream artifact can reveal that an upstream contract is incomplete. It
-cannot silently repair or reinterpret that contract.
+An existing registry does not override a conflicting participant contract, and
+prose cannot silently add a new identifier or world capability. Return the
+mismatch to the affected owners and review their candidates together. During
+initial authoring, a proposed vocabulary can be coordinated with the Scenario
+candidate; executable acceptance waits for the final parent set and projection.
+Pin that set in the external review record after the candidate bytes settle.
 
 ## Core ownership test
 

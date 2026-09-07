@@ -107,19 +107,25 @@ release failure; neither side silently overrides the other.
 
 ## Identity and current-version policy
 
-Publish one current Definition at the event's canonical path. In the
-participant semantic index or release receipt, record:
+Publish one current Definition at the event's canonical path. The maintained
+participant semantic index pins its actor, representation kind, semantic ID,
+path, checksum, source participant IDs, and Draft anchors. It is a closed
+machine contract: do not add template, reviewer, or successor fields to it or
+to a run/configuration receipt.
 
-- event and Agent IDs;
-- template revision;
-- semantic parent identity;
-- source participant IDs;
-- content checksum;
-- reviewer disposition; and
-- successor condition.
+Use a separate review record for the exact candidate path/hash, template
+path/hash or repository revision, accepted parent paths/content identities,
+reviewer/date, checks, findings, accepted limitations, successor condition,
+verdict, and next legal action. Supervisor working reviews belong in ignored
+project memory. If a semantic release publishes a review as a formal artifact,
+its manifest must seal that artifact like the other release files; the
+manifest alone does not validate the review's meaning. An unpublished review
+must not become a required runtime or clean-checkout input.
 
-Do not self-embed a checksum that covers the Definition file, and do not make
-the prose a competing authority for event release status.
+The Definition names semantic parents and the review-record location; the
+external record pins the completed candidate and projection set. This avoids
+self-embedded Definition hashes and reciprocal content-hash dependencies. The
+review is not a competing authority for the event's current release status.
 
 Git history preserves replaced text. Do not publish parallel `v0.1`, `v0.2`,
 “final,” “revised,” or dated copies as competing current authorities unless a
@@ -161,12 +167,17 @@ authority is justified or whether the representation is scientifically useful.
 
 ## Review disposition
 
-Use one unambiguous disposition:
+Separate product state from the independent review verdict:
 
-- `REVIEW_CANDIDATE`: authoring complete, independent review pending;
-- `REVISE`: named findings remain open;
-- `ACCEPTED`: semantic review closed for the current parent set; or
-- `SUPERSEDED`: another accepted Definition is the sole current authority.
+| Product state | Review verdict and meaning |
+|---|---|
+| `REVIEW_CANDIDATE` | no verdict yet; independent review pending |
+| `REVISE` | `return to owning layer`; findings prevent acceptance |
+| `ACCEPTED` | `accept` or `accept with recorded limitations`, with the distinction preserved in the review record |
+| `SUPERSEDED` | historical accepted product replaced by the sole current successor; not a new reviewer verdict |
+
+Use the three verdicts from the Agent Definition review Skill. A product-state
+label alone never stands in for reviewer identity, findings, or acceptance.
 
 Acceptance records the reviewer, parent identities, checks performed, accepted
 limitations, and exact content identity. It does not accept a backend, run, or

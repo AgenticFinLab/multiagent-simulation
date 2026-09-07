@@ -93,18 +93,17 @@ Unobserved world truth and another Agent's private choice are not appropriate.
 
 ## Own intent versus admitted intent
 
-Keep these states separate:
+Keep action disposition, transport disposition, and domain result separate.
+The backend selects an action; the environment admits or rejects it and the
+reducer applies its effects at the current coordinate. The next observation
+can expose that actor's own action disposition and the resulting public or
+own-private state. This does not require a message addressed back to the actor.
 
-1. the backend selected an intent;
-2. the participant emitted it;
-3. transport admitted or rejected it;
-4. a target received it;
-5. the environment acted on it; and
-6. an effect became observable.
-
-The Agent may remember its own selection if runtime exposes that record. It
-must not infer admission, delivery, or effect until the corresponding receipt
-or observation is delivered.
+Attached messages enter transport only after their source action is accepted.
+Their pending, rejected, delivered, or expired states do not retroactively
+change that action disposition. A recipient's later response or a domain result
+such as authorization is a separate event with its own owner. Own accepted
+request, delivered request, and effective requested outcome are different facts.
 
 ## Reconsideration
 
@@ -118,7 +117,8 @@ Meaningful reopening events include:
 - an observation is superseded;
 - an environment result changes feasibility;
 - a new decision situation activates; or
-- the Agent's own prior intent expires or is withdrawn.
+- an outgoing message expires, or an explicit business-withdrawal action
+  receives its own disposition.
 
 “Retry every tick” is backend policy, not semantic reopening. “Never reconsider”
 is invalid when the interface declares later observations that materially
@@ -160,10 +160,9 @@ scenario or registry design.
 
 ## Backend context projection
 
-The participant interface should provide a backend-neutral context containing
-only:
+The participant interface provides a backend-neutral context containing:
 
-- active decision situation;
+- actor identity and logical coordinate;
 - allowed observation values and missing markers;
 - permitted persistent state;
 - admissible intent schema;
@@ -174,6 +173,13 @@ Rule code, prompts, and hybrid admission may serialize this differently. They
 must receive equivalent semantics. Hidden access to the full reducer state,
 Draft future, or another Agent's memory invalidates comparison.
 
+Document-local decision labels explain how to interpret this context; they are
+not fields in the current observation schema. The maintained menu lists the
+actor's registered action types, not only those whose shared preconditions
+currently pass. Backend activation and environment admission therefore remain
+separate. General active-duty enforcement or recurring decision instances
+require a reviewed projection; prose alone does not provide them.
+
 ## Information-related falsifiers
 
 The contract fails if:
@@ -181,7 +187,8 @@ The contract fails if:
 - a worked case requires a value absent from the observation inventory;
 - a decision uses a message before delivery;
 - stale data is treated as current without an explicit rule;
-- a pending request is represented as an accepted result;
+- a pending message is represented as recipient receipt or authorization,
+  or an action without an accepted disposition is treated as applied;
 - another participant's private state appears in context;
 - a backend can access more event information than another without declaration;
 - transient reasoning silently persists; or

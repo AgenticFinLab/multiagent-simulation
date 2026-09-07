@@ -147,14 +147,22 @@ handler. Use attached messages for addressed or public communication. A
 message may influence later behavior, but delivery and interpretation are not
 guaranteed by emission.
 
-For every intent, name the full boundary:
+Describe the action and its attached messages separately:
 
-> Agent selects → participant emits → transport admits or rejects →
-> environment delivers or schedules → reducer applies an authorized effect →
-> later observation may expose the result.
+- The participant selects and emits an action. The environment admits or
+  rejects it against the sealed prestate, and the reducer applies any admitted
+  effects at that coordinate.
+- Only messages attached to an accepted source action enter transport.
+  Transport separately admits, rejects, delays, delivers, or expires them.
+  An accepted action and a pending or failed outgoing message can coexist.
+- A recipient may later select its own action after actual delivery. Any
+  mandatory receipt requirement belongs to that action's shared handler;
+  the sender's action does not wait for its own attached message to arrive.
 
-The Definition owns the first two semantics. Shared transport, scenario, and
-runtime own the remainder.
+The Definition owns admissible choices and communication meaning. Shared
+handlers, the reducer, and transport own their respective dispositions and
+effects. A handler may record a request without making the requested
+restriction or allocation effective; name the separate owner of that result.
 
 ## Environment-owned results
 
@@ -194,7 +202,8 @@ if a worked case or planned comparison depends on it.
 Rule code, an LLM, or RuleLLM admission selects within the same semantic choice
 set. Backend-specific representations may differ, but all must share:
 
-- active commitment identity;
+- the reviewed mapping from document-local commitments to observation and
+  action identifiers;
 - admissible alternatives;
 - observation and state boundary;
 - mandatory information checks;
@@ -205,6 +214,16 @@ set. Backend-specific representations may differ, but all must share:
 If an LLM needs contextual prose, it must be a projection of admitted semantics,
 not a new source of authority. If Rule needs an exact threshold, the value and
 provenance belong to configuration.
+
+The current observation schema has no active-commitment instance field. Runtime
+invokes every active actor at each coordinate; Rule selects rows using its
+configured activation and guards. An accepted Rule row is complete and is not
+automatically rearmed. A business withdrawal must be an explicit action with
+shared effects and, where needed, a later recipient decision; it does not cancel
+an already submitted transport message. General minimum-response enforcement,
+event-triggered invocation, and recurring commitment instances are not current
+kernel capabilities. A candidate requiring them must identify an unclosed
+projection and return to its owner before executable acceptance.
 
 ## Contradiction patterns
 

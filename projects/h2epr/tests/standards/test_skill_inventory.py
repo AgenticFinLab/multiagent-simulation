@@ -50,6 +50,30 @@ AGENT_DEFINITION_HEADINGS = [
 ]
 
 
+def _case_coverage_errors(example: str) -> list[str]:
+    """Check case references and substantive bodies, not domain truth."""
+    cases = dict(re.findall(
+        r"^### `(case\.[a-z_]+)`[^\n]*\n(.*?)(?=^### |^## |\Z)",
+        example, re.MULTILINE | re.DOTALL))
+    matrix = re.findall(
+        r"^\| `(case\.[a-z_]+)` \| `(decision\.[a-z_]+)` \| `([a-z_]+)` \| ([^|]+) \| ([^|]+) \|$",
+        example, re.MULTILINE)
+    errors = []
+    if not matrix or set(cases) != {row[0] for row in matrix}:
+        errors.append("case_matrix_mismatch")
+    decisions = set(re.findall(r"^### `(decision\.[a-z_]+)`", example, re.MULTILINE))
+    intent_section = example.split("## 7. Intent and environment-result boundary", 1)[1].split("### Message output surface", 1)[0]
+    intents = set(re.findall(r"^\| `([a-z_]+)` \|", intent_section, re.MULTILINE))
+    if decisions != {row[1] for row in matrix} or intents != {row[2] for row in matrix}:
+        errors.append("uncovered_contract")
+    for case, decision, intent, information, result in matrix:
+        body = cases.get(case, "")
+        if (decision not in body or intent not in body or len(body.split()) < 40
+                or len(information.split()) < 3 or len(result.split()) < 3):
+            errors.append("case_content_incomplete:" + case)
+    return errors
+
+
 class SkillInventoryTests(unittest.TestCase):
     def test_skill_inventory_is_exact_and_named_consistently(self) -> None:
         paths = sorted(SKILL_ROOT.glob("*/SKILL.md"))
@@ -178,7 +202,7 @@ class SkillInventoryTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "entities.cleanup.progress_status",
+                "entities.office.request_status",
                 "entities.communication.operational_notice_status",
                 "entities.navigation.restriction_status",
             },
@@ -222,6 +246,20 @@ class SkillInventoryTests(unittest.TestCase):
         self.assertIn("environment may admit or reject", example)
         self.assertNotIn("agent_harbor_response_office", example)
         self.assertNotRegex(example, r"\b(?:DC|OBS|ST|INT)-")
+
+    def test_case_coverage_rejects_deleted_bodies_and_uncovered_intents(self):
+        example = (SKILL_ROOT / "agent-definition/references/complete-synthetic-example.md").read_text()
+        self.assertEqual([], _case_coverage_errors(example))
+        mutations = [
+            re.sub(r"(^### `case\.[^\n]+\n).*?(?=^### |^## )", r"\1", example,
+                   flags=re.MULTILINE | re.DOTALL),
+            re.sub(r"^\| `case.withdrawal`.*\n", "", example, flags=re.MULTILINE),
+            example.replace("| `decision.operational_notice` | `issue_operational_notice` |",
+                            "| `decision.response_request` | `request_navigation_restriction` |"),
+        ]
+        for mutation in mutations:
+            with self.subTest(mutation=mutations.index(mutation)):
+                self.assertTrue(_case_coverage_errors(mutation))
 
 
 if __name__ == "__main__":

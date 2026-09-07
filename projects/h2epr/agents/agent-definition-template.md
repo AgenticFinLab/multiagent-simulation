@@ -32,10 +32,10 @@ unless a reviewed schema explicitly adopts them.
 | Represented decision interface | `<one accountable interface and bounded choice family>` |
 | Source participant IDs | `<all source participant IDs and Draft appearances>` |
 | Primary decision commitments | `<document-local decision.<descriptive_name> labels>` |
-| Invocation semantics | `<event-triggered or otherwise bounded; exact cadence owner>` |
+| Invocation semantics | `<runtime coordinate invocation; semantic activation and backend selection owner>` |
 | Participant-state authority | `<state the Agent may retain and state it cannot own>` |
 | Dataset exposure and scope | `<admitted inputs and explicit exclusions>` |
-| Semantic parents | `<Source Profile, roster, registries, and scenario identities>` |
+| Semantic parents | `<Source Profile and roster identities; coordinated registry/scenario vocabulary, final set pinned externally>` |
 | Definition semantic ID | `<h2epr.<event_number>.agent.<actor_id>.v1 or current maintained form>` |
 
 In one compact paragraph, explain why this participant is an Agent, which
@@ -286,13 +286,19 @@ Close with:
 
 | Field | Record |
 |---|---|
-| template revision | `<current template identity>` |
-| Source Profile and roster | `<paths and content identities>` |
-| shared registries and scenario | `<paths and content identities>` |
+| template revision | `<repository revision or template path; exact file identity pinned in external review>` |
+| Source Profile and roster | `<paths and semantic identities>` |
+| shared registries and scenario | `<paths and semantic identities; final content identities pinned in external review>` |
 | Definition semantic ID | `<stable ID used by participant-interface projections>` |
-| External content identity record | `<participant semantic index or release receipt; never a self-embedded file digest>` |
+| External content identity record | `<participant semantic index for Definition hash; separate review-record path for review metadata>` |
 | commitment/observation/state/intent/case counts | `<counts>` |
 | validation | `<structural, semantic, and event-wide checks>` |
 | review record | `<authoritative external disposition, reviewer, and date>` |
 | unresolved findings | `<specific findings or none>` |
 | next legal action | `<independent review, projection, revision, or successor>` |
+
+The external review record pins the exact Definition, template, and parent
+bytes. Do not add review metadata to a closed semantic index or runtime receipt,
+or embed a downstream digest that itself covers this Definition. State which
+requirements are executable now and which remain unclosed projections;
+document-local duties and decision labels are not new runtime capabilities.

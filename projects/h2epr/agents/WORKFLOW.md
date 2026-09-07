@@ -31,6 +31,13 @@ stable record identifier. Close representation, provenance, information,
 authority, decision commitments, intent/result boundaries, and falsifying
 cases before projecting a machine interface.
 
+Coordinate proposed identifiers and world routes with registry and Scenario
+owners during authoring. The Definition owns participant meaning; existing
+registry identifiers do not override it. Close mismatches with the affected
+owners and pin the final candidate/projection set in an external review record
+before executable acceptance. Keep Population choice units, aggregation and
+heterogeneity under the Population Model template.
+
 ## 4. Close shared interfaces
 
 Publish observation, intent, and lifecycle registries. Each observation has

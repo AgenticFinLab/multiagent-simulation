@@ -51,15 +51,20 @@ fills the gap.
 
 ### Pending lifecycle
 
-Give the Agent evidence that an intent was emitted but no final disposition has
-arrived. The case fails if it treats the request as accepted, delivered,
-executed, or effective.
+Specify which lifecycle is pending. An emitted action without an admission
+disposition proves no accepted effect. An accepted action with an outgoing
+message still pending already has its admitted reducer effect, but proves no
+recipient receipt or later authorization. Exercise both boundaries; a pending
+message does not invalidate its source action's recorded acceptance.
 
 ### Authority denial
 
-Allow an admissible request and have the environment reject it for authority,
-route, or target reasons. The Agent's choice may remain valid even though the
-world does not change. The case fails if intent validity depends on success.
+Allow a semantically meaningful request that shared admission rejects for a
+target or precondition reason: no action delta or attached message follows.
+Separately consider an accepted request whose message fails routing, or whose
+recipient later denies authorization. These results have different owners and
+do not retroactively change the source action disposition. The case fails if
+intent meaning is defined only by eventual success.
 
 ### Adverse or partial result
 
