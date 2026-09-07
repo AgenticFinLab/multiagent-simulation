@@ -17,12 +17,12 @@ verification receipts and reproduction instructions. The
 | Shared configuration | h2epr.1031.comparison.v1; 1fdd3ff487570175d387e406ff8c1fea6599548b8ce0646b7834b8ab6d4766a9 |
 | Rule configuration | h2epr.1031.rule.v1; 36e94810565faaf3e656362b95b2ae359a66ff683bae2c7cbcb451fc6cd37636 |
 | Run | run.f53d0be85dbb76fc46dcdde4 |
-| Run manifest | 4816bcfacf04000bf3b1f5512eb387dd937d90d79c7b48b6df882fe4f09d42f2 |
-| Trace | 3b6d399af0cf8247b2f284a375b1d69e347bf95ad3f10ce79390c0250423e475 |
+| Run manifest | ade7c0f89bba617e22a7fee3a7c650f4d3ef735037936c29ba712489a7387eba |
+| Trace | 66017e69de58b299710dafbbf71ba2f43bbe250c426015eb205f0e49deda15fa |
 | Terminal state | b5c58efa2c78ab645c4eac75ff0481a2c122576551084ab6227cfe2735c8ec32 |
-| Run seal | 114604c982effaab1e166b1652745439eba0bb6f2d83582ae93058ad1e1fe0ae |
-| Generated EPG seal | 06d315f500d23348b3c3a888d6f1f859ca872e7b254d1f1494ef3aadcd8ba1e2 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-06-semantic-contracts/materialization-a |
+| Run seal | 1da74470baae7ecf22db8bd91328cb12c81aa557cd8f3e7f2e5a33503fc0b46c |
+| Generated EPG seal | ba4d9645bcba2be72987650897d7748f7682b86e0507d575606e2d55c12d5ba5 |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-07-four-task-maintenance/materialization-a |
 
 Fresh A/B outputs are byte-identical across all eight output roles and the run
 receipt. The generated-ID probe preserves semantic trace/graph structure and

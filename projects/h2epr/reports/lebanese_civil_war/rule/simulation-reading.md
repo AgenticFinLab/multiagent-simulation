@@ -22,7 +22,7 @@ verification receipts and reproduction guidance. The
 | Terminal state | 3aff7c57db691e4088eea06b88cb8179c1f21b78d108d437998c2fe68f5cde25 |
 | Run seal | 537ff58de661c7abf5926fd15a4046a0619893a15e3cab8af3b714b04805f250 |
 | Generated EPG seal | ed5c47ee5094f03c87a8f8d8898fcaf6a449e676294917decbd055626adccf19 |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-06-semantic-contracts/materialization-a |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/lebanese_civil_war/rule/2026-09-07-four-task-maintenance/materialization-a |
 
 Fresh accepted A/B materializations are byte-identical across all eight output
 roles and the run receipt. The generated-ID probe changes opaque run and record

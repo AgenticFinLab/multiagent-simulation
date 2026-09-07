@@ -248,6 +248,39 @@ class ParticipantBehaviorTests(unittest.TestCase):
                          self._actions(trace, V.second_actor))
         self.assertFalse(receipt["outcome_assessments"][0]["met"])
 
+    def test_accepted_row_does_not_resubmit_with_a_still_known_message(self):
+        def persistent_guard(settings):
+            _behavioral_rules(settings)
+            # Keep only message_known: its receipt survives acceptance. The
+            # shared status precondition can reject a repeat, but must not
+            # conceal a repeated participant submission from this test.
+            response = settings["decision_rules"][1]
+            response["guards"] = [response["guards"][0]]
+            response["activation"].update(
+                start_coordinate_id=f"{V.slug}.c01",
+                end_coordinate_id=f"{V.slug}.c03",
+            )
+        event = self._build(rules=persistent_guard)
+        _, _, trace = self._run(event)
+        observations = [row["payload"]["contract"] for row in trace
+                        if row["record_type"] == "observation"
+                        and row["payload"]["contract"]["actor_id"] == V.second_actor]
+        for tick in (2, 3):
+            observation = next(row for row in observations if row["logical_tick"] == tick)
+            self.assertTrue(any(message["message_kind"] == V.message_kind
+                                and message["sender_id"] == V.first_actor
+                                for message in observation["memory"]["received_messages"]))
+        accepted = [row["logical_tick"] for row in trace
+                    if row["record_type"] == "action_disposition"
+                    and row["payload"]["actor_id"] == V.second_actor
+                    and row["payload"]["action_type"] == V.second_intent
+                    and row["payload"]["status"] == "accepted"]
+        self.assertEqual([2], accepted)
+        # Count intents, including ones shared admission would reject. A
+        # completed row must stay silent even with its guard and window open.
+        self.assertEqual([(1, "no_op"), (2, V.second_intent), (3, "no_op")],
+                         self._actions(trace, V.second_actor))
+
     def test_open_outcome_publishes_with_replay_and_determinism_intact(self):
         def unavailable(mechanism):
             mechanism["intent_handlers"][1]["preconditions"][0]["value"] = V.terminal_value
@@ -263,6 +296,7 @@ class ParticipantBehaviorTests(unittest.TestCase):
                          file_sha256(right / "run_receipt.json"))
         self.assertTrue(build_identity_invariance_receipt(left, probe)["passed"])
         publish_rule_run_release(
+            project_root=event.project_root,
             package_root=event.package_root, data_root=event.data_root,
             canonical_root=left, repeat_root=right, probe_root=probe,
             release_root=self.root / "release", event_title=event.title,

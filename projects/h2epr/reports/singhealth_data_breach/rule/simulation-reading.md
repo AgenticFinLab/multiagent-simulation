@@ -22,7 +22,7 @@ verification receipts and reproduction guidance. The
 | Terminal state | 5c8ecedefd2211d9f41636bdd47a144ec079ed9de97135f764e589ec5f745472 |
 | Run seal | b4834493f4d893676e58f2a221376f9f6eec72ae06f3e7ec34fbd595c7a0c438 |
 | Generated EPG seal | bf365f5d1306ead1ac0fd46f6feaddfe6e55d8b49546b3512a92f10bdf308dde |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/materialization-a |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-07-four-task-maintenance/materialization-a |
 
 Fresh A/B materializations are byte-identical across all eight output roles and
 the run receipt. The generated-ID probe changes opaque run and record IDs while

@@ -31,10 +31,16 @@ ordinary admission rejection.
 | `materialize` | admitted package and dataset | absent raw-custody root | unavailable backend, invalid decision/effect, replay, graph, seal, or transport failure |
 | `identity-conformance` | canonical and opaque-ID custody roots | optional receipt | semantic trajectory or graph drift |
 | `admit-experiment` | plan, packages, bindings, analysis contracts | optional receipt | parity, custody, model-control, scheduling, retry, or claim-boundary failure |
-| `publish-run-release` | package and three sealed Rule custody roots | absent compact release root | any independent reproduction or evidence failure |
+| `publish-run-release` | package, matching formal event package, and three sealed Rule custody roots | absent compact release root | formal package identity mismatch, independent reproduction or evidence failure |
 | `publish-cross-event-release` | at least two package/custody pairs | absent compact release root | identity alias, contract/source/output mismatch, or failed constituent evidence |
 
 Use `python -B -m h2epr.cli <command> --help` for the exact argument surface.
+
+Run publication requires `projects/h2epr/events/<event>/package` to carry the
+same manifest identity as `--package`, including when the latter is a local
+candidate. Generated README commands use that formal repository-relative path.
+Their `H2EPR_DATA_ROOT` override defaults to `data/h2epr` and accepts paths with
+spaces; only the three admitted files pinned by the Source Profile are needed.
 
 ## Standard sequence for Rule
 

@@ -11,18 +11,18 @@ The event entry links every semantic owner.
 
 | Item | Exact identity |
 |---|---|
-| Package | `h2epr.event-package.0481.v1`; `6b37fcffdb633d9696cc757d71e0fe60d62c7cd6e9ac074862f8281f346a48fe` |
-| Rule binding | `34f80fc27a8ce458777a94234f4178fbb8cd7ab7a44adec06462d7ed010c5419` |
+| Package | `h2epr.event-package.0481.v1`; `9a34a37f7267f47c8b07b6b37c596968d6ecf8b38a83630c00fa940dcbb6479c` |
+| Rule binding | `6b39e17dafd0aaa9d768dd18d1995f6abfd78cb204758dca06ae072e03a0a95d` |
 | Realization | `h2epr.0481.rule-realization.v1`; `3efb0abe46003efa1af672b5d9e78290b6ee2f4187c6788349d93e24ebce3754` |
 | Shared configuration | `h2epr.0481.comparison.v1`; `1c2bbf2cb1b4e65253c65b1b3c4a5d987b1acc2d934dcdf84aefb0279c92bc33` |
 | Rule configuration | `h2epr.0481.rule.v1`; `5328bbdbfe8e1fc073e87535ca43fa4783c71bd187e42f72882ab7efd03bafaf` |
-| Run | `run.9120d67d5fe0c22266400e21` |
-| Run manifest | `2a5ee513c4271b40510b501cb3d3e46509c1f983e8f546f79ef8c1aa97181d14` |
-| Trace | `8696796a7002226e83c62272d8f078ddbe9d8d8b181b75809180f7611f301825` |
+| Run | `run.9eedae94989891d2df7519e8` |
+| Run manifest | `788d4936cde79aebfb987eb0f64b8124c7f787dc6247d3888cb54c45851a76c5` |
+| Trace | `4cac466657a808a14f536b459fa6865335095e4c2dc1529d85a27f71909e2a47` |
 | Terminal state | `ed367bf27f6c59a047b0ac40b07957dbc8f7a3d5a17752b4be522eb829970c32` |
-| Run seal | `797a72f31f2415c7a9b56e4098fb21c9f33141915bbb07f91737f4c3e3f5adc4` |
-| Generated EPG seal | `daf947cb36ba655f70e76577f0b6d3801be46c63d2166733a0e28abfb818600a` |
-| Physical raw custody | `.local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-06-semantic-contracts/materialization-a` |
+| Run seal | `d83c9964fb612c6ec5a5ee0cec2192319d5e5ae7a41da52297f1d33289122fa4` |
+| Generated EPG seal | `7f120cae71e02739c4876ff4b5f77d95e5b906aa6bc511af410713e36202ed61` |
+| Physical raw custody | `.local-runtime/h2epr-simulation/runs/benchmark/samsung_galaxy_note7_battery_recall_crisis/rule/2026-09-07-four-task-maintenance/materialization-a` |
 
 Fresh A/B output is byte-identical across all eight output roles and the run
 receipt. The generated-ID probe changes opaque run/record identities while
@@ -88,7 +88,7 @@ causes or a minimal set of influential decisions.
 
 Opening `unrecorded` values mean that the simulation has not yet admitted a
 modeled record. They do not deny the underlying history or set physical facts to
-zero. Trace suffixes abbreviate `trace.run.9120d67d5fe0c22266400e21.`.
+zero. Trace suffixes abbreviate `trace.run.9eedae94989891d2df7519e8.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 |---|---|---|

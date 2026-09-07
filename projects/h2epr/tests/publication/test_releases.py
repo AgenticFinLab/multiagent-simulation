@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import json
+import os
+import re
+import shlex
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -99,6 +103,14 @@ class FormalReleaseTests(unittest.TestCase):
                         file_sha256(REPOSITORY_ROOT / row["relative_path"]),
                     )
                 _assert_inventory(self, root)
+                readme = (root / "README.md").read_text()
+                command = re.search(r"```bash\n(.*?)\n```", readme, re.DOTALL).group(1)
+                arguments = shlex.split(command.replace("\\\n", ""))
+                reproduction_package = arguments[arguments.index("--package") + 1]
+                self.assertEqual("projects/h2epr/" + event["package_relative_path"], reproduction_package)
+                self.assertTrue((REPOSITORY_ROOT / reproduction_package / "manifest.json").is_file())
+                self.assertEqual("${H2EPR_DATA_ROOT:-data/h2epr}",
+                                 arguments[arguments.index("--data-root") + 1])
 
     def test_current_cross_event_receipt_closes(self) -> None:
         root = PROJECT_ROOT / "releases" / "cross-event" / "rule"
@@ -228,6 +240,7 @@ class PublicationAdversarialTests(unittest.TestCase):
     def test_publisher_independently_reproduces_candidate(self) -> None:
         release = self.root / "published"
         summary = publish_rule_run_release(
+            project_root=self.event.project_root,
             package_root=self.package,
             data_root=self.data_root,
             canonical_root=self.canonical,
@@ -262,6 +275,7 @@ class PublicationAdversarialTests(unittest.TestCase):
             "run_generated_epg_not_independently_derived",
         ):
             publish_rule_run_release(
+                project_root=self.event.project_root,
                 package_root=self.package,
                 data_root=self.data_root,
                 canonical_root=forged,
@@ -271,6 +285,56 @@ class PublicationAdversarialTests(unittest.TestCase):
                 event_title=self.event.title,
                 simulation_reading_link="../../../reports/example.md",
             )
+        self.assertFalse(release.exists())
+
+    def test_reproduction_command_survives_absent_candidate_and_relocated_data(self):
+        candidate = self.root / "ignored-candidate"
+        shutil.copytree(self.package, candidate)
+        release = self.root / "portable-release"
+        publish_rule_run_release(
+            project_root=self.event.project_root, package_root=candidate,
+            data_root=self.data_root, canonical_root=self.canonical,
+            repeat_root=self.repeat, probe_root=self.probe, release_root=release,
+            event_title=self.event.title, simulation_reading_link="reading.md")
+        readme = (release / "README.md").read_text()
+        command = re.search(r"```bash\n(.*?)\n```", readme, re.DOTALL).group(1)
+        self.assertNotIn(str(candidate), command)
+        self.assertNotIn(str(self.data_root), command)
+        clean = self.root / "clean checkout"
+        project = clean / "projects/h2epr"
+        shutil.copytree(PROJECT_ROOT / "src", project / "src", ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copytree(PROJECT_ROOT / "schemas", project / "schemas")
+        shutil.copytree(REPOSITORY_ROOT / "masim/integrations/event_process",
+                        clean / "masim/integrations/event_process", ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copytree(self.package, project / "events" / self.event.slug / "package")
+        admitted = self.root / "admitted data 'with spaces'"
+        shutil.copytree(self.data_root, admitted)
+        shutil.rmtree(candidate)
+        result = subprocess.run(["bash", "-c", command], cwd=clean,
+                                env={**os.environ, "H2EPR_DATA_ROOT": str(admitted),
+                                     "PYTHONDONTWRITEBYTECODE": "1"},
+                                capture_output=True, text=True, timeout=60)
+        self.assertEqual(0, result.returncode, result.stderr)
+        receipts = list((clean / ".local-runtime").rglob("run_receipt.json"))
+        self.assertEqual(1, len(receipts))
+        reproduced = _read(receipts[0])
+        original = _read(self.canonical / "run_receipt.json")
+        for field in ("run_id", "package_sha256", "binding_sha256", "trace_sha256",
+                      "final_state_sha256", "generated_epg_sha256", "counts"):
+            self.assertEqual(original[field], reproduced[field], field)
+
+    def test_publisher_rejects_different_formal_package(self):
+        def delay(settings):
+            settings["communication_routes"][0]["latency_ticks"] += 1
+        other = build_synthetic_event(self.root / "different-formal", SIGNAL_CASE,
+                                      shared_settings_transform=delay)
+        release = self.root / "mismatched-release"
+        with self.assertRaisesRegex(PublicationError, "reproduction_package_identity_mismatch"):
+            publish_rule_run_release(
+                project_root=other.project_root, package_root=self.package,
+                data_root=self.data_root, canonical_root=self.canonical,
+                repeat_root=self.repeat, probe_root=self.probe, release_root=release,
+                event_title=self.event.title, simulation_reading_link="reading.md")
         self.assertFalse(release.exists())
 
 

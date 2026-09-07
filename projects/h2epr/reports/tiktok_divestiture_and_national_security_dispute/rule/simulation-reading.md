@@ -11,18 +11,18 @@ verification receipts and reproduction guidance. The
 
 | Item | Exact identity |
 | --- | --- |
-| Package | h2epr.event-package.0170.v1; 13ea21a15889014555de7f3c8c6603325a3fb42525fd538492f2e996fc768a05 |
-| Rule binding | 7590f24b391353120b53ddf981c6c97c5f6003faa49b651879e6ddc89cfa3023 |
+| Package | h2epr.event-package.0170.v1; f2f4e3262bf1612a01a89e30548aead483d620ee34cebb3a98010312fd908391 |
+| Rule binding | 3c9c973203242cff6bacd7fe9e76560c1e4ed0297c88e3211a62f644f0e997d9 |
 | Realization | h2epr.0170.rule-realization.v1; 39e417866f28548f9c7b55ba422742cfdba8f8d6e9cc83f1facf15371c1a67f3 |
 | Shared configuration | h2epr.0170.comparison.v1; 80d200fab3d23cbeec1c6044500cc78e46ef07bca17f40dcff0f61b945d85815 |
 | Rule configuration | h2epr.0170.rule.v1; f38efe3f112562b0c3f1e826bc6bea7433ba8424ec881080888718ab3bdabd9d |
-| Run | run.2a983fc27557518b15624c54 |
-| Run manifest | 3c37d1a7c6992eacfedec7ce514737ab647bb04e235cb6c9254ad371e3c001f5 |
-| Trace | c0675d758934200aa78ebaa0e7ac4c2b7d56ffae56ed0dd9196112d2ab9688a8 |
+| Run | run.62bbe5fca5c9ff9df58411c1 |
+| Run manifest | 85e01307c02dcf6f180bc041c651be462a0cb067d34e7cf158be90e817128d00 |
+| Trace | 1fd04a881ceea2e1fa45b680ef322ec0f907b3aa05ec6beace708b5be9d0c66f |
 | Terminal state | 0749d3f388ca92fd77275afde9c0e5075f614b561efed216c430e9b50eda0269 |
-| Run seal | 2781db8c44b4c8a461e2d30159af1597a1980e6c1cd6316120dab446a08b2461 |
-| Generated EPG seal | c671f1e35f06899cfa83c42222a4ba8dd3e2ab7594221d5bcff3ab014d4b1dbb |
-| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-06-semantic-contracts/materialization-a |
+| Run seal | 7910558254cca590707109a0756454e5ba170a16717287a4b4928362b1be34d9 |
+| Generated EPG seal | 2d4572b4d075e11276779c5f03ce4b336e41a8788e6e665756472ee35ae231d9 |
+| Physical raw custody | .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-07-four-task-maintenance/materialization-a |
 
 Fresh accepted A/B materializations are byte-identical across all eight output
 roles and the run receipt. The generated-ID probe changes opaque run and record
@@ -93,7 +93,7 @@ minimal explanation of the dispute.
 An opening `unrecorded` value means that no modeled record has yet been accepted;
 it does not say that an underlying historical proposition was false. The table
 lists every coordinate, all non-default dispositions and every reducer delta.
-Trace suffixes abbreviate `trace.run.2a983fc27557518b15624c54.`.
+Trace suffixes abbreviate `trace.run.62bbe5fca5c9ff9df58411c1.`.
 
 | Coordinate | Accepted participant choices | Reducer effects and delivery count |
 | --- | --- | --- |

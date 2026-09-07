@@ -4,21 +4,21 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0170`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-06-semantic-contracts/materialization-a`.
+`.local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-07-four-task-maintenance/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.2a983fc27557518b15624c54` |
-| Package SHA-256 | `13ea21a15889014555de7f3c8c6603325a3fb42525fd538492f2e996fc768a05` |
-| Rule binding SHA-256 | `7590f24b391353120b53ddf981c6c97c5f6003faa49b651879e6ddc89cfa3023` |
-| Run manifest SHA-256 | `3c37d1a7c6992eacfedec7ce514737ab647bb04e235cb6c9254ad371e3c001f5` |
-| Trace SHA-256 | `c0675d758934200aa78ebaa0e7ac4c2b7d56ffae56ed0dd9196112d2ab9688a8` |
-| Run seal SHA-256 | `2781db8c44b4c8a461e2d30159af1597a1980e6c1cd6316120dab446a08b2461` |
+| Run | `run.62bbe5fca5c9ff9df58411c1` |
+| Package SHA-256 | `f2f4e3262bf1612a01a89e30548aead483d620ee34cebb3a98010312fd908391` |
+| Rule binding SHA-256 | `3c9c973203242cff6bacd7fe9e76560c1e4ed0297c88e3211a62f644f0e997d9` |
+| Run manifest SHA-256 | `85e01307c02dcf6f180bc041c651be462a0cb067d34e7cf158be90e817128d00` |
+| Trace SHA-256 | `1fd04a881ceea2e1fa45b680ef322ec0f907b3aa05ec6beace708b5be9d0c66f` |
+| Run seal SHA-256 | `7910558254cca590707109a0756454e5ba170a16717287a4b4928362b1be34d9` |
 | Final state SHA-256 | `0749d3f388ca92fd77275afde9c0e5075f614b561efed216c430e9b50eda0269` |
-| Generated EPG seal | `c671f1e35f06899cfa83c42222a4ba8dd3e2ab7594221d5bcff3ab014d4b1dbb` |
+| Generated EPG seal | `2d4572b4d075e11276779c5f03ce4b336e41a8788e6e665756472ee35ae231d9` |
 
 The run covers 10 action-bearing representations over
 22 logical coordinates. Its sealed trace contains
@@ -40,15 +40,21 @@ transport custody contains no unresolved message.
 
 ## Reproduce
 
-Run from the repository root with an absent output directory.
+Run from the repository root with an absent output directory. The command uses
+the formal tracked package, verified against the package identity above; no
+ignored candidate package is required. Set `H2EPR_DATA_ROOT` to the admitted
+dataset root if it is not `data/h2epr`. That root must contain the exact
+`development_samples_v1/events/H2EPR-0170/` files pinned by the
+package Source Profile: `event_spec.json`, `frozen_evidence.json`, and
+`draft_epg.json`. No other dataset file is needed.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
-  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/tiktok_divestiture_and_national_security_dispute/package \
+  --data-root "${H2EPR_DATA_ROOT:-data/h2epr}" \
+  --package projects/h2epr/events/tiktok_divestiture_and_national_security_dispute/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-06-semantic-contracts/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-06-semantic-contracts/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-07-four-task-maintenance/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/tiktok_divestiture_and_national_security_dispute/rule/2026-09-07-four-task-maintenance/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/tiktok_divestiture_and_national_security_dispute/rule/simulation-reading.md) describes the

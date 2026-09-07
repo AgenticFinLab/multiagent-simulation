@@ -49,7 +49,7 @@ entries declare availability status and cannot act as fallback backends.
 
 ## Current result
 
-The current canonical seed-0 Rule run is `run.8fca27c569b81c55eab3a256`. Its
+The current canonical seed-0 Rule run is `run.0eb5b7a94ef55fc1bdddf756`. Its
 8 actors execute 20 coordinates and produce
 826 trace records, 866 graph nodes, and
 2,481 graph edges. Exact identities, deterministic A/B evidence,
@@ -63,7 +63,7 @@ transport remain mandatory. The
 [simulation reading](../../reports/angola_yellow_fever_outbreak/rule/simulation-reading.md)
 reviews the full output with a complete machine scan and coordinate-level
 semantic analysis. Raw custody is retained under ignored
-`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-06-semantic-contracts/materialization-a`.
+`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-07-four-task-maintenance/materialization-a`.
 
 The [current-event registry](../current-events.json) and
 [cross-event Rule conformance](../../releases/cross-event/rule/) cover the

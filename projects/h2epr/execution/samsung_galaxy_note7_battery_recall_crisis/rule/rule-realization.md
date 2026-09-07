@@ -3,7 +3,7 @@
 ## Identity and capabilities
 
 This realization binds the exact current Rule configuration and eight current
-human parents to `h2epr.backend.rule.declarative.v4`. It pins the four maintained
+human parents to `h2epr.backend.rule.declarative.v4`. It pins the five maintained
 Rule implementation files. No event-specific Python, model caller, network
 access, dependency substitution or MASim edit is used.
 

@@ -90,6 +90,7 @@ class SyntheticContractTests(unittest.TestCase):
                     )
                 release_root = root / case.slug / "release"
                 summary = publish_rule_run_release(
+                    project_root=case.project_root,
                     package_root=case.package_root,
                     data_root=case.data_root,
                     canonical_root=run_root,

@@ -60,7 +60,7 @@ new semantic support rather than hidden per-person backend behavior.
 
 ## 7. Intent and environment-result boundary
 
-The population emits typed reports or acknowledgements. The environment checks target, state preconditions, timing, and authority and then records accepted or rejected dispositions. Message delivery and any downstream public action are separate lifecycles; residents never author their own medical validity or settlement outcome.
+The population emits typed reports or acknowledgements. Rule configuration selects availability windows. The environment checks target, state preconditions, declared information requirements, and authority and then records accepted or rejected dispositions; it does not enforce the Rule timing windows. Message delivery and any downstream public action are separate lifecycles; residents never author their own medical validity or settlement outcome.
 
 ## 8. Configuration and uncertainty
 

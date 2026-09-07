@@ -5,6 +5,8 @@
 | Field | Account |
 |---|---|
 | Semantic parent | `h2epr.0481.population.china_test_unit_owners.v1` |
+| Choice unit | one aggregate request interface for the mainland test-unit cohort identified as P_5 |
+| Runtime representation | one aggregate Population actor; no individual agents or weighted samples |
 | Actor ID | `china_test_unit_owners` |
 | Benchmark | H2EPR-0481, August 2016–January 2017 represented boundary |
 | Representation | population; bounded test-unit return/refund-request interface |
@@ -14,13 +16,20 @@
 | State authority | Intent producer only; environment admission and reducer own results. |
 | Exposure | Full Draft exposed, dataset-conditioned descriptive Rule baseline. |
 
-## 2. Benchmark participant and representation
+## 2. Population scope and representation
 
 The Draft exposes eligibility and an explicit refund-or-replacement option rather than observed uptake. The Population therefore records a constructed request choice and labels it as such; it does not claim that all 1,858 owners acted.
 
 No completed return, payment, replacement delivery, participation rate or individual consumer trajectory is represented. The parent fixes no calibrated utility, personality,
 risk score or backend timing parameter. It owns represented meaning and authority;
 Rule configuration remains a separate replaceable owner.
+
+The represented test-unit cohort excludes regular mainland purchasers and the separately represented global cohort. The number 1,858 describes recall scope, not a sampled population size or a participation weight.
+
+Aggregation is categorical: an accepted intent records one bounded group-level
+choice. No weights, shares, representative individual, or unanimity are inferred.
+An independently attributable unit with its own observations or veto requires
+roster and semantic review; a purely passive group belongs in scenario/context.
 
 ## 3. Dataset basis and provenance
 
@@ -33,7 +42,7 @@ The Source Profile seals all three permitted inputs. Actor-local rows and cohere
 narrative own capability; malformed relation or transaction endpoints do not.
 Selected receipt dependencies are explicit construction assumptions.
 
-## 4. Event role, relationships, and authority
+## 4. Event role and relationships
 
 This population may submit one aggregate modeled return/refund request after receiving the limited-recall notice. It cannot act as another producer,
 recipient, regulator, institution or environment process. A message reports a
@@ -56,7 +65,11 @@ changed visible information. Clock advance or repeated rejection alone is not
 new evidence. Future stage descriptions, Reference content and generated opaque
 identifiers are never participant observations.
 
-## 6. Admissible decision semantics
+No individual persistent state is instantiated. The fields in module 7 are
+aggregate world records owned by shared handlers/reducer; received and own-action
+memory belongs to this single runtime interface.
+
+## 6. Choice model and heterogeneity
 
 | Intent | Activation / reopening | Permitted response and boundary |
 | --- | --- | --- |
@@ -65,6 +78,12 @@ identifiers are never participant observations.
 `no_op` covers waiting, abstention, completed rows and closed windows. The current
 Rule selects exposed bounded meanings; it is not a fitted preference model.
 Broader alternatives require a reviewed semantic successor before backend work.
+
+Heterogeneity is unmodeled, not assumed absent. There is no distribution,
+independence, perfect-correlation, or representative-agent claim. The aggregate
+rows can differ through their own observations and prerequisites; adaptation
+is the bounded retry behavior described above, not learning or calibrated
+preference change. No general eventual-response duty is machine-enforced.
 
 ## 7. Intent and environment-result boundary
 
@@ -76,7 +95,7 @@ The environment checks actor, target, parameters and preconditions against the
 same sealed state. Rejection yields no delta. Coupled messages have independent
 transport dispositions and do not prove action acceptance or recipient uptake.
 
-## 8. Configurable dimensions and uncertainty
+## 8. Configuration and uncertainty
 
 | Construct | Owner | Behavioral use |
 |---|---|---|
@@ -87,7 +106,12 @@ transport dispositions and do not prove action acceptance or recipient uptake.
 
 All are structural choices, not calibrated probabilities or historical timings.
 
-## 9. Worked cases and contract falsification
+Only the aggregate instantiation above is supported. Changing population size,
+weights or distributions is not a current configuration option. Sensitivity
+within this model concerns admitted information and Rule selection windows;
+changing aggregation routes to the parent and roster owners.
+
+## 9. Worked cases and falsification
 
 - Normal: After notice delivery, the Population records one aggregate request and sends it to Samsung for information only.
 - Missing information: Without actual delivery of Samsung's limited-recall notice, the selected request row waits; eligibility is not treated as received information.
@@ -95,13 +119,19 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: An accepted request does not settle a refund. P_5 cannot issue the recall notice or update manufacturer compliance.
 - Perturbation: Suppressing the notice leaves request status unrecorded while the limited-recall announcement itself remains valid.
 
+- Aggregate alternatives: Missing notice keeps the aggregate request unrecorded; a received notice permits the selected request without proving any individual returned a device.
+- Aggregation change: Splitting return versus replacement preferences would require admitted choice data and distinct response semantics; duplicating this actor would double the request record rather than estimate uptake.
+- Rejected request: a stale or unauthorized intent produces no aggregate state
+  delta and no accepted-source message; a later retry requires changed visible
+  information, not an invented additional population member.
+
 A foreign-actor write, premature generated result or undeclared environment
 effect fails this contract. Rule-only windows and receipt guards constrain the
 selected policy; mandatory shared prerequisites require an explicit handler
 projection. Event-specific capability names are vocabulary-exposed, as declared
 in the Scenario, and do not establish historically prefix-clean observation.
 
-## 10. Limitations and successor route
+## 10. Limitations and source anchors
 
 No completed return, payment, replacement delivery, participation rate or individual consumer trajectory is represented. The Draft compensation transaction points to the regulator rather than P_5. Actor-local cohort identity and transaction prose support only the qualified request boundary.
 Changing owner, choice, information prerequisite or record meaning revises this

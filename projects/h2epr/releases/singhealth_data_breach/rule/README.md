@@ -4,7 +4,7 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0616`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/materialization-a`.
+`.local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-07-four-task-maintenance/materialization-a`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
@@ -40,15 +40,21 @@ transport custody contains no unresolved message.
 
 ## Reproduce
 
-Run from the repository root with an absent output directory.
+Run from the repository root with an absent output directory. The command uses
+the formal tracked package, verified against the package identity above; no
+ignored candidate package is required. Set `H2EPR_DATA_ROOT` to the admitted
+dataset root if it is not `data/h2epr`. That root must contain the exact
+`development_samples_v1/events/H2EPR-0616/` files pinned by the
+package Source Profile: `event_spec.json`, `frozen_evidence.json`, and
+`draft_epg.json`. No other dataset file is needed.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root /home/lenovo/projects/AgenticFinLab/multiagent-simulation/data/h2epr \
-  --package /home/lenovo/projects/AgenticFinLab/multiagent-simulation/.local-runtime/h2epr-simulation/working/2026-09-06-contracts/current-candidates/singhealth_data_breach/final-package \
+  --data-root "${H2EPR_DATA_ROOT:-data/h2epr}" \
+  --package projects/h2epr/events/singhealth_data_breach/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-06-semantic-contracts-final/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-07-four-task-maintenance/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/singhealth_data_breach/rule/2026-09-07-four-task-maintenance/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/singhealth_data_breach/rule/simulation-reading.md) describes the

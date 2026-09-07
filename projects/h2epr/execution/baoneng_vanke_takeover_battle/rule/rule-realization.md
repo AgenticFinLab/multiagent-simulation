@@ -4,7 +4,7 @@
 
 `h2epr.1031.rule-realization.v1` binds configuration `h2epr.1031.rule.v1`
 to the common `h2epr.backend.rule.declarative.v4` implementation and all eight
-exact Agent parents. Four implementation source files are hash-pinned. No new
+exact Agent parents. Five implementation source files are hash-pinned. No new
 event-specific Python, MASim change, model caller or alternative backend is used.
 
 ## Actor and capability coverage

@@ -7,40 +7,51 @@ not establish runtime or experiment readiness.
 ## H2EPR contract and asset validation
 
 The environment in `environments/lmsim.yml` provides Python 3.11 and the tools
-needed for offline contract, construction, configuration, and research-asset
-checks. H2EPR is packaged independently from MASim. Install it from the
+needed for offline validation. H2EPR is packaged independently from MASim.
+The maintained test groups below match `.github/workflows/h2epr-validation.yml`.
+Install it from the
 repository root:
 
 ```bash
 python -m pip install -e "projects/h2epr[test]"
 python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/contracts \
-  projects/h2epr/tests/construction \
-  projects/h2epr/tests/configuration \
-  projects/h2epr/tests/agents
+  projects/h2epr/tests/standards \
+  projects/h2epr/tests/semantic \
+  projects/h2epr/tests/benchmark \
+  projects/h2epr/tests/experiments \
+  projects/h2epr/tests/publication
 ```
 
-These suites resolve checked-in schemas without network access and do not
-start a simulator, call a model provider, or evaluate an event.
+These suites resolve checked-in schemas without network access. Publication
+and experiment tests include temporary synthetic Rule materializations; this
+is not a read-only validation command. They do not call a model provider or
+perform held-out evaluation.
 
 ## H2EPR runtime development
 
-Runtime tests additionally use this MASim checkout and its dependencies.
-Install MASim and the separately sourced `lmbase` package as described in
-`requirements.txt`, then install H2EPR:
+The offline Rule tests use the unchanged MASim event-process kernel from this
+checkout. H2EPR's isolated loader supports an environment without the complete
+distributed/model stack. With the H2EPR validation dependencies installed:
 
 ```bash
-python -m pip install -e ".[tests]"
-python -m pip install -e "projects/h2epr[test]"
 python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/g2 \
-  projects/h2epr/tests/g3 \
-  projects/h2epr/tests/g4 \
-  projects/h2epr/tests/execution
+  projects/h2epr/tests/runtime
 ```
 
-The deterministic runtime and full-roster Rule suites do not require
-model-provider credentials.
+All current H2EPR tests also support standard-library discovery from the
+repository root when the existing environment supplies H2EPR's dependencies:
+
+```bash
+PYTHONPATH=projects/h2epr/src:projects/h2epr/tests \
+PYTHONDONTWRITEBYTECODE=1 RAY_USAGE_STATS_ENABLED=0 \
+python -B -m unittest discover -s projects/h2epr/tests -v
+```
+
+These tests create temporary materializations and require writable temporary
+storage, but no model-provider credentials. The CI runtime job separately
+checks the full MASim import path with pinned `lmbase` and dependencies; use
+that workflow for its exact installation profile. An isolated-kernel pass
+does not establish distributed or model-backed readiness.
 An actual distributed or model-backed run has additional resource, credential,
 and output requirements and must pass the experiment preflight described in
 `docs/experiment-preflight-skill/`.

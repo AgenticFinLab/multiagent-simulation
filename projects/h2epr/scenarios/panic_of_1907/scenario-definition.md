@@ -172,8 +172,10 @@ route changes require admitted configuration successors.
   it, Morgan cannot import gold, and the Commission cannot enact legislation.
 - Result boundary: an accepted support record moves no money; a gold-flow record
   creates no recovery; statute passage proves no policy effectiveness.
-- Temporal firewall: a 1913 recommendation or institution visible to a 1907
-  participant falsifies the package even if final endpoint labels later match.
+- Result/receipt boundary: a 1913 recommendation or enactment presented as an
+  already generated result before its transition, or a report consumed before
+  actual delivery, falsifies the package. Reform vocabulary is declared exposed
+  from the first coordinate; its early visibility alone is not this falsifier.
 
 This full-Draft, logical-time construction supports dataset-conditioned
 engineering, behavioral-mechanism inspection and simulation-only description.

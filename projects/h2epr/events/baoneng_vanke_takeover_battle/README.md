@@ -56,7 +56,7 @@ records full-output coverage, every non-default action and terminal expectation,
 and the limits of this disclosure/decision-record model. It also distinguishes
 the canonical baseline from local missing/late-information construction probes.
 Raw custody is retained under ignored
-`.local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-06-semantic-contracts/materialization-a`.
+`.local-runtime/h2epr-simulation/runs/benchmark/baoneng_vanke_takeover_battle/rule/2026-09-07-four-task-maintenance/materialization-a`.
 
 The [current registry](../current-events.json) and
 [cross-event Rule conformance](../../releases/cross-event/rule/) cover the

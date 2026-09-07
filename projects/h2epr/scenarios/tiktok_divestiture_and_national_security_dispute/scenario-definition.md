@@ -43,8 +43,11 @@ read. No external reconciliation is performed.
 | E2/E4/E5/E6/E7 relations misdirect owner/target | actor-local rows and coherent descriptions own authority |
 | E10 relation omits both delegation rows | P_9 and P_10 publish distinct positions before P_2 can record its own position |
 
-September 2025 terms never appear in an earlier observation. Draft stage labels,
-Reference content and generated opaque identifiers are not participant input.
+September 2025 result values appear only after the corresponding generated
+state transition or actual message receipt. Names of those fields and actions
+are already exposed from the first coordinate. Draft stage descriptions and
+Reference content are not participant input; generated opaque identities do
+not determine Rule selection.
 
 This is a declared-event-vocabulary-exposed baseline: all public field names and each actor's complete capability menu are visible from the first coordinate, including event-specific future terms. Generated result values and actual receipt remain distinct from that vocabulary. No historically prefix-clean information claim is made.
 
@@ -159,8 +162,10 @@ route or timing changes require admitted configuration successors.
   either delegation cannot write the other's position.
 - Result boundary: a passed bill is not enacted law; one delegation position is
   not agreement; a resolution record changes no ownership or algorithm state.
-- Temporal firewall: a 2025 resolution term visible to a 2020–2024 actor
-  falsifies the package regardless of terminal labels.
+- Result/receipt boundary: a 2025 resolution result exposed as already realized
+  before its generated transition, or a report treated as received before actual
+  delivery, falsifies the package. Future field/action vocabulary is declared
+  exposed; its early visibility alone is not this falsifier.
 
 This full-Draft logical-time construction supports dataset-conditioned
 engineering, behavior-mechanism inspection and simulation-only description. It

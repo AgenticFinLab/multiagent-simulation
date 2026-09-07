@@ -2,7 +2,7 @@
 
 ## Identity and semantic parents
 
-Realization `h2epr.0551.rule-realization.v2` attaches the registered declarative Rule backend to configuration `h2epr.0551.rule.v2` and eight exact semantic parents. Four implementation files are hash-pinned in `realization.json`.
+Realization `h2epr.0551.rule-realization.v2` attaches the registered declarative Rule backend to configuration `h2epr.0551.rule.v2` and eight exact semantic parents. Five implementation files are hash-pinned in `realization.json`.
 
 ## Actor and capability coverage
 

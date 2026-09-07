@@ -119,6 +119,41 @@ class InformationContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "rule_message_payload_invalid"):
             self._build("invented")
 
+    def test_context_only_process_cannot_be_a_transport_producer(self):
+        def context_route(settings):
+            settings["communication_routes"][0]["source_id"] = "context_only_cleanup"
+        with self.assertRaisesRegex(ValueError, "route_actor_unknown"):
+            build_synthetic_event(self.root / "route", V,
+                                  shared_settings_transform=context_route)
+        def context_sender(mechanism):
+            mechanism["message_kinds"][0]["eligible_senders"] = ["context_only_cleanup"]
+        with self.assertRaisesRegex(ValueError, "message_sender_unknown"):
+            build_synthetic_event(self.root / "sender", V,
+                                  mechanism_transform=context_sender)
+
+    def test_accepted_action_effect_precedes_message_delivery(self):
+        def delay(settings):
+            settings["communication_routes"][0]["latency_ticks"] = 2
+        event = build_synthetic_event(self.root, V, mechanism_transform=_mechanism,
+                                     rule_settings_transform=_rules,
+                                     shared_settings_transform=delay)
+        output = self.root / "delayed"
+        materialize_run(package_root=event.package_root, data_root=event.data_root,
+                        output_root=output)
+        trace = [json.loads(line) for line in (output / "simulation_trace.jsonl").read_text().splitlines()]
+        accepted = [r for r in trace if r["record_type"] == "action_disposition"
+                    and r["payload"]["action_type"] == V.first_intent
+                    and r["payload"]["status"] == "accepted"]
+        self.assertEqual([1], [r["logical_tick"] for r in accepted])
+        observations = [r["payload"]["contract"] for r in trace if r["record_type"] == "observation"]
+        sender = next(o for o in observations if o["actor_id"] == V.first_actor and o["logical_tick"] == 2)
+        recipient = next(o for o in observations if o["actor_id"] == V.second_actor and o["logical_tick"] == 2)
+        self.assertTrue(sender["pending_lifecycles"])
+        self.assertEqual(V.intermediate_value, recipient["public_state"]["entities"][V.entity_id]["status"])
+        self.assertFalse(recipient["memory"]["received_messages"])
+        # Public effect is already visible, yet receipt-dependent authority is absent.
+        self.assertFalse(matching_receipts(REQUIREMENT, recipient["delivered_messages"], 2))
+
     def test_compiler_rejects_content_predicate_without_typed_declaration(self):
         def untyped(value):
             _mechanism(value)

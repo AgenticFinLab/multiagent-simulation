@@ -9,16 +9,16 @@ verification and reproduction instructions. Model and network access are denied.
 
 | Item | Identity |
 |---|---|
-| Package | `h2epr.event-package.0551.v2`; `40dd6cf24ad8c162f861e476cc5665ab8260738a11d4d4dd2157bac46b9e22e7` |
-| Rule binding | `1292f017d4c6b01130941e5f5e5648dfd14bf51d91f0c270b3bdd2b1ced86c3d` |
+| Package | `h2epr.event-package.0551.v2`; `6912a3ad8c7c37cffd31d545a9ace24f07ae94d76eab73e61b4d66996b3af9a3` |
+| Rule binding | `e44a24d780f138b524004c363becd767d3b0cdcd5fa7deccaa7179a073ded36d` |
 | Rule configuration | `h2epr.0551.rule.v2`; `ff0fa17ee24f6edda66d511833df5d597a7715eae127a03ee0be2a261dbe6e0c` |
-| Run | `run.8fca27c569b81c55eab3a256` |
-| Run manifest | `e306618d0370a4ce0796890ecbc2d33182e5d8b1fa329ce83895af63fd309ea3` |
-| Trace | `78028b7fca6dd0cef5cea19b02c341486e894cafafc11f42f9f97c6a207c1560` |
+| Run | `run.0eb5b7a94ef55fc1bdddf756` |
+| Run manifest | `bf28737791516b59583699f36c3cc4ca1e0484cd1f39c3114ab63e45755a578d` |
+| Trace | `0a59a40b4dc1b65d1fc51f2c303b130314b5d96be1e785c3e401d90245a934fb` |
 | Terminal state | `6e43cbba3847a1df9b6dd5c5395932c964d8baf6f086717e7c04f375da0ea26e` |
-| Run seal | `0223571c1cf4bbdebe39d653f791421a1522b4312ae23950e38c380d22e75800` |
-| Generated EPG seal | `80c6561b450686e76d2c3bfd4208bcf627ddc87bad8206065e6e978239955146` |
-| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-06-semantic-contracts/materialization-a` |
+| Run seal | `9d78393f5d135d454ad2e8343235a5429451300da31afef93f0973d983c46500` |
+| Generated EPG seal | `766ac4821ca634eff173f9fd6ca771d8cbed005de0f1c299cb7bb1d68c3fada4` |
+| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-07-four-task-maintenance/materialization-a` |
 
 Fresh A/B materializations are byte-identical across the eight output roles and
 run receipt. A generated-ID probe changes opaque identities while preserving
@@ -61,8 +61,8 @@ provenance includes the contributing coordinate batch, not a minimal causal set.
 ## Generated trajectory
 
 The table lists every coordinate and every non-default action and state change.
-Trace suffixes abbreviate `trace.run.8fca27c569b81c55eab3a256.`; corresponding graph
-record nodes use `record.trace.run.8fca27c569b81c55eab3a256.` with the same suffix.
+Trace suffixes abbreviate `trace.run.0eb5b7a94ef55fc1bdddf756.`; corresponding graph
+record nodes use `record.trace.run.0eb5b7a94ef55fc1bdddf756.` with the same suffix.
 
 | Coordinate | Accepted choices | Recorded effects and delivery |
 |---|---|---|

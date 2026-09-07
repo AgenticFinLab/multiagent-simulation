@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+import shlex
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -34,6 +35,17 @@ from h2epr.runtime.environment import apply_delta
 
 
 PublicationError = _PublicationCoreError
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _reproduction_package(package: EventPackage, data_root: Path, project_root: Path) -> str:
+    """Require the published package to reproduce the verified candidate identity."""
+    slug = package.source_profile["event_slug"]
+    relative = Path("events") / slug / "package"
+    formal = load_event_package(project_root / relative, data_root, "rule")
+    _require(formal.manifest == package.manifest,
+             "reproduction_package_identity_mismatch")
+    return (Path("projects/h2epr") / relative).as_posix()
 
 
 def _verify_custody(
@@ -80,11 +92,13 @@ def publish_rule_run_release(
     release_root: Path,
     event_title: str,
     simulation_reading_link: str,
+    project_root: Path = PROJECT_ROOT,
 ) -> dict[str, Any]:
     """Independently verify three materializations and publish one release."""
 
     _require(not release_root.exists(), "release_root_must_be_absent")
     package = load_event_package(package_root, data_root, "rule")
+    reproduction_package = _reproduction_package(package, data_root, project_root)
     manifest, receipt = _verify_custody(
         canonical_root,
         package,
@@ -178,15 +192,21 @@ transport custody contains no unresolved message.
 
 ## Reproduce
 
-Run from the repository root with an absent output directory.
+Run from the repository root with an absent output directory. The command uses
+the formal tracked package, verified against the package identity above; no
+ignored candidate package is required. Set `H2EPR_DATA_ROOT` to the admitted
+dataset root if it is not `data/h2epr`. That root must contain the exact
+`development_samples_v1/events/{manifest['event_id']}/` files pinned by the
+package Source Profile: `event_spec.json`, `frozen_evidence.json`, and
+`draft_epg.json`. No other dataset file is needed.
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \\
-  --data-root {data_root.as_posix()} \\
-  --package {package_root.as_posix()} \\
+  --data-root "${{H2EPR_DATA_ROOT:-data/h2epr}}" \\
+  --package {shlex.quote(reproduction_package)} \\
   --backend rule --seed 0 --identity-variant canonical \\
-  --custody-locator {reproduction_root} \\
-  --output {reproduction_root}
+  --custody-locator {shlex.quote(reproduction_root)} \\
+  --output {shlex.quote(reproduction_root)}
 ```
 
 The accompanying [simulation reading]({simulation_reading_link}) describes the

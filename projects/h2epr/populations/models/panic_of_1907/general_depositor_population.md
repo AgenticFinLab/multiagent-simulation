@@ -1,10 +1,12 @@
-# General Public Depositor Population Population Model
+# General Public Depositor Population Model
 
 ## 1. Model overview
 
 | Field | Account |
 |---|---|
 | Semantic parent | `h2epr.0288.population.general_depositor_population.v1` |
+| Choice unit | one aggregate depositor interface for P_5, with four distinct withdrawal or cessation records |
+| Runtime representation | one aggregate Population actor; no individual agents or weighted samples |
 | Actor ID | `general_depositor_population` |
 | Benchmark | H2EPR-0288, October 1907–January 1908 acute record boundary with a coarse post-crisis reform horizon through 1913-12-23 |
 | Representation | population; aggregate withdrawal and cessation records exposed for public depositors |
@@ -14,13 +16,20 @@
 | State authority | Intent producer only; environment admission and reducer own results. |
 | Exposure | Full Draft exposed, dataset-conditioned descriptive Rule baseline. |
 
-## 2. Benchmark participant and representation
+## 2. Population scope and representation
 
 P_5 appears in five episodes as an aggregate group. A Population Model retains the represented collective records without fabricating individual depositors, unanimity, cash amounts or a calibrated behavioral distribution.
 
 The population cannot decide for banks, verify solvency, create a suspension, transfer conserved money, establish contagion causality, or prove that every depositor acted. The parent fixes no calibrated utility, personality,
 risk score or backend timing parameter. It owns represented meaning and authority;
 Rule configuration remains a separate replaceable owner.
+
+Affiliated-bank, Knickerbocker and other-trust records are distinct aggregate situations, not disjoint sampled depositor cohorts. Deposits, balances and account holders are not instantiated.
+
+Aggregation is categorical: an accepted intent records one bounded group-level
+choice. No weights, shares, representative individual, or unanimity are inferred.
+An independently attributable unit with its own observations or veto requires
+roster and semantic review; a purely passive group belongs in scenario/context.
 
 ## 3. Dataset basis and provenance
 
@@ -37,7 +46,7 @@ The Source Profile seals all three permitted inputs. Actor-local rows and cohere
 narrative own capability; malformed relation or transaction endpoints do not.
 Selected receipt dependencies are explicit construction assumptions.
 
-## 4. Event role, relationships, and authority
+## 4. Event role and relationships
 
 This population may record bounded aggregate withdrawals from affiliated banks and trusts, and record cessation of the initial member-bank run after delivered assurance. It cannot act as another producer,
 recipient, regulator, institution or environment process. A message reports a
@@ -60,7 +69,11 @@ changed visible information. Clock advance or repeated rejection alone is not
 new evidence. Future stage descriptions, Reference content and generated opaque
 identifiers are never participant observations.
 
-## 6. Admissible decision semantics
+No individual persistent state is instantiated. The fields in module 7 are
+aggregate world records owned by shared handlers/reducer; received and own-action
+memory belongs to this single runtime interface.
+
+## 6. Choice model and heterogeneity
 
 | Intent | Activation / reopening | Permitted response and boundary |
 | --- | --- | --- |
@@ -72,6 +85,12 @@ identifiers are never participant observations.
 `no_op` covers waiting, abstention, completed rows and closed windows. The current
 Rule selects exposed bounded meanings; it is not a fitted preference model.
 Broader alternatives require a reviewed semantic successor before backend work.
+
+Heterogeneity is unmodeled, not assumed absent. There is no distribution,
+independence, perfect-correlation, or representative-agent claim. The aggregate
+rows can differ through their own observations and prerequisites; adaptation
+is the bounded retry behavior described above, not learning or calibrated
+preference change. No general eventual-response duty is machine-enforced.
 
 ## 7. Intent and environment-result boundary
 
@@ -86,7 +105,7 @@ The environment checks actor, target, parameters and preconditions against the
 same sealed state. Rejection yields no delta. Coupled messages have independent
 transport dispositions and do not prove action acceptance or recipient uptake.
 
-## 8. Configurable dimensions and uncertainty
+## 8. Configuration and uncertainty
 
 | Construct | Owner | Behavioral use |
 |---|---|---|
@@ -97,7 +116,12 @@ transport dispositions and do not prove action acceptance or recipient uptake.
 
 All are structural choices, not calibrated probabilities or historical timings.
 
-## 9. Worked cases and contract falsification
+Only the aggregate instantiation above is supported. Changing population size,
+weights or distributions is not a current configuration option. Sensitivity
+within this model concerns admitted information and Rule selection windows;
+changing aggregation routes to the parent and roster owners.
+
+## 9. Worked cases and falsification
 
 - Normal: The population records the initial run, later cessation after assurance, the Knickerbocker run, and trust-company contagion after suspension becomes known.
 - Missing information: Withdrawal rows wait for both separately delivered joint-scheme records or for a delivered Knickerbocker suspension. Missing information is a valid open endpoint.
@@ -105,13 +129,19 @@ All are structural choices, not calibrated probabilities or historical timings.
 - Authority/adverse case: One accepted aggregate withdrawal record neither moves a cash ledger nor forces another population's action. Cessation requires an actually delivered NYCH assurance.
 - Perturbation: Withholding a scheme record blocks early withdrawals; withholding the suspension leaves trust-company contagion open while other valid records may continue.
 
+- Aggregate alternatives: Withheld suspension can leave the trust-company withdrawal record open while earlier withdrawals remain recorded; delivered assurance can enable the separate cessation record.
+- Aggregation change: A depositor or institution-specific observation boundary needs reviewed microdata and successor semantics. Treating the four records as independent observations of contagion would be an aggregation error.
+- Rejected request: a stale or unauthorized intent produces no aggregate state
+  delta and no accepted-source message; a later retry requires changed visible
+  information, not an invented additional population member.
+
 A foreign-actor write, premature generated result or undeclared environment
 effect fails this contract. Rule-only windows and receipt guards constrain the
 selected policy; mandatory shared prerequisites require an explicit handler
 projection. Event-specific capability names are vocabulary-exposed, as declared
 in the Scenario, and do not establish historically prefix-clean observation.
 
-## 10. Limitations and successor route
+## 10. Limitations and source anchors
 
 The population cannot decide for banks, verify solvency, create a suspension, transfer conserved money, establish contagion causality, or prove that every depositor acted. Draft transactions reverse or misidentify withdrawal endpoints, and later rescue transactions name P_5 as a funding recipient. Actor-local withdrawal rows control; monetary transfer and bailout receipt are not modeled.
 Changing owner, choice, information prerequisite or record meaning revises this

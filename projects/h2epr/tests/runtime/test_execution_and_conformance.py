@@ -100,6 +100,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
                 "slug": slug,
                 "title": event.title,
                 "package": package,
+                "project_root": event.project_root,
                 "package_root": event.package_root,
                 "data_root": event.data_root,
                 "left": left,
@@ -233,6 +234,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         case = next(iter(self.cases.values()))
         release = self.root / "published-release"
         summary = publish_rule_run_release(
+            project_root=case["project_root"],
             package_root=case["package_root"],
             data_root=case["data_root"],
             canonical_root=case["left"],
@@ -267,6 +269,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_output_size_mismatch:final_state.json",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=tampered,
@@ -297,6 +300,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "replay_receipt_evidence_mismatch",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged_replay,
@@ -334,6 +338,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         self._reseal_run_receipt_inventory(forged_manifest)
         with self.assertRaisesRegex(PublicationError, "run_seed_mismatch"):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged_manifest,
@@ -359,6 +364,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "coordinate_results_not_trace_derived",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged_summary,
@@ -382,6 +388,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_count_evidence_mismatch",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged_counts,
@@ -413,6 +420,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_trace_invalid:RECORD_HASH_MISMATCH",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged_trace,
@@ -438,6 +446,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_decision_action_mismatch",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged,
@@ -472,6 +481,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_generated_epg_not_independently_derived",
         ):
             publish_rule_run_release(
+                project_root=case["project_root"],
                 package_root=case["package_root"],
                 data_root=case["data_root"],
                 canonical_root=forged,
