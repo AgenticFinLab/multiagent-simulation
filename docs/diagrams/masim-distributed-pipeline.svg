@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1274" viewBox="0 0 1600 1274" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+<defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#475569"/></marker><marker id="arr-b" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#2563eb"/></marker><marker id="arr-g" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#059669"/></marker><marker id="arr-r" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#e11d48"/></marker><marker id="arr-a" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#d97706"/></marker><marker id="arr-i" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#4f46e5"/></marker></defs>
+<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<text x="40.0" y="44.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="27" fill="#0f172a" font-weight="bold" text-anchor="start">MASim 分布式（多服务器 / Ray 集群）执行 Pipeline</text>
+<text x="40.0" y="72.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#475569" font-weight="normal" text-anchor="start">driver 进程 + Ray Cluster → 每个 PlayerPersona 一个 Ray Actor（分布到多 worker）→ 拓扑分层并行执行 → 跨节点 Ray remote 通信 → 分布式存储</text>
+<text x="40.0" y="106.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">① 驱动进程与 Ray 集群</text>
+<text x="242.0" y="107.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">DRIVER + RAY CLUSTER</text>
+<line x1="40.0" y1="115.0" x2="1560.0" y2="115.0" stroke="#4f46e5" stroke-width="1.2"/>
+<rect x="40.0" y="120.0" width="250.0" height="96.0" rx="12" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+<text x="165.0" y="146.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="middle">simulation.yml</text>
+<text x="165.0" y="168.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="middle">配置入口</text>
+<rect x="330.0" y="120.0" width="300.0" height="96.0" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="480.0" y="146.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14.5" fill="#1e40af" font-weight="bold" text-anchor="middle">GeneralSimulator</text>
+<text x="480.0" y="168.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="middle">driver 进程（循环驱动执行）</text>
+<text x="480.0" y="188.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="middle">ensure_ray() · 创建 Actor · 调度</text>
+<line x1="290.0" y1="168.0" x2="330.0" y2="168.0" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="630.0" y1="168.0" x2="668.0" y2="168.0" stroke="#4f46e5" stroke-width="2" marker-end="url(#arr-i)"/>
+<rect x="668.0" y="120.0" width="892.0" height="150.0" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+<text x="684.0" y="146.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#3730a3" font-weight="bold" text-anchor="start">Ray Cluster（Head + 多 Worker，可跨多台服务器）</text>
+<rect x="684.0" y="158.0" width="190.0" height="84.0" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="1.2"/>
+<text x="779.0" y="184.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#3730a3" font-weight="bold" text-anchor="middle">Head</text>
+<text x="779.0" y="200.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#3730a3" font-weight="bold" text-anchor="middle">(调度/对象存储)</text>
+<rect x="890.0" y="158.0" width="210.0" height="84.0" rx="10" fill="#ffffff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="995.0" y="184.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#3730a3" font-weight="bold" text-anchor="middle">Worker 1</text>
+<rect x="1116.0" y="158.0" width="210.0" height="84.0" rx="10" fill="#ffffff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="1221.0" y="184.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#3730a3" font-weight="bold" text-anchor="middle">Worker 2</text>
+<rect x="1342.0" y="158.0" width="210.0" height="84.0" rx="10" fill="#ffffff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="1447.0" y="184.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#3730a3" font-weight="bold" text-anchor="middle">Worker 3</text>
+<text x="40.0" y="300.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">② Ray Actor 分布：每个 PlayerPersona 一个 Actor（Player 对 Simulator 隐藏）</text>
+<text x="747.6" y="301.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">RAY ACTORS</text>
+<line x1="40.0" y1="309.0" x2="1560.0" y2="309.0" stroke="#0891b2" stroke-width="1.2"/>
+<rect x="40.0" y="316.0" width="486.0" height="240.0" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="1.4"/>
+<text x="56.0" y="342.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#155e75" font-weight="bold" text-anchor="start">Worker 1</text>
+<rect x="56.0" y="358.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="72.0" y="382.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">MarketCoordinator</text>
+<text x="72.0" y="400.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: coordinator</text>
+<text x="72.0" y="420.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<rect x="56.0" y="454.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="72.0" y="478.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">Investor A</text>
+<text x="72.0" y="496.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: player</text>
+<text x="72.0" y="516.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<rect x="548.0" y="316.0" width="486.0" height="240.0" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="564.0" y="342.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">Worker 2</text>
+<rect x="564.0" y="358.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="580.0" y="382.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">Investor B</text>
+<text x="580.0" y="400.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: player</text>
+<text x="580.0" y="420.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<rect x="564.0" y="454.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="580.0" y="478.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">Investor C</text>
+<text x="580.0" y="496.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: player</text>
+<text x="580.0" y="516.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<rect x="1056.0" y="316.0" width="486.0" height="240.0" rx="14" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.4"/>
+<text x="1072.0" y="342.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#0f766e" font-weight="bold" text-anchor="start">Worker 3</text>
+<rect x="1072.0" y="358.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#0d9488" stroke-width="1.1"/>
+<text x="1088.0" y="382.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">Investor D</text>
+<text x="1088.0" y="400.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: player</text>
+<text x="1088.0" y="420.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<rect x="1072.0" y="454.0" width="454.0" height="84.0" rx="10" fill="#ffffff" stroke="#0d9488" stroke-width="1.1"/>
+<text x="1088.0" y="478.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">RAG / Knowledge</text>
+<text x="1088.0" y="496.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">PlayerPersona（Actor）· role: player + 检索</text>
+<text x="1088.0" y="516.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">Player · SendReceiveProxy · StorageProxy · MonitoringProxy</text>
+<text x="40.0" y="600.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">③ 分布式执行：每轮四阶段（拓扑层级 fan-out / 汇聚 / 跨节点投递）</text>
+<text x="622.5" y="601.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">DISTRIBUTED EXECUTION</text>
+<line x1="40.0" y1="609.0" x2="1560.0" y2="609.0" stroke="#059669" stroke-width="1.2"/>
+<rect x="40.0" y="612.0" width="1520.0" height="214.0" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 4"/>
+<text x="56.0" y="636.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13" fill="#0f172a" font-weight="bold" text-anchor="start">每轮执行循环：for level in topology.levels（同层并行 → 下一层级 → 下一轮 round+1）</text>
+<rect x="40.0" y="652.0" width="340.0" height="132.0" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="210.0" y="676.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#1e40af" font-weight="bold" text-anchor="middle">EXECUTE</text>
+<text x="54.0" y="702.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">driver → 同层所有 Actor</text>
+<text x="54.0" y="718.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">operate.remote() 并行 fan-out</text>
+<text x="54.0" y="734.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">（分布到多 worker）</text>
+<line x1="380.0" y1="718.0" x2="420.0" y2="718.0" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="420.0" y="652.0" width="340.0" height="132.0" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="590.0" y="676.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#5b21b6" font-weight="bold" text-anchor="middle">COLLECT</text>
+<text x="434.0" y="702.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">ray.get() 汇聚</text>
+<text x="434.0" y="718.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">TurnResult + pending Info</text>
+<text x="434.0" y="734.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">（对象存储取回）</text>
+<line x1="760.0" y1="718.0" x2="800.0" y2="718.0" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="800.0" y="652.0" width="340.0" height="132.0" rx="14" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+<text x="970.0" y="676.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#0f766e" font-weight="bold" text-anchor="middle">DISPATCH</text>
+<text x="814.0" y="702.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">encode_and_deliver</text>
+<text x="814.0" y="718.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">→ target.receive_message.remote()</text>
+<text x="814.0" y="734.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">跨节点 Ray remote 调用</text>
+<line x1="1140.0" y1="718.0" x2="1180.0" y2="718.0" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="1180.0" y="652.0" width="340.0" height="132.0" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="1350.0" y="676.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#9f1239" font-weight="bold" text-anchor="middle">RECORD</text>
+<text x="1194.0" y="702.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">各 Actor StorageProxy</text>
+<text x="1194.0" y="718.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">写 records / monitoring</text>
+<text x="1194.0" y="734.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">checkpoint 落盘</text>
+<path d="M 1520 784.0 L 1560 784.0 L 1560 798.0 L 40 798.0 L 40 718.0" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr-g)"/>
+<text x="800.0" y="814.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#065f46" font-weight="normal" text-anchor="middle">循环：下一层级 level+1 ｜ 下一轮 round+1</text>
+<text x="40.0" y="850.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">④ 跨节点消息：三层模型 + Ray 对象传输</text>
+<text x="382.4" y="851.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">CROSS-NODE MESSAGING</text>
+<line x1="40.0" y1="859.0" x2="1560.0" y2="859.0" stroke="#0891b2" stroke-width="1.2"/>
+<rect x="40.0" y="864.0" width="260.0" height="96.0" rx="12" fill="#ecfeff" stroke="#0891b2" stroke-width="1.3"/>
+<text x="170.0" y="888.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13.5" fill="#155e75" font-weight="bold" text-anchor="middle">Info（Player 层）</text>
+<text x="54.0" y="910.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">业务内容</text>
+<line x1="300.0" y1="912.0" x2="370.0" y2="912.0" stroke="#0891b2" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="370.0" y="864.0" width="260.0" height="96.0" rx="12" fill="#ecfeff" stroke="#0891b2" stroke-width="1.3"/>
+<text x="500.0" y="888.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13.5" fill="#155e75" font-weight="bold" text-anchor="middle">Message（Proxy 层）</text>
+<text x="384.0" y="910.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">sender/recipient</text>
+<text x="384.0" y="925.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">时间戳 · 优先级</text>
+<line x1="630.0" y1="912.0" x2="700.0" y2="912.0" stroke="#0891b2" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="700.0" y="864.0" width="260.0" height="96.0" rx="12" fill="#ecfeff" stroke="#0891b2" stroke-width="1.3"/>
+<text x="830.0" y="888.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13.5" fill="#155e75" font-weight="bold" text-anchor="middle">SimPacket（Channel 层）</text>
+<text x="714.0" y="910.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">JSON 编码 wire 包</text>
+<text x="40.0" y="982.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#475569" font-weight="normal" text-anchor="start">Worker 间消息经 Ray remote call 传递，SimPacket 进入对象存储（可跨服务器节点）。</text>
+<text x="40.0" y="1020.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">⑤ 分布式存储与对象</text>
+<text x="211.8" y="1021.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">STORAGE</text>
+<line x1="40.0" y1="1029.0" x2="1560.0" y2="1029.0" stroke="#e11d48" stroke-width="1.2"/>
+<rect x="40.0" y="1034.0" width="1520.0" height="84.0" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+<text x="56.0" y="1056.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">EXPERIMENT/{Scenario}/{Mechanism}/：records · communication · monitoring · checkpoints · logs · analysis</text>
+<text x="56.0" y="1076.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#0f172a" font-weight="normal" text-anchor="start">各 Actor 的 StorageProxy 独立写盘 ｜ Ray object store 缓存中间结果 ｜ resume：detect_resume_round 断点续跑</text>
+<text x="56.0" y="1096.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#0f172a" font-weight="normal" text-anchor="start">simulation-results/（整理后发布包）· analysis.py（指标/图）</text>
+<text x="40.0" y="1154.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="17" fill="#0f172a" font-weight="bold" text-anchor="start">⑥ 关键设计原则（所有权边界）</text>
+<text x="298.5" y="1155.0" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#64748b" font-weight="normal" text-anchor="start">DESIGN PRINCIPLES</text>
+<line x1="40.0" y1="1163.0" x2="1560.0" y2="1163.0" stroke="#7c3aed" stroke-width="1.2"/>
+<rect x="40.0" y="1170.0" width="298.0" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="189.0" y="1191.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">Simulator owns Channel（编码/路由/日志）</text>
+<rect x="350.0" y="1170.0" width="217.0" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="458.5" y="1191.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">Persona owns Player + Proxy</text>
+<rect x="579.0" y="1170.0" width="268.8" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="713.4" y="1191.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">Player 对 Simulator 完全隐藏（封装）</text>
+<rect x="859.8" y="1170.0" width="259.2" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="989.4" y="1191.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">Info 单次投递（operate 内消费一次）</text>
+<rect x="1131.0" y="1170.0" width="198.0" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="1230.0" y="1191.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">拓扑驱动 expected senders</text>
+<rect x="40.0" y="1214.0" width="284.0" height="34.0" rx="17" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="182.0" y="1235.5" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" fill="#5b21b6" font-weight="normal" text-anchor="middle">三层消息模型（Info/Message/SimPacket）</text>
+</svg>

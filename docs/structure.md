@@ -36,6 +36,9 @@ YAML 配置
 3. `dispatch`：按拓扑发送信息；
 4. `record`：持久化轮次、消息和市场状态。
 
+
+![MASim 总体架构与执行 Pipeline](diagrams/masim-architecture.png)
+
 **Player 生命周期细化**：金融场景 Player 由 `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator`（`masim/agents/_base.py`）派生。每一轮 `perceive → decide → act` 的最后一步由框架实现的 `_apply_fill_and_emit_action` 统一执行：从 `decide()` 返回的 `decision_payload` 中读取 `action / quantity / bid_price`，走 `require_positive_bid_price` 断言、`clip_order_to_liquidity`、更新 `cash / position`，然后调用可选的 `on_fill(action, quantity, bid_price)` 钩子进行 archetype 级 VWAP/cost-basis 更新。所有 archetype 类（含四个变体的 `players.py`）**禁止** override `act()` / `decide()`；如需 per-fill 状态维护，只能覆盖 `on_fill`。完整契约见 `docs/framework-contract.md`。
 
 ## 3. 顶层目录
@@ -91,6 +94,9 @@ multiagent-simulation/
 | `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
 职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
+
+
+![MASim 分布式（Ray 集群）执行 Pipeline](diagrams/masim-distributed-pipeline.png)
 
 ## 5. 场景与机制
 
