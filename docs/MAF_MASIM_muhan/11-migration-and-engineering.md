@@ -12,7 +12,7 @@
 
 | MASim 资产 | 可保留内容 | 新系统位置与必要改动 |
 |---|---|---|
-| [Player](../../masim/player/general.py)、[Persona](../../masim/persona/general.py) | 身份、行为生命周期和配置经验 | model / runtime；将持久主体状态与执行实例分开 |
+| [Player](../../masim/player/general.py)、[Persona](../../masim/persona/general.py) | 身份、行为生命周期和配置经验 | model / runtime；主体与子角色长期状态、行为实例和 worker 分开 |
 | [GeneralSimulator](../../masim/simulator/general.py) | 并行执行、收集与 Ray 组织经验 | coordination / execution；按事件和活动片段重组 |
 | [TopologyGraph](../../masim/utils/topology.py) | 图关系、连接和分组计算 | 关系与路由组件；执行拓扑不直接等同于模拟时间 |
 | [Proxy](../../masim/proxy/general.py) 与通信分层 | 内容、路由和传输信封分离 | MessageRouter；补充 activity_id、可见时间与投递身份 |
@@ -32,20 +32,20 @@
 
 ```text
 src/sim_runtime/
-  contracts/                 # 定义、身份、请求、结果、版本与 schema
-  model/                     # 注册、群体初始化、组合校验
-  coordination/              # Scheduler、ActivityManager、MessageRouter
-  environment/               # ObservationBuilder、环境与后果处理接口
+  contracts/                 # 主体、角色、实例、请求、结果、绑定与 schema
+  model/                     # 注册、群体与复合角色初始化、机制与组合校验
+  coordination/              # 调度、行为实例、活动、机制任务、联合处置与路由
+  environment/               # 可见投影、环境约束、领域组合与后果投影
   runtime/
-    function.py              # 函数和状态机
-    maf/                     # MAFExecutor、WorkflowBridge、会话与工具
-  execution/                 # Ray worker 池、任务尝试、ModelAccess
+    function.py              # 函数、状态机与机制任务执行
+    maf/                     # MAFExecutor、Bridge、角色与嵌套流程、会话与工具
+  execution/                 # 共享 Ray 池、任务尝试、ModelAccess 与端点绑定
   storage/                   # RunStore、事务、BlobStore、恢复与迁移
   observability/             # 记录、指标、检查、回放与导出
   cli.py                     # 运行管理入口
 
 examples/
-  resource_community/        # X / Y 贯穿示例
+  resource_community/        # 原子/复合主体与 X / Y 重叠活动示例
   component_extension/      # 新行为、新环境、新活动的接入示例
 tests/
   contracts/
@@ -55,17 +55,17 @@ workloads/                   # 负载定义、响应分布与测量配置
 docs/                        # 架构、组件开发、运行、证据与限制
 ```
 
-按模块职责拆包，避免把全部机制堆入一个 simulator 类。初期实现可以很小，但名称和数据流与最终设计一致。
+按模块职责拆包。BehaviorManager 管理独立行为与活动流程的实例，MechanismPlanner 组织计算依赖，ResolutionCoordinator 协调各模块的处置规则。这些职责由每次运行的协调进程承载，MAF 继续管理局部工作流。
 
 ## 4. 依赖边界
 
 | 层 | 允许依赖 | 边界 |
 |---|---|---|
 | contracts | 基础类型与序列化库 | 无 MAF、Ray、数据库对象 |
-| model / coordination | contracts、组件接口 | 不直接调用模型 SDK |
+| model / coordination | contracts、组件接口 | 定义角色、阶段依赖和联合处置，不直接调用模型 SDK |
 | environment | contracts、领域算法 | 不写数据库、不隐藏模型调用 |
-| runtime/maf | contracts、固定版本 MAF | 不直接修改生效状态 |
-| execution | contracts、运行适配、Ray | 不解释领域行动后果 |
+| runtime/maf | contracts、固定版本 MAF | 接续时注入当前视图，内部角色也不直接修改生效状态 |
+| execution | contracts、运行适配、Ray | 行为和机制共用池与账目，不解释领域后果或擅自改模型 |
 | storage | contracts、数据库与 Blob 客户端 | 不执行主体行为 |
 | examples / plugins | 公开扩展接口 | 不靠改写通用协调代码接入 |
 

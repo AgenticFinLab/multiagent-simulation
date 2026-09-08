@@ -8,9 +8,11 @@
 
 **选择理由：** 复杂行为和活动已经需要图、工具、模型与接续，采用 MAF 可以集中复用这些构件。函数行为继续走统一合同，通用模型类型不依赖 MAF。
 
-**需要新增：** 模拟身份、可见坐标、活动登记、请求去重、环境后果及与全局提交关联的 WorkflowBridge。
+**需要新增：** 模拟身份与行为实例管理、当前可见输入、请求去重，以及连接模拟后果和全局提交的 WorkflowBridge。
 
-**证据限制：** 官方接口支持请求与接续，参考源码显示会话恢复需要完整性校验。新系统的动态成员、跨 worker 接续和联合恢复仍需集成验证。
+嵌套工作流和 Workflow-as-Agent 为内部角色组合提供入口；参考源码将子工作流状态与待请求映射纳入父流程检查点。采用时为不同实例创建隔离对象，顶层 checkpoint 统一关联局部状态。[MAF Workflow-as-Agent](https://learn.microsoft.com/en-us/agent-framework/workflows/as-agents)、[嵌套执行器源码](https://github.com/microsoft/agent-framework/blob/4507512f95effaae4518d658e86e9afc0ccb4514/python/packages/core/agent_framework/_workflows/_workflow_executor.py)
+
+**证据限制：** 嵌套执行不自动建立角色长期记忆、世界权限或动态成员协议。恢复还需完整性检查与新观察注入；这些适配及联合恢复仍需新系统集成验证。
 
 ## 2. MASim：迁移资产与实际改造点
 
@@ -36,7 +38,7 @@ Meta 的 Matrix 面向多 Agent 合成数据生成，在 Ray 上提供推理与 
 
 LangGraph 官方持久化说明区分 thread 范围的 checkpoint 与跨 thread 的长期 store。[LangGraph Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
 
-**本稿推论：** 活动 checkpoint、成员会话和主体长期记忆应有清楚归属。恢复一个局部工作流时，还要核对它与共享世界的版本关系。
+**本稿推论：** 行为实例的 checkpoint 和局部会话，与主体及内部角色的长期记忆应有清楚归属。恢复局部工作流时，还要核对它与共享世界的版本关系。
 
 **采用位置：** [记忆归属](../04-agents-and-memory.md)、[联合恢复](../09-state-and-recovery.md)。
 
@@ -46,11 +48,11 @@ LangGraph 官方持久化说明区分 thread 范围的 checkpoint 与跨 thread 
 
 官方项目将分析、研究、交易和风险管理等角色组合成决策流程。[TradingAgents 官方仓库](https://github.com/TauricResearch/TradingAgents)
 
-**本稿推论：** 一个模拟主体可以使用内部角色分工，复杂任务交给 MAF Workflow 组织。这为充分利用 MAF 提供具体行为形态。
+**本稿推论：** 复合主体可以使用持久内部角色分工，由 MAF Workflow 组织局部计算。长期角色经验与本次会话分别保存，对外行动归于父主体。
 
 **采用位置：** [内部角色、组织与活动](../04-agents-and-memory.md)。
 
-**适用边界：** 内部助手是否拥有独立模拟身份由模型决定。金融任务角色不成为通用框架的固定类，也不从此项目推导主体规模或实证有效性。
+**适用边界：** 本方案的 SubAgent 使用父主体的对外身份。需要独立世界权限与生命周期的成员建模为独立 Actor。金融角色不成为通用框架的固定类，角色协作也不直接证明主体规模或实证有效性。
 
 ## 6. Ray 与 PostgreSQL：执行和生效的基础构件
 
@@ -66,10 +68,10 @@ PostgreSQL 提供事务，用于同时保存状态与后续事件引用。[Postg
 
 | 来源经验 | 本稿采用 | 本稿承担的新增工作 |
 |---|---|---|
-| MAF 局部工作流与接续 | 复杂行为和活动运行 | 模拟边界、身份、时间与提交映射 |
+| MAF 局部、嵌套工作流与接续 | 复杂行为、内部协作和活动运行 | 持久角色、当前视图、模拟时间与提交映射 |
 | MASim 模拟组织经验 | 主体、环境、通信和 Ray 资产迁移 | 通用组件化、持续活动、完整恢复 |
 | Matrix 执行层经验 | 共享 worker、调用治理和负载分解 | 共享世界中的受控生效 |
-| LangGraph 状态分工 | 局部进度与长期状态分离 | 跨对象版本和恢复一致性 |
+| LangGraph 状态分工 | 实例会话与主体/角色长期状态分离 | 跨对象版本与恢复一致性 |
 | TradingAgents 角色协作 | 内部复合行为 | 内部角色与独立模拟主体的权限区分 |
 | Ray / PostgreSQL | 执行资源与事务支撑 | 所有权、有效尝试与重复效果处理 |
 

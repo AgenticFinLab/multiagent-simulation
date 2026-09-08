@@ -4,22 +4,22 @@
 
 ## 1. 架构选择
 
-采用“模型组件—模拟协调—共享执行—持久支撑”的组织方式。模型组件表达主体和环境；模拟协调确定何时执行、看见什么及结果何时生效；共享执行运行函数和 MAF；持久支撑保存状态、恢复依据和调用账目。
+采用“模型组件—模拟协调—共享执行—持久支撑”的组织方式。模型组件表达主体、环境和机制；模拟协调确定时间、输入与后果；共享执行运行函数和 MAF；持久支撑保存状态、恢复依据和调用账目。
 
-MAF 的内部图调度留在行为与活动中。新系统围绕它组织跨活动的时间、资源和信息关系。MASim 中适用的配置、主体、拓扑、消息和 Ray 经验按职责迁入，迁移表见 [11](11-migration-and-engineering.md)。
+MAF 承载主体决策、内部协作和活动流程。模拟协调层管理长期存在的主体与活动，处理它们之间的资源、信息和时间关系。MASim 适用资产按职责迁入，见 [11](11-migration-and-engineering.md)。
 
 ## 2. 逻辑运行图
 
-图中展示主要处理顺序。运行完成装配后，反复执行第 2–6 步；共享存储和观测连线省略，以保持图的可读性。
+装配后反复执行第 2–6 步。共享存储和观测连线省略，以保持主要处理顺序清楚。
 
 ```mermaid
 flowchart TB
     SETUP["1. 装配模型与运行配置<br/>ModelRegistry · RunController"]
-    PLAN["2. 安排活动与可见输入<br/>Scheduler · ActivityManager<br/>ObservationBuilder"]
-    POOL["3. 派发本阶段任务<br/>ExecutionPool"]
-    FUNC["规则与数值行为<br/>FunctionExecutor"]
+    PLAN["2. 安排实例与可见输入<br/>Scheduler · BehaviorManager<br/>ObservationBuilder"]
+    POOL["3. 按依赖执行任务<br/>ExecutionPool"]
+    FUNC["规则与数值计算<br/>FunctionExecutor"]
     MAF["复杂行为与局部协作<br/>MAFExecutor · WorkflowBridge"]
-    EFFECT["4. 处理后果与投递计划<br/>EnvironmentRuntime · MessageRouter"]
+    EFFECT["4. 联合处置与后果计划<br/>ResolutionCoordinator"]
     COMMIT["5. 提交状态与后续事件<br/>CommitManager · RunStore"]
     NEXT["6. 进入下一模拟坐标<br/>Scheduler"]
 
@@ -38,56 +38,63 @@ flowchart TB
     class EFFECT,COMMIT state
 ```
 
-两类执行都返回 `SegmentResult`。同阶段结果收齐后，环境处理行动，消息模块生成投递计划，提交模块统一保存后果与后续事件。独立主体可以直接形成执行任务，只有持续交互才建立活动。
+第 3 步按模型声明的依赖完成输入准备、行为计算和可选的环境辅助判断。结果齐备后，系统统一确定行动后果，生成状态更新与消息投递计划。各类任务的输入输出见 [03](03-model-and-contracts.md)。
 
 ## 3. 模块职责
 
-| 模块 | 主要输入 → 输出 | 负责的规则或状态 |
+| 模块 | 输入 → 输出 | 负责的规则或状态 |
 |---|---|---|
-| ModelRegistry | 定义与配置 → ValidatedSpec | 组件注册、版本、类型和组合约束 |
-| RunController | 运行定义与操作 → 运行状态 | 初始化、暂停、恢复、停止及协调进程生命周期 |
-| Scheduler | 已提交事件 → 到期事件集合 | 模拟坐标、事件顺序和阶段推进 |
-| ActivityManager | 事件、主体与活动视图 → ExecutionPlan | 激活、成员、生命周期、等待和接续位置 |
-| ObservationBuilder | 指定版本与参与身份 → ActorView | 可见字段、已到达消息、允许使用的记忆和能力描述 |
-| ExecutionPool | 执行请求 → 候选结果引用 | 派发、并发、尝试与 worker 资源 |
-| FunctionExecutor / MAFExecutor | 可见输入与接续状态 → SegmentResult | 行为计算、MAF 局部执行与输出校验 |
-| WorkflowBridge | MAF 外部请求 ↔ SimulationRequest / Response | 模拟交互节点、请求身份映射与返回边界 |
-| EnvironmentRuntime | 状态视图、候选行动、定时事件 → EffectPlan | 能力检查、资源约束、冲突和后果 |
-| MessageRouter | 消息、成员和关系视图 → DeliveryPlan | 接收者、信息范围、可见时间与投递身份 |
-| CommitManager / RunStore | 结果与后果计划 → CommitReceipt | 联合更新、版本检查、事务写入与恢复依据 |
-| ModelAccess / RunRecorder | 调用和过程记录 → 配额、账目与观测 | 端点总负载、费用、因果关联、指标及导出 |
+| ModelRegistry | 模型与执行配置 → ValidatedSpec | 组件、模型绑定、版本和组合检查 |
+| RunController | 定义与操作 → 运行状态 | 初始化、暂停、恢复、停止与协调进程 |
+| Scheduler | 已提交事件 → 到期集合 | 模拟坐标、事件顺序和阶段推进 |
+| ActivityManager | 活动请求与处置 → 活动计划 | 成员、参与条件和领域生命周期 |
+| BehaviorManager | 事件与实例状态 → PhasePlan / 行为计划 | 独立及活动实例、触发合并、等待与接续位置 |
+| ObservationBuilder | 版本与身份范围 → ActorView | 当前可见字段、消息、角色记忆与能力 |
+| MechanismPlanner | 阶段规则与上游结果 → 机制任务 | prepare / adjudicate 依赖、输入范围及结果消费绑定 |
+| ExecutionPool | 执行请求 → 完整候选引用 | 统一派发、并发、任务尝试与资源 |
+| FunctionExecutor / MAFExecutor | 授权输入 → SegmentResult 或 MechanismResult | 行为和机制计算、局部流程、输出校验 |
+| WorkflowBridge | MAF 请求 ↔ 模拟反馈 | 请求身份、当前视图注入、去重与接续 |
+| ResolutionCoordinator | 请求、更新、规则、机制结果 → DispositionPlan | 跨模块约束、组合成败和资源分配 |
+| EnvironmentRuntime / ActorStatePolicy | 固定处置 → 环境 / 主体计划 | 领域规则、状态归属及更新计划 |
+| MessageRouter | 固定处置与成员规则 → DeliveryPlan | 接收者、信息范围、可见时间和投递身份 |
+| CommitManager / RunStore | 完整计划 → CommitReceipt | 所有权、版本、联合事务与恢复依据 |
+| ModelAccess / RunRecorder | 调用和过程记录 → 配额、账目与观测 | 模型身份核对、总负载、费用与来源关联 |
 
-模块是职责边界，无须全部部署成独立服务。参考实现中，Scheduler、ActivityManager、EnvironmentRuntime、MessageRouter 与 CommitManager 位于每次运行的协调进程；worker 和端点配额服务独立承载。
+这些是逻辑职责，无须分别部署服务。参考实现将调度、实例管理、领域验证与处置、消息和提交组织在每 run 的协调进程中；行为及机制模型计算进入共享 worker，端点配额由共享 ModelAccess 管理。
 
 ## 4. 状态归属
 
-| 状态 | 规则归属 | 持久保存位置 | 谁可以提出修改 |
-|---|---|---|---|
-| 主体属性与长期记忆 | 主体更新规则 | RunStore + 内容引用 | 所属主体的有效行为、已声明的环境规则 |
-| 环境资源、空间和关系 | 对应环境模块 | RunStore | 注册操作与环境定时事件 |
-| 活动成员、状态与等待 | ActivityManager | RunStore | 有权限的参与者请求、模板生命周期规则 |
-| 工作流位置与成员会话 | MAF 适配层 | BlobStore，RunStore 指向生效版本 | 该活动唯一有效的执行尝试 |
-| 消息与可见时间 | MessageRouter | RunStore + 内容引用 | 有效发送请求及系统反馈 |
-| 任务、尝试、预算和用量 | 执行层、ModelAccess | 运行账目表 | 相应运行组件 |
+| 状态 | 规则归属 | 唯一生效位置 |
+|---|---|---|
+| 主体属性、长期记忆与内部角色状态 | 所属主体的更新和记忆规则 | ActorState 及其 SubAgentState 引用 |
+| 环境资源、空间和关系 | 所属环境模块 | 相应环境状态 |
+| 活动成员、共享记录和领域状态 | ActivityManager | ActivityState |
+| 流程位置、局部角色会话与待请求 | BehaviorManager + MAF 适配 | BehaviorInstanceState 指向的 checkpoint 根 |
+| 消息、反馈和可见时间 | MessageRouter | 消息、响应与投递记录 |
+| 任务、选中候选、预算和用量 | 执行层与 ModelAccess | 运行账目，不推进模拟状态版本 |
 
-worker 可以保存候选载荷，不直接覆盖已生效主体或环境状态。主体拥有资源引用时，资源余额仍由环境模块管理，避免两处余额相互矛盾。所有共享字段须有唯一的权威更新位置。
+状态元数据保存在 RunStore，大载荷通过不可变引用进入 BlobStore。ActorState 和 ActivityState 通过行为实例关联各自的流程进度。
 
-## 5. 三条关键边界
+worker 产生候选结果，由状态所属模块决定如何更新。主体规则管理长期属性与记忆，行为实例保存局部会话与执行位置；资源余额由环境管理，主体和活动持有资源引用。
 
-**计算与生效。** 一次 MAF 调用完成，只表明产生了可校验结果。资源获得、消息发送和活动完成由提交确认；流式输出用于观测。
+## 5. 关键边界
 
-**局部流程与全局时间。** MAF 管理节点、分支和局部并发；Scheduler 管理模拟坐标。一次工作流可以跨多个模拟时刻，一个模拟阶段也可以执行多个工作流。
+**持久状态与执行对象。** 主体、内部角色和活动按各自生命周期保留状态，worker 按任务分配与释放。状态容量和同时运行的计算量因此可以分别扩展。
 
-**持久状态与暂态对象。** 主体和活动长期存在；Python 对象、Ray 引用和客户端连接可以重建。恢复读取已提交引用，不能依赖某个 worker 的残留内存。
+**计算与生效。** 一次 MAF 调用完成只产生候选。联合处置确定请求和更新的结果，各模块据此生成更新计划，再由数据库统一提交。
+
+**局部流程与全局时间。** MAF 管理节点、分支和内部并发；Scheduler 管理模拟坐标。机制任务的依赖顺序也不自动增加模拟时长。
+
+**模型与部署。** 行为、模型身份、解码、信息和时间规则属于模型定义；worker、连接、凭据和配额属于执行配置。恢复核对二者的绑定关系。
 
 ## 6. 完整运行链
 
-1. 校验组件和配置，展开群体定义，持久化初始状态与初始事件。
-2. 选取到期事件，固定阶段读取版本，生成主体任务和活动接续任务。
-3. 为每名参与者构造独立视图，保存任务清单，再有界派发。
-4. 函数或 MAF 执行一个片段，返回完整候选结果和接续引用。
-5. 环境处理行动与定时后果；活动和消息规则形成相应更新。
-6. 检查版本、运行所有权及有效尝试，一次提交状态和后续事件。
-7. 将反馈安排到允许可见的坐标，继续运行或进入等待、暂停、完成状态。
+1. 校验模型，展开群体与环境，保存初始状态和事件。
+2. 固定本阶段读版本，安排独立或活动行为实例及机制依赖。
+3. 构造授权输入，封存各工作阶段任务，再经共享执行池计算。
+4. 保存完整候选与接续状态，固定供下游使用的上游结果。
+5. 统一确定请求结果，各模块生成相应状态更新与后续事件。
+6. 检查版本、有效尝试与运行所有权，一次提交状态和后续事件。
+7. 到允许坐标后，携带当前视图与反馈继续实例，或进入等待、暂停、结束状态。
 
-时间细则见 [07](07-time-and-communication.md)，数据库提交细则见 [09](09-state-and-recovery.md)。终态行为不由这张处理链预先决定，具体结果取决于行为组件和环境规则。
+数据合同见 [03](03-model-and-contracts.md)，时间见 [07](07-time-and-communication.md)，提交与恢复见 [09](09-state-and-recovery.md)。行为路径由组件与环境规则共同决定。
