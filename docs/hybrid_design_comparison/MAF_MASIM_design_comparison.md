@@ -1,6 +1,6 @@
 # MASim × MAF：两套模拟系统设计的比较分析
 
-本文比较 [hybrid-design](hybrid-design/README.md) 与 [MAF_MASIM_muhan](MAF_MASIM_muhan/README.md) 两套独立方案，后者简称 **Muhan 方案**。比较覆盖目标、架构、运行语义、规模策略、工程组织和验收设计，并结合各自的相关工作材料分析选择依据。
+本文比较 [hybrid-design](../hybrid-design/README.md) 与 [MAF_MASIM_muhan](../MAF_MASIM_muhan/README.md) 两套独立方案，后者简称 **Muhan 方案**。比较覆盖目标、架构、运行语义、规模策略、工程组织和验收设计，并结合各自的相关工作材料分析选择依据。
 
 文中区分三件事：方案已经明确的设计、由设计推导的收益与代价、仍需实现验证的能力。文档完整度、底座已有能力和新系统实测能力分别评价。
 
@@ -17,7 +17,7 @@
 | 主要工程风险 | 预取与降级的行为含义、聚合失真、跨状态恢复的一致性 | 协调与事务复杂度、MAF 完整接续、单 run 屏障和提交瓶颈 |
 | 更直接的首个成果 | 保持既有市场行为的 MAF 适配和复合基金 demo | 可等待、可恢复、能处理双活动冲突的完整工程运行链 |
 
-依据：[hybrid-design 的需求与原则](hybrid-design/03-design-principles.md)、[演进路线](hybrid-design/11-open-questions-and-roadmap.md)；[Muhan 方案的需求](MAF_MASIM_muhan/01-scope-and-requirements.md)、[实施与验收](MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
+依据：[hybrid-design 的需求与原则](../hybrid-design/03-design-principles.md)、[演进路线](../hybrid-design/11-open-questions-and-roadmap.md)；[Muhan 方案的需求](../MAF_MASIM_muhan/01-scope-and-requirements.md)、[实施与验收](../MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
 
 若目标是**通用、持续、灵活且可检查的模拟基础设施**，Muhan 方案与这一终态更直接对应；若目标是**尽快扩展现有金融模拟并验证规模与外部服务接入**，hybrid-design 的兼容路线更直接。两者的真实性、吞吐和开发成本，均不能仅凭文档判定高低。
 
@@ -48,9 +48,9 @@
   → 下一层级或轮次
 ```
 
-复合主体可采用本地函数、MAF Workflow 或动态 supervisor；子主体可部署在本地协程、Ray Actor 或远端 A2A 服务中。规模进一步增加时，通过 leader 代表成员决策、低频战略与高频规则执行等方式减少模型调用。[目标架构](hybrid-design/04-target-architecture.md)、[混合引擎](hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[层级组织](hybrid-design/06-hierarchy-and-subagents.md)。
+复合主体可采用本地函数、MAF Workflow 或动态 supervisor；子主体可部署在本地协程、Ray Actor 或远端 A2A 服务中。规模进一步增加时，通过 leader 代表成员决策、低频战略与高频规则执行等方式减少模型调用。[目标架构](../hybrid-design/04-target-architecture.md)、[混合引擎](../hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[层级组织](../hybrid-design/06-hierarchy-and-subagents.md)。
 
-这一路线具有较清楚的增量开发入口。其成立条件是：保留的内核能够满足目标状态与后果要求；新增规模策略对主体行为的影响能够声明、测量和接受。方案自身也将预取、缓存异质性、聚合失真和恢复顺序列为开放问题。[开放问题与路线图](hybrid-design/11-open-questions-and-roadmap.md)。
+这一路线具有较清楚的增量开发入口。其成立条件是：保留的内核能够满足目标状态与后果要求；新增规模策略对主体行为的影响能够声明、测量和接受。方案自身也将预取、缓存异质性、聚合失真和恢复顺序列为开放问题。[开放问题与路线图](../hybrid-design/11-open-questions-and-roadmap.md)。
 
 ### 2.2 Muhan 方案：围绕持续对象与共同生效组织系统
 
@@ -79,9 +79,9 @@
   → 携带当前视图和有效反馈继续相应流程
 ```
 
-MAF 负责局部计算与流程，WorkflowBridge 将其请求响应和 checkpoint 接入模拟时间、身份与提交。等待未来模拟反馈时释放 worker；一个主体在不同活动中的会话分别保留。记忆处理与环境辅助判断也进入统一任务与调用管理。[总体架构](MAF_MASIM_muhan/02-architecture.md)、[数据合同](MAF_MASIM_muhan/03-model-and-contracts.md)、[活动与 MAF](MAF_MASIM_muhan/06-activities-and-workflows.md)。
+MAF 负责局部计算与流程，WorkflowBridge 将其请求响应和 checkpoint 接入模拟时间、身份与提交。等待未来模拟反馈时释放 worker；一个主体在不同活动中的会话分别保留。记忆处理与环境辅助判断也进入统一任务与调用管理。[总体架构](../MAF_MASIM_muhan/02-architecture.md)、[数据合同](../MAF_MASIM_muhan/03-model-and-contracts.md)、[活动与 MAF](../MAF_MASIM_muhan/06-activities-and-workflows.md)。
 
-这一路线更细致地定义了持续互动怎样执行和恢复，但需要建设新的协调与持久化协议。接口、包结构和验收用例已经写明，完整实现和负载证据仍是待交付目标。[迁移与工程组织](MAF_MASIM_muhan/11-migration-and-engineering.md)、[实施与验收](MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
+这一路线更细致地定义了持续互动怎样执行和恢复，但需要建设新的协调与持久化协议。接口、包结构和验收用例已经写明，完整实现和负载证据仍是待交付目标。[迁移与工程组织](../MAF_MASIM_muhan/11-migration-and-engineering.md)、[实施与验收](../MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
 
 ## 3. 共同基础与能力覆盖
 
@@ -107,13 +107,13 @@ MAF 负责局部计算与流程，WorkflowBridge 将其请求响应和 checkpoin
 | 规模验证 | 面向 L1–L3，关联成本与金融统计性质 | 分稀疏激活、复杂活动、高争用负载测量 | 前者目标跨度大；后者测量分解更具体 |
 | 输出与评价 | 对接既有实验产物及金融指标 | 通用记录、检查、回放，后续 EPG 适配 | 由应用研究与基础设施各自的优先级决定 |
 
-该表以双方的[架构与接口](hybrid-design/04-target-architecture.md)、[对象与合同](MAF_MASIM_muhan/03-model-and-contracts.md)为入口，各维度的具体依据在下一节展开。“未单独定义”表示当前文档没有展开相应合同，不表示底层框架无法扩展支持。
+该表以双方的[架构与接口](../hybrid-design/04-target-architecture.md)、[对象与合同](../MAF_MASIM_muhan/03-model-and-contracts.md)为入口，各维度的具体依据在下一节展开。“未单独定义”表示当前文档没有展开相应合同，不表示底层框架无法扩展支持。
 
 ## 4. 会改变模拟行为的关键差异
 
 ### 4.1 慢决策：预取继续，还是等待当前结果
 
-hybrid-design 希望保持世界推进，通过上一轮预取下一轮决策、超时丢弃、缓存或降级隔离慢调用。Muhan 方案允许同阶段任务并行，但要求必需结果完整后才提交；运行层超时或预算不足默认引起重试或暂停。[hybrid-design 规模策略 §5–6](hybrid-design/09-scaling-and-cost-control.md)、[Muhan 时间规则 §1–5](MAF_MASIM_muhan/07-time-and-communication.md)。
+hybrid-design 希望保持世界推进，通过上一轮预取下一轮决策、超时丢弃、缓存或降级隔离慢调用。Muhan 方案允许同阶段任务并行，但要求必需结果完整后才提交；运行层超时或预算不足默认引起重试或暂停。[hybrid-design 规模策略 §5–6](../hybrid-design/09-scaling-and-cost-control.md)、[Muhan 时间规则 §1–5](../MAF_MASIM_muhan/07-time-and-communication.md)。
 
 例如，在第 4 轮根据价格 100 预取第 5 轮决策，而第 5 轮价格已变为 120：
 
@@ -127,7 +127,7 @@ hybrid-design 希望保持世界推进，通过上一轮预取下一轮决策、
 
 ### 4.2 规模策略：执行优化与行为近似怎样区分
 
-hybrid-design 把引擎配比、抽样、leader 代表、语义缓存和降级纳入 Scale Policy；Muhan 方案允许这些选择，但将其归入显式模型变化。差异是默认管理位置和验证标准，双方都希望控制成本，也都承认聚合可能影响行为。[hybrid-design 原则 P4](hybrid-design/03-design-principles.md)、[hybrid-design 开放问题 O2–O4](hybrid-design/11-open-questions-and-roadmap.md)、[Muhan 执行优化与模型变化](MAF_MASIM_muhan/08-execution-and-scaling.md)。
+hybrid-design 把引擎配比、抽样、leader 代表、语义缓存和降级纳入 Scale Policy；Muhan 方案允许这些选择，但将其归入显式模型变化。差异是默认管理位置和验证标准，双方都希望控制成本，也都承认聚合可能影响行为。[hybrid-design 原则 P4](../hybrid-design/03-design-principles.md)、[hybrid-design 开放问题 O2–O4](../hybrid-design/11-open-questions-and-roadmap.md)、[Muhan 执行优化与模型变化](../MAF_MASIM_muhan/08-execution-and-scaling.md)。
 
 应分别看待三种“保持一致”：
 
@@ -141,11 +141,11 @@ hybrid-design 的“规模变化后结果语义一致”需要明确对应哪一
 
 “主体越多，规则占比必须越高”适合作为特定预算、激活率和时长下的策略假设，不能仅凭主体总数确定。实际调用量还受角色数量、激活频率、局部工作流深度、记忆计算和重试影响。两个方案的规模比较应先对齐这些条件。
 
-降级链本身也需要成本定义。hybrid-design 将 RuleLLM 描述为规则约束下的 LLM 决策，因此从 LLM 切换到 RuleLLM 后，仍可能调用同一个模型。是否降低成本或时延，取决于提示、模型、调用次数和失败处理怎样改变，不能仅由引擎名称推出。[引擎映射与降级链](hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)。
+降级链本身也需要成本定义。hybrid-design 将 RuleLLM 描述为规则约束下的 LLM 决策，因此从 LLM 切换到 RuleLLM 后，仍可能调用同一个模型。是否降低成本或时延，取决于提示、模型、调用次数和失败处理怎样改变，不能仅由引擎名称推出。[引擎映射与降级链](../hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)。
 
 ### 4.3 复合主体、群体与持续活动
 
-双方均允许一个对外主体由多个内部决策单元组成。hybrid-design 进一步强调子主体的本地、Ray 与远端部署，Muhan 方案进一步规定长期身份、父主体授权、局部会话和角色退出后的反馈处理。[hybrid-design 复合引擎与部署](hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[Muhan 主体与记忆](MAF_MASIM_muhan/04-agents-and-memory.md)。
+双方均允许一个对外主体由多个内部决策单元组成。hybrid-design 进一步强调子主体的本地、Ray 与远端部署，Muhan 方案进一步规定长期身份、父主体授权、局部会话和角色退出后的反馈处理。[hybrid-design 复合引擎与部署](../hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[Muhan 主体与记忆](../MAF_MASIM_muhan/04-agents-and-memory.md)。
 
 这里有三个不能直接互换的概念：
 
@@ -155,11 +155,11 @@ hybrid-design 的“规模变化后结果语义一致”需要明确对应哪一
 
 hybrid-design 已区分 supervisor-worker、group-leader 和 hub 三种结构，但统一 AgentRuntime 与远端调用还需要说明：执行地址、服务身份和模拟世界权限之间如何映射。远端部署本身不能决定它应成为独立模拟主体。
 
-Muhan 方案还增加了持续活动这一层：A 同时参加 X、Y，角色身份长期保留，各活动会话独立；两项活动对 A 的资源申请共同处理。其代价是增加活动成员、行为实例、控制事件和清理状态。独立主体默认最多一条未结束独立行为实例，也是一项需要在使用文档中明确的约束。[hybrid-design 层级组织](hybrid-design/06-hierarchy-and-subagents.md)、[Muhan 活动与重叠参与](MAF_MASIM_muhan/06-activities-and-workflows.md)。
+Muhan 方案还增加了持续活动这一层：A 同时参加 X、Y，角色身份长期保留，各活动会话独立；两项活动对 A 的资源申请共同处理。其代价是增加活动成员、行为实例、控制事件和清理状态。独立主体默认最多一条未结束独立行为实例，也是一项需要在使用文档中明确的约束。[hybrid-design 层级组织](../hybrid-design/06-hierarchy-and-subagents.md)、[Muhan 活动与重叠参与](../MAF_MASIM_muhan/06-activities-and-workflows.md)。
 
 ### 4.4 环境后果：领域契约与通用联合处置
 
-hybrid-design 保留市场撮合、统一成交处理与 `on_fill` 边界。这有利于复用金融场景已经形成的规则。Muhan 方案将领域操作注册为能力，由联合处置协调环境、活动、主体更新和消息。[hybrid-design 引擎合同](hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[Muhan 环境与联合处置](MAF_MASIM_muhan/05-environment-and-actions.md)。
+hybrid-design 保留市场撮合、统一成交处理与 `on_fill` 边界。这有利于复用金融场景已经形成的规则。Muhan 方案将领域操作注册为能力，由联合处置协调环境、活动、主体更新和消息。[hybrid-design 引擎合同](../hybrid-design/05-agent-taxonomy-and-hybrid-engines.md)、[Muhan 环境与联合处置](../MAF_MASIM_muhan/05-environment-and-actions.md)。
 
 “加入活动并预约资源”可以检验两种设计的覆盖范围。若加入失败，系统需要同时保证没有成员资格、资源占用或成功记忆，并让其他合法申请继续竞争资源。
 
@@ -169,7 +169,7 @@ Muhan 方案也需承担额外成本：每种组合处理器必须明确可接�
 
 ### 4.5 恢复：对齐到哪一个位置
 
-hybrid-design 已提出主体状态、消息游标和订单簿共同快照，并将 MAF checkpoint 纳入统一 StateStore。Muhan 方案进一步区分任务、尝试、选中候选、调用、响应消费和生效提交，使用同一提交位置关联世界与局部流程。[hybrid-design 状态与恢复](hybrid-design/08-state-storage-and-durability.md)、[Muhan 提交与恢复](MAF_MASIM_muhan/09-state-and-recovery.md)。
+hybrid-design 已提出主体状态、消息游标和订单簿共同快照，并将 MAF checkpoint 纳入统一 StateStore。Muhan 方案进一步区分任务、尝试、选中候选、调用、响应消费和生效提交，使用同一提交位置关联世界与局部流程。[hybrid-design 状态与恢复](../hybrid-design/08-state-storage-and-durability.md)、[Muhan 提交与恢复](../MAF_MASIM_muhan/09-state-and-recovery.md)。
 
 | 故障情形 | hybrid-design 已有表达 | Muhan 方案的进一步约束 |
 |---|---|---|
@@ -179,13 +179,13 @@ hybrid-design 已提出主体状态、消息游标和订单簿共同快照，并
 | 世界已改变、流程需继续 | StateStore 包装 MAF checkpoint | 当前视图、有效反馈、响应消费和新 checkpoint 共同关联 |
 | 外部调用结果未知 | 重试、预算及降级原则 | 保留 unknown 账目，核对后决定许可、预算与重试 |
 
-一项影响迁移判断的具体事实是：当前 [GeneralSimulator.run](../masim/simulator/general.py#L657) 的说明将通用恢复标为跳过已完成轮次，并明确 `custom_state` 从配置默认值重新初始化。**现有轮次定位功能不能直接作为完整主体状态恢复的证据。** hybrid-design 的共同快照是需要进一步实现的增强目标；Muhan 方案也不能仅迁入扫描函数就完成恢复。
+一项影响迁移判断的具体事实是：当前 [GeneralSimulator.run](../../masim/simulator/general.py#L657) 的说明将通用恢复标为跳过已完成轮次，并明确 `custom_state` 从配置默认值重新初始化。**现有轮次定位功能不能直接作为完整主体状态恢复的证据。** hybrid-design 的共同快照是需要进一步实现的增强目标；Muhan 方案也不能仅迁入扫描函数就完成恢复。
 
 Muhan 方案在这一维度的设计较细，但保证来自未来的应用协议与测试，不能仅由 PostgreSQL 事务或 MAF checkpoint 的存在推出。两者都需要检验完整状态、在途消息和局部流程能否共同恢复。
 
 ### 4.6 外部互操作与内部信息隔离
 
-hybrid-design 较早规划 A2A 远端子主体、MCP 工具与 AG-UI 人机入口，并讨论租户、run 和会话作用域。Muhan 方案保留相应扩展位置，首版集中于受控团队使用，重点明确主体、角色、活动与当前调用的信息范围。[hybrid-design 通信与协议](hybrid-design/07-communication-and-protocols.md)、[hybrid-design 隔离设计](hybrid-design/08-state-storage-and-durability.md)、[Muhan 信息范围](MAF_MASIM_muhan/06-activities-and-workflows.md)、[Muhan 扩展入口](MAF_MASIM_muhan/10-operation-and-observability.md)。
+hybrid-design 较早规划 A2A 远端子主体、MCP 工具与 AG-UI 人机入口，并讨论租户、run 和会话作用域。Muhan 方案保留相应扩展位置，首版集中于受控团队使用，重点明确主体、角色、活动与当前调用的信息范围。[hybrid-design 通信与协议](../hybrid-design/07-communication-and-protocols.md)、[hybrid-design 隔离设计](../hybrid-design/08-state-storage-and-durability.md)、[Muhan 信息范围](../MAF_MASIM_muhan/06-activities-and-workflows.md)、[Muhan 扩展入口](../MAF_MASIM_muhan/10-operation-and-observability.md)。
 
 两种隔离需要分别实现：租户鉴权阻止不同用户的数据混用；模拟可见性限制同一次运行中不同主体能知道什么。统一会话键不能自动完成后一项，ActorView 合同也不等于不可信代码的安全沙箱。
 
@@ -195,7 +195,7 @@ hybrid-design 较早规划 A2A 远端子主体、MCP 工具与 AG-UI 人机入�
 
 ### 5.1 两种承载方式各自适合什么负载
 
-hybrid-design 采用有状态 AgentActor 加慢任务 worker 池，状态接近执行位置，利于沿用既有 Player 生命周期；同一文档也允许 per-group Actor，并非要求所有规模都逐主体部署。Muhan 方案将长期对象存入 RunStore，共享 worker 按任务装载，适合检验主体总数远大于同时活跃数的情形。[hybrid-design 物理部署](hybrid-design/04-target-architecture.md)、[Muhan 资源粒度](MAF_MASIM_muhan/08-execution-and-scaling.md)。
+hybrid-design 采用有状态 AgentActor 加慢任务 worker 池，状态接近执行位置，利于沿用既有 Player 生命周期；同一文档也允许 per-group Actor，并非要求所有规模都逐主体部署。Muhan 方案将长期对象存入 RunStore，共享 worker 按任务装载，适合检验主体总数远大于同时活跃数的情形。[hybrid-design 物理部署](../hybrid-design/04-target-architecture.md)、[Muhan 资源粒度](../MAF_MASIM_muhan/08-execution-and-scaling.md)。
 
 以下是架构推论，需要负载实验确认：
 
@@ -216,7 +216,7 @@ hybrid-design 明确提出分组、hub、兴趣路由与聚合 schema，是比 M
 O(m·k² + m²) = O(N·k + (N/k)²)
 ```
 
-这是对[层级组织与复杂度表达](hybrid-design/06-hierarchy-and-subagents.md)的展开。固定 k 时，组间全连接项仍随 N 的平方增长；大规模收益还取决于组间连接稀疏度、订阅匹配和 hub 分片规则。分层能降低实际通信量，不自动保证任意负载近似线性。
+这是对[层级组织与复杂度表达](../hybrid-design/06-hierarchy-and-subagents.md)的展开。固定 k 时，组间全连接项仍随 N 的平方增长；大规模收益还取决于组间连接稀疏度、订阅匹配和 hub 分片规则。分层能降低实际通信量，不自动保证任意负载近似线性。
 
 Muhan 方案规定了逻辑投递、共享载荷和兴趣索引的正确性边界，但缺少同等具体的路由分区、索引更新和拥塞测量方案。它可以借鉴这些组织方式，同时区分透明转发优化与会改变成员信息的摘要、代表者策略。
 
@@ -231,7 +231,7 @@ hybrid-design 的 L1–L3 是面向应用的目标画像；Muhan 方案提出的
 - **模型成本**：行为、记忆、环境判断及重试分别用了多少调用和 token。
 - **恢复成本**：故障后恢复耗时、重算范围与重复外部调用。
 
-hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试降低同一声明模型的执行开销。若比较时一方抽样、另一方全量执行，吞吐差异需要与模型变化分开报告。[hybrid-design 规模画像](hybrid-design/09-scaling-and-cost-control.md)、[Muhan 规模指标](MAF_MASIM_muhan/08-execution-and-scaling.md)。
+hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试降低同一声明模型的执行开销。若比较时一方抽样、另一方全量执行，吞吐差异需要与模型变化分开报告。[hybrid-design 规模画像](../hybrid-design/09-scaling-and-cost-control.md)、[Muhan 规模指标](../MAF_MASIM_muhan/08-execution-and-scaling.md)。
 
 ## 6. 完整性、清晰度与证据成熟度
 
@@ -252,7 +252,7 @@ hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试
 2. existing-work 的能力矩阵适合梳理方向；“未列出同时覆盖所有能力的系统”不足以证明研究领域中不存在类似系统，也不能单独证明组合创新性。
 3. Muhan 方案引用了固定 MAF 源码并指出恢复边界，证据表达更克制；这些引用仍不能替代真实 Agent 会话、Ray 执行、存储和动态生命周期的集成验收。
 
-依据：[hybrid-design 成本依据](hybrid-design/09-scaling-and-cost-control.md)、[existing-work 比较矩阵](hybrid-design/existing-work/08-comparative-matrix.md)、[核心洞察](hybrid-design/existing-work/09-key-insights.md)；[Muhan 证据入口](MAF_MASIM_muhan/related-work/README.md)、[MAF 适配依据](MAF_MASIM_muhan/related-work/02-runtime-and-infrastructure.md)。上述判断评价材料对结论的支撑范围，不将尚未复核的外部数值判为已证实或错误。
+依据：[hybrid-design 成本依据](../hybrid-design/09-scaling-and-cost-control.md)、[existing-work 比较矩阵](../hybrid-design/existing-work/08-comparative-matrix.md)、[核心洞察](../hybrid-design/existing-work/09-key-insights.md)；[Muhan 证据入口](../MAF_MASIM_muhan/related-work/README.md)、[MAF 适配依据](../MAF_MASIM_muhan/related-work/02-runtime-and-infrastructure.md)。上述判断评价材料对结论的支撑范围，不将尚未复核的外部数值判为已证实或错误。
 
 因此，**hybrid-design 在规模策略和生态蓝图上更完整，Muhan 方案在模拟运行合同和验收设计上更成熟；双方的完整工程实现与规模效果仍需证据。**
 
@@ -270,7 +270,7 @@ hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试
 | 分组和身份映射 | 独立成员、内部角色、代表者与远端服务的权限；分组重配与 leader 失败处理 | 递归接口和部署位置不能替代模拟身份规则 |
 | 规模配置与验证条件 | 实际引擎配比、激活率、路由连接度、硬件与误差目标；逐项核对依赖能力 | 将 L1–L3 转为可执行、可比较的测试合同 |
 
-这些问题与其[开放问题 O1–O10](hybrid-design/11-open-questions-and-roadmap.md)基本一致，后续重点是把风险条目落实为明确的输入、输出、状态和断言。
+这些问题与其[开放问题 O1–O10](../hybrid-design/11-open-questions-and-roadmap.md)基本一致，后续重点是把风险条目落实为明确的输入、输出、状态和断言。
 
 ### 7.2 Muhan 方案
 
@@ -282,7 +282,7 @@ hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试
 | 单 run 扩展预算 | 阶段任务量、慢调用尾部、提交批量、状态装载和记录大小的测量阈值 | 确认保守屏障与完整记录能支撑哪些负载 |
 | 组件开发与扩展路径 | 一个新行为、一个环境、一个活动的最小开发示例；进一步定义路由和近似策略插件 | 概念较多，需要证明作者能通过公开接口组合系统 |
 
-这些补足项可以沿现有 [M0–M5](MAF_MASIM_muhan/12-implementation-and-acceptance.md)落实。多租户、完整外部协议和真实事件评价属于其明确延后的范围，不能按首版遗漏项要求全部提前完成。
+这些补足项可以沿现有 [M0–M5](../MAF_MASIM_muhan/12-implementation-and-acceptance.md)落实。多租户、完整外部协议和真实事件评价属于其明确延后的范围，不能按首版遗漏项要求全部提前完成。
 
 ## 8. 可以互相借鉴什么，哪些选择必须保持明确
 
@@ -316,7 +316,7 @@ hybrid-design 主动通过近似策略减少工作量；Muhan 方案首先尝试
 | 提交与反馈处中断 | 相同故障位置、重复消息与请求 | 世界和流程是否一致恢复，是否重复效果或外部调用 |
 | 分组、抽样与降级 | 先建立相同基线，再分别启用策略 | 节约了多少工作，改变了哪些个体和群体结果 |
 
-基础设施正确性对照与模型近似对照分别报告。前者主要检查身份、状态、信息和消费次数，后者再评价行为分布或领域指标。双方的原有测试计划都可为这一组用例提供内容：[hybrid-design 的验证问题](hybrid-design/11-open-questions-and-roadmap.md)、[Muhan 方案的性质测试](MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
+基础设施正确性对照与模型近似对照分别报告。前者主要检查身份、状态、信息和消费次数，后者再评价行为分布或领域指标。双方的原有测试计划都可为这一组用例提供内容：[hybrid-design 的验证问题](../hybrid-design/11-open-questions-and-roadmap.md)、[Muhan 方案的性质测试](../MAF_MASIM_muhan/12-implementation-and-acceptance.md)。
 
 ## 10. 对后续选型的建议
 
