@@ -57,3 +57,27 @@ MAF  强：D6 协议 · D7 复合/编排 · D8 治理/中间件 · D5 会话隔�
 
 ### 图
 ![已有工作分类地图](diagrams/taxonomy.png)
+
+---
+
+## 5. 补充对比（第二轮新增的系统）
+
+> 用同一把尺子（D1–D8）快速定位新增系统，避免与主表混在一起。
+
+| 系统 | 类型 | D1 规模 | 核心资产 | 对混合架构的价值 |
+|------|------|---------|----------|------------------|
+| MetaGPT | 软件工程 | ○ 应用 | SOP + 消息总线 | 复合 agent 的 SOP 编排 |
+| ChatDev | 软件工程 | ○ 应用 | ChatChain 两两对话 | 低 token 的链式协作 |
+| OpenAI Agents SDK | 编排 | ○ 应用 | handoff + session/guardrail | 最小交接原语 |
+| AgentVerse | 环境 | ○ 应用 | 模块化环境 + Order | 顺序可配置 |
+| AutoAgents | 动态生成 | ○ 应用 | Drafting→Execution | 按需生成 agent 团队 |
+| FinAgent | 金融 | ○ 单/多 | 多模态 + 双层反思 | 感知-反思-记忆范本 |
+| FinMem | 金融 | ○ 单 | 分层记忆 + 角色 | 分层金融记忆 |
+| FinGPT | 金融模型 | ○ 模型 | RLSP + LoRA | 低成本金融信号 |
+| QuantAgents | 金融 | ○ 多 | 4 agent 会议 | 复合内部 supervisor |
+| FinRobot | 金融平台 | ○ 平台 | Financial CoT | 金融推理链 |
+| MemGPT/Letta | 记忆 | ○ 应用 | 分页/摘要/检索/淘汰 | 冷热分层实现 |
+| LiteLLM/Portkey | 网关 | ● 集群 | 路由/限流/缓存/归因 | 复用，不重复造 |
+| NetLogo/Repast/GAMA | ABM | ○ 单机 | Model/Scheduler/Space | 建模概念 |
+| FLAME GPU | ABM | ● GPU 百万 | CUDA 规则洪流 | L3 规则路径优化 |
+| MCP/A2A/AG-UI | 协议 | — | 标准互操作 | D1 决定的底座 |

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8.5" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#475569"/></marker></defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40.0" y="44.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="26" fill="#0f172a" font-weight="bold" text-anchor="start">智能体互操作协议全景（Protocol Landscape）</text>
+<text x="40.0" y="70.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">内部高频通信走消息总线；外部跨系统/工具/人走标准协议（与 D1 决策一致）</text>
+<rect x="40.0" y="100.0" width="1520.0" height="64.0" rx="12" fill="#f8fafc" stroke="#64748b" stroke-width="1.2"/>
+<text x="56.0" y="124.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="start">内部（同集群/同进程高频）</text>
+<text x="56.0" y="146.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">轻量消息总线（Info→Message→SimPacket 扩展），不走协议</text>
+<text x="820.0" y="124.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="start">外部（跨语言 / 跨系统 / 工具 / 人）</text>
+<text x="820.0" y="146.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f172a" font-weight="normal" text-anchor="start">A2A / MCP / AG-UI 标准协议</text>
+<line x1="780.0" y1="100.0" x2="780.0" y2="164.0" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="40.0" y="210.0" width="292.0" height="220.0" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="56.0" y="238.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1e40af" font-weight="bold" text-anchor="start">MCP</text>
+<text x="56.0" y="262.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">模型 ↔ 工具/数据</text>
+<text x="56.0" y="286.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">JSON-RPC / Streamable HTTP</text>
+<text x="56.0" y="302.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">采用最广（Anthropic→Linux 基金会）</text>
+<rect x="56.0" y="360.0" width="260.0" height="40.0" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="1.0"/>
+<text x="186.0" y="384.3" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1e40af" font-weight="bold" text-anchor="middle">采用</text>
+<rect x="347.0" y="210.0" width="292.0" height="220.0" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="363.0" y="238.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#065f46" font-weight="bold" text-anchor="start">A2A</text>
+<text x="363.0" y="262.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">agent ↔ agent 任务协作</text>
+<text x="363.0" y="286.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">JSON-RPC over HTTP</text>
+<text x="363.0" y="302.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">Google→Linux 基金会，跨语言</text>
+<rect x="363.0" y="360.0" width="260.0" height="40.0" rx="20" fill="#ffffff" stroke="#059669" stroke-width="1.0"/>
+<text x="493.0" y="384.3" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#065f46" font-weight="bold" text-anchor="middle">采用</text>
+<rect x="654.0" y="210.0" width="292.0" height="220.0" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="670.0" y="238.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#92400e" font-weight="bold" text-anchor="start">AG-UI</text>
+<text x="670.0" y="262.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">agent ↔ 前端/人</text>
+<text x="670.0" y="286.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">HTTP + SSE</text>
+<text x="670.0" y="302.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">CopilotKit，事件流</text>
+<rect x="670.0" y="360.0" width="260.0" height="40.0" rx="20" fill="#ffffff" stroke="#d97706" stroke-width="1.0"/>
+<text x="800.0" y="384.3" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#92400e" font-weight="bold" text-anchor="middle">采用</text>
+<rect x="961.0" y="210.0" width="292.0" height="220.0" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="977.0" y="238.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#9f1239" font-weight="bold" text-anchor="start">ANP</text>
+<text x="977.0" y="262.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">去中心化 agent 网络</text>
+<text x="977.0" y="286.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">Web 原生</text>
+<text x="977.0" y="302.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">社区，DID 身份 + 鉴权</text>
+<rect x="977.0" y="360.0" width="260.0" height="40.0" rx="20" fill="#ffffff" stroke="#e11d48" stroke-width="1.0"/>
+<text x="1107.0" y="384.3" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#9f1239" font-weight="bold" text-anchor="middle">暂不引入</text>
+<rect x="1268.0" y="210.0" width="292.0" height="220.0" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="1284.0" y="238.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#5b21b6" font-weight="bold" text-anchor="start">ACP</text>
+<text x="1284.0" y="262.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="bold" text-anchor="start">agent 云平台互操作</text>
+<text x="1284.0" y="286.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">—</text>
+<text x="1284.0" y="302.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#0f172a" font-weight="normal" text-anchor="start">IBM BeeAI</text>
+<rect x="1284.0" y="360.0" width="260.0" height="40.0" rx="20" fill="#ffffff" stroke="#7c3aed" stroke-width="1.0"/>
+<text x="1414.0" y="384.3" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#5b21b6" font-weight="bold" text-anchor="middle">暂不引入</text>
+<text x="40.0" y="480.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f172a" font-weight="normal" text-anchor="start">分工一句话：MCP 让 agent 有「执行能力」（连工具/数据）；A2A 让 agent 有「协作能力」（发现并委托其他 agent）；AG-UI 让 agent 有「可交互性」（给人看/介入）。</text>
+<text x="40.0" y="508.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#9f1239" font-weight="normal" text-anchor="start">安全提醒：A2A 的 AgentCard 只做能力发现、不做授权；多用户宿主必须绑定鉴权，客户端 id 仅作连续性标识（MAF 安全指导）。</text>
+<rect x="40.0" y="540.0" width="1520.0" height="150.0" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56.0" y="566.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">本项目的协议桥（Protocol Bridge）</text>
+<text x="56.0" y="590.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="normal" text-anchor="start">内部 agent 暴露为 A2A 服务（带 AgentCard）· 外部 A2A agent 包成内部 AgentRuntime</text>
+<text x="56.0" y="609.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="normal" text-anchor="start">工具/知识/数据以 MCP server 暴露，agent 声明并调用多个 MCP server</text>
+<text x="56.0" y="628.0" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="normal" text-anchor="start">人机调试 / HITL / 面板走 AG-UI</text>
+</svg>

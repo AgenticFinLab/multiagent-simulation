@@ -19,6 +19,12 @@
 │     Mesa · Ray · Matrix
 └─ F. 两个底座（本项目将结合的双方）
       MASim（我们） · Microsoft Agent Framework
+├─ G. 软件工程/任务型多智能体
+│     MetaGPT · ChatDev · OpenAI Agents SDK · AgentVerse · AutoAgents
+├─ H. 金融 LLM agent（补充）
+│     FinAgent · FinMem · FinGPT · QuantAgents · FinRobot
+└─ I. 协议 / 记忆 / 基础设施
+      MCP · A2A · AG-UI · ANP · ACP ｜ MemGPT/Letta ｜ LiteLLM/Portkey
 ```
 
 ## 文档索引
@@ -34,6 +40,11 @@
 | `07-maf-base.md` | Microsoft Agent Framework | 复用 `../../../diagrams/maf-architecture.png` |
 | `08-comparative-matrix.md` | 横向对比总表（8 维度） | `taxonomy` |
 | `09-key-insights.md` | 提炼的核心洞察（供讨论） | 文字 |
+| `10-software-engineering-agents.md` | MetaGPT / ChatDev / Agents SDK / AgentVerse / AutoAgents | 文字 |
+| `11-financial-llm-agents.md` | FinAgent / FinMem / FinGPT / QuantAgents / FinRobot | 文字 |
+| `12-memory-and-llm-gateway.md` | MemGPT/Letta · LiteLLM/Portkey 网关 | 文字 |
+| `13-traditional-abm-platforms.md` | NetLogo / Repast / GAMA / FLAME GPU 等 | 文字 |
+| `14-protocols-interop.md` | MCP / A2A / AG-UI / ANP / ACP | `protocol-landscape` |
 
 ## 一页核心结论（审查后）
 
