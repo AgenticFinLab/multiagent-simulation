@@ -1,6 +1,6 @@
 # 总体架构（讨论收敛版）
 
-> 本文把讨论阶段 D1–D8 的结论整合成一份权威架构，作为后续「接口契约 / 实现」的基线。
+> 本文把讨论阶段 D1–D10 的结论整合成一份权威架构，作为后续「接口契约 / 实现」的基线。
 > 平台定位：**领域无关的通用多智能体模拟基础设施**；金融/社会由使用者实现。
 
 ## 1. 一句话架构
@@ -75,6 +75,8 @@ Config(M20) 加载场景
 | D6 | 平台只定义时钟/信号/同步策略接口；等待/异步是使用者策略 |
 | D7 | 时间/激活域拆成 Clock/Scheduler/SyncPolicy/Activation/Signal 五模块，最小改造 |
 | D8 | Signal 与 Activation 同域 `masim/activation/`；SyncPolicy 默认仅 strict |
+| D9 | 契约规定（每个模块 `base.py` 只定义不实现）+ 契约包 `masim/platform/`（首批 11 个模块） |
+| D10 | 4–6 按推荐定案：ProtocolBridge 不写 base.py；MessageBus 最简；A2A 鉴权强制；复合 `max_depth=4/max_children=32/max_total=1024`；聚合「统计 + LLM 摘要」；Composite 顺序 + Fan-out |
 
 ## 7. 与两个底座的关系
 
@@ -83,6 +85,7 @@ Config(M20) 加载场景
 
 ## 8. 下一步
 
-1. 为 §5 的 8 个接口写第一版**接口契约**（输入/输出/生命周期/错误语义）。
-2. 补一张「一轮运行时流程」的正式图。
-3. 之后进入实现（按 D7 的 5 步顺序）。
+1. ~~为 §5 的 8 个接口写第一版**接口契约**~~ → **已完成**：11 个契约文件已存在于 `masim/platform/`（`agent` / `decision` / `composite` / `activation` / `runtime` / `message` / `state` / `topology` / `world` / `registry` / `scale`，各一个 `base.py`），D9/D10 已冻结。
+2. **实现**：按 `FRAMEWORK-IMPLEMENTATION-RULE.md` 落实现类（继承 base 并按场景增强），含 D7 的最小改造 5 步。
+3. **预算 / 截止接线**：把 `DecisionEngine` 的 budget 与 `DeadlineSignal` / 同步策略、降级链真正接起来——这是目前**仍未落地**的部分（只有契约，没有运行时接线）。
+4. 补一张「一轮运行时流程」的正式图。

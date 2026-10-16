@@ -552,7 +552,7 @@ def on_fill(self, action: str, quantity: float, bid_price: float) -> None:
     ...
 ```
 
-The tuple `(action, quantity, bid_price)` is already validated (`bid_price > 0` guaranteed for `buy`/`sell`), and the base has already mutated `self.state.custom_state["cash" | "position"]` by the time `on_fill` runs. Do not re-compute fills, do not re-mutate cash/position inside `on_fill`. Reference implementations: `masim/agents/{disposition_trader,disposition_investor,endowed_holder,institutional_investor,long_term_investor}.py`.
+The tuple `(action, quantity, bid_price)` is already validated (`bid_price > 0` guaranteed for `buy`/`sell`), and the base has already mutated `self.state.custom_state["cash" | "position"]` by the time `on_fill` runs. Do not re-compute fills, do not re-mutate cash/position inside `on_fill`. Reference implementations: `masim/agents/finance/{disposition_trader,disposition_investor,endowed_holder,institutional_investor,long_term_investor}.py`.
 
 ### 11.4 Never write a silent-fill fallback anywhere
 
@@ -564,7 +564,7 @@ The regex `bid_price\s*=.*market_data\[["']price["']\]` (or any equivalent that 
 
 ### 11.6 Use canonical bases, not `GeneralPlayer`, for financial archetypes
 
-New financial archetypes MUST inherit from `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` (or `CanonicalMarketCoordinator` for market coordinators). Inheriting directly from `GeneralPlayer` is a `LEGACY-BASE` finding of `scripts/audit_scenario_contract.py` — the 176 remaining `LEGACY-BASE` entries in the audit baseline are exactly the migration backlog.
+New financial archetypes MUST inherit from `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` (or `CanonicalMarketCoordinator` for market coordinators). Inheriting directly from `GeneralPlayer` is a `LEGACY-BASE` finding of `scripts/audit_scenario_contract.py` — the 175 remaining `LEGACY-BASE` entries in the audit baseline are exactly the migration backlog (measured: `python3 scripts/audit_scenario_contract.py --json` → 175 `LEGACY-BASE` findings).
 
 ### 11.7 Zero-drift STRATEGY id imports
 
@@ -580,6 +580,6 @@ Hard-coding `"MomentumTrader"` (PascalCase class name) is the exact bug that sil
 ### 11.8 Verification checklist (before commit)
 
 - [ ] `scripts/audit_scenario_contract.py --scenario {Scenario}` reports zero `STRUCT-ACT` / `STRUCT-DECIDE` / `SEM-SILENT-FILL` / `SEM-CASH-MUT` findings.
-- [ ] `PYTHONPATH=. python3 verify_archetype_fixes.py` still reports `24/24 PASS` if the touched archetype has a verification row.
+- [ ] ~~`PYTHONPATH=. python3 verify_archetype_fixes.py` still reports `24/24 PASS` if the touched archetype has a verification row.~~ **Historical**: `verify_archetype_fixes.py` no longer exists anywhere in the repo, so this check cannot be run. Use `scripts/audit_scenario_contract.py` plus the scenario's own tests instead.
 - [ ] The archetype ships with a `docstring` that references `docs/framework-contract.md §4` (the on_fill contract) where relevant.
 - [ ] No `.get("bid_price", ...)` fallbacks, no `market_data["price"]` fills, no `state.custom_state["cash"] -= ...` in `decide()` or a subclass `act()`.

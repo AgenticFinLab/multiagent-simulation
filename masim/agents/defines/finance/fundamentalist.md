@@ -194,7 +194,7 @@ Does NOT use: `momentum`, `trend`, `volatility`, peer positions, cost basis, bid
   ```
 - State variables: `cash`; `position`; `price_history`; `volatility_history`.
 - State-update rule: update position and cash post-fill via `_execute_trade`.
-- Determinism contract: stochastic-given-seed due to `random.gauss(0, value_noise_std)`.
+- Determinism contract: stochastic-given-seed. The Gaussian noise draw comes from the agent's own seeded stream (`self.rng.gauss(0, value_noise_std)`, derived from `setting.seed` salted with the agent identity). Given an identical seed and call sequence, outputs are reproducible; with `seed: null` the stream is OS-seeded.
 
 | Symbol      | Meaning                    | Default Value | Source                         |
 |-------------|----------------------------|---------------|--------------------------------|

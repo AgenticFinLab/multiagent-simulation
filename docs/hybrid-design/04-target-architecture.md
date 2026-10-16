@@ -47,6 +47,9 @@ on_fill(action, quantity, bid_price) -> None   # 成交后钩子（MASim 契约�
 children() -> list[AgentRuntime]               # 复合 agent 的子 agent（可为空）
 ```
 - 规则 agent：`decide()` 直接跑规则。
+
+> ⚠️ 本节“投机预取”表述已被 D4 撤回（见 02-decisions-log.md 的 D4 再修正）。当前语义为「低频决策 + 高频执行 + 异步刷新」，不是预取。
+
 - LLM agent：`decide()` 提交给 LLMEngine（异步预取）。
 - 复合 agent：`decide()` 由 CompositeEngine 编排 children，再汇总。
 

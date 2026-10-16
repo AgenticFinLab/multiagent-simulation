@@ -6,7 +6,7 @@
 # IMF rescue packages and value contrarians provide partial stabilization.
 #
 # Usage:
-#   python examples/AsianFinancialCrisis/Rule/run_asianfinancialcrisis.py \
+#   python examples/AsianFinancialCrisis/Rule/run_asianfinancialcrisis_rule.py \
 #       -c configs/AsianFinancialCrisis/Rule/simulation.yml
 # =============================================================================
 

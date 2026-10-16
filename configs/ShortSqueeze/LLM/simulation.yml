@@ -5,7 +5,7 @@
 # Tests: Supply-demand imbalance, forced covering, retail coordination
 #
 # Usage:
-#   python examples/ShortSqueeze/LLM/run_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
+#   python examples/ShortSqueeze/LLM/run_short_squeeze_llm.py -c configs/ShortSqueeze/LLM/simulation.yml
 # =============================================================================
 
 setting:

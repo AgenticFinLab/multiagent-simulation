@@ -5,7 +5,7 @@
 # Tests: Evaluation frequency, loss aversion, risk premium dynamics
 #
 # Usage:
-#   python examples/EquityPremium/LLM/run_equity_llm.py -c configs/EquityPremium/LLM/simulation.yml
+#   python examples/EquityPremium/LLM/run_equity_premium_llm.py -c configs/EquityPremium/LLM/simulation.yml
 # =============================================================================
 
 setting:

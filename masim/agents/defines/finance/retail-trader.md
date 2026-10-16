@@ -223,7 +223,7 @@ Step 8 — Execute trade:
 - `price_history`: Updated pre-decide (during `perceive`).
 - `position` and `cash`: Updated post-decide (during `_execute_trade`).
 
-**Determinism contract:** Stochastic-given-seed. The Gaussian draw uses Python's `random.gauss()` seeded by the simulation's global RNG seed. Given identical seed and call sequence, outputs are reproducible.
+**Determinism contract:** Stochastic-given-seed. The Gaussian draw comes from the agent's own seeded stream (`self.rng.gauss(...)`, derived from `setting.seed` salted with the agent identity). Given identical seed and call sequence, outputs are reproducible, and agents never share one process-global RNG.
 
 **Parameter symbol table:**
 

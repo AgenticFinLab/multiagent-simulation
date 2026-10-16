@@ -5,7 +5,7 @@
 # disconfirming evidence, leading to persistent price deviations from fundamentals.
 #
 # Usage:
-#   python examples/ConfirmationBias/Rule/run_confirmationbias.py \
+#   python examples/ConfirmationBias/Rule/run_confirmationbias_rule.py \
 #       -c configs/ConfirmationBias/Rule/simulation.yml
 # =============================================================================
 

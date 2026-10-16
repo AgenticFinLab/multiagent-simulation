@@ -36,8 +36,8 @@
 | `03-generative-agent-foundations.md` | Park 2023 / 1000 People | `generative-agents-memory` |
 | `04-agent-frameworks.md` | AutoGen / LangGraph / CrewAI / AgentScope / CAMEL | `autogen-langgraph-patterns` |
 | `05-abm-and-distributed-infra.md` | Mesa / Ray / Matrix | 文字为主 |
-| `06-masim-base.md` | 我们的 MASim | 复用 `../../../diagrams/masim-architecture.png` |
-| `07-maf-base.md` | Microsoft Agent Framework | 复用 `../../../diagrams/maf-architecture.png` |
+| `06-masim-base.md` | 我们的 MASim | 复用 `../../diagrams/masim-architecture.png` |
+| `07-maf-base.md` | Microsoft Agent Framework | 复用 `../../diagrams/maf-architecture.png` |
 | `08-comparative-matrix.md` | 横向对比总表（8 维度） | `taxonomy` |
 | `09-key-insights.md` | 提炼的核心洞察（供讨论） | 文字 |
 | `10-software-engineering-agents.md` | MetaGPT / ChatDev / Agents SDK / AgentVerse / AutoAgents | 文字 |

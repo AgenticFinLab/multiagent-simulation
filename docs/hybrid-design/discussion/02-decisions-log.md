@@ -59,7 +59,7 @@
 - 复合 agent（`06`）的三个待确认：先实现哪些组织模式、聚合默认实现、远端子 agent 是否先留接口。
 
 ### D4 补充：时间由专门模块负责 —— 已定
-**Scheduler（逻辑时钟）是平台的一等模块（M2）**：维护 round/level/step + 同步策略接口（默认 strict）；与 ActivationController（M3，谁动）分工。
+**Scheduler 是平台的一等模块（M3），逻辑时钟为独立的 Clock（M2）**：维护 round/level/step + 同步策略接口（默认 strict）；与 ActivationController（M5，谁动）分工。
 - 详见 `08-async-prefetch-explained.md` 与 `07-platform-modules.md`。
 
 ### D5 补充：激活控制器 —— 已确认
@@ -110,3 +110,9 @@
 - 补充「评估基准」与「多智能体辩论/MoA」两类，以“简述 + 可借鉴点”形式，写入 `examples/_platform-notes/`。
 
 > 4–6 全部冻结；进入「深入文章总结 + 实现参考」补充阶段（不写代码）。
+
+---
+
+## 变更记录（Change Log）
+
+- **M 编号变更（取代早期临时编号）**：上面的「D4 补充」最初把 Scheduler 记为 **M2**、ActivationController 记为 **M3**——那是时间/激活尚未拆分时的临时编号。该编号自 **D7** 冻结起作废，现行编号为 **M2 Clock / M3 Scheduler / M4 SynchronizationPolicy / M5 ActivationController / M6 Signal**（见 D7 与 `docs/structure.md` §10）。此后引用 M2/M3 一律按 D7 的编号理解。

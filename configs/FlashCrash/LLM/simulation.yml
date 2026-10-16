@@ -5,7 +5,7 @@
 # Tests: HFT dynamics, liquidity withdrawal, algorithmic cascades
 #
 # Usage:
-#   python examples/FlashCrash/LLM/run_flash_llm.py -c configs/FlashCrash/LLM/simulation.yml
+#   python examples/FlashCrash/LLM/run_flash_crash_llm.py -c configs/FlashCrash/LLM/simulation.yml
 # =============================================================================
 
 setting:

@@ -1,21 +1,35 @@
-# MASim 项目结构
+# MASim · 通用多智能体模拟平台（项目结构与当前设计总览）
+
+> 本文是**当前框架的权威总览**：既描述「正在运行的多智能体模拟框架 MASim」，也描述「正在演进的领域无关通用平台设计」（契约层 + 总体架构 + 决策）。
+> 设计细节分目录存放：总体架构 `docs/hybrid-design/`、讨论与决策 `docs/hybrid-design/discussion/`、已有工作审查 `docs/hybrid-design/existing-work/`、深入实现参考 `examples/_platform-notes/`。
+
+---
+
+## 0. 当前状态一句话
+
+**MASim 正在从“金融市场多智能体模拟框架”演进为“领域无关的通用多智能体模拟基础设施”。**
+
+- **运行中的部分**（Part 1）：MASim 现有框架，支撑 45 个金融场景、四机制、Ray 分布式、市场撮合、实验产物。
+- **设计中的部分**（Part 2）：通用平台契约层 `masim/platform/`（只定义不实现）+ 总体架构 + 10 项核心决策（D1–D10），金融/社会等由使用者实现。
+
+两部分的衔接点在 `docs/hybrid-design/diagrams/migration-mapping.png`：现有代码如何改造成平台契约。
+
+---
+
+# Part 1 · 现有运行框架（MASim）
 
 ## 1. 项目定位
 
-MASim 是一个面向金融市场与群体行为研究的多智能体模拟框架。它让不同类型的 Agent 在共享市场中持续感知、决策、行动和通信，用于观察个体行为如何形成价格、成交量、波动率、流动性和信息传播等宏观结果。在项目的研究脉络中，MASim 同时承担两个角色：
-
-1. 作为 **场景实验平台**，复现并分析已知的金融现象（泡沫、崩盘、行为偏差、流动性危机等）；
-2. 作为 **Financial Multi-Agent World Model 的基座**，为新场景的快速构建提供标准化的 Agent / Market / Communication / Storage 抽象。
+MASim 是一个面向金融市场与群体行为研究的多智能体模拟框架。它让不同类型的 Agent 在共享市场中持续感知、决策、行动和通信，用于观察个体行为如何形成价格、成交量、波动率、流动性和信息传播等宏观结果。
 
 仓库当前包含：
 
-- 45 个正式场景（见 `examples/{Scenario}/`），每个场景四种变体；
+- 45 个正式场景（`examples/{Scenario}/`），每个场景四种变体；
 - 四种决策机制：`Rule`、`LLM`、`RuleLLM`、`Rag`；
-- 标准化实验产物（`EXPERIMENT/` 单次运行 + `simulation-results/` 发布包）；
-- 由 261 个场景级角色合并而来的 29 类通用 Agent 原型，外加 `masim/agents/defines/` 下的可复用 Agent 档案库；
+- 标准化实验产物（`EXPERIMENT/` 单次运行）；`simulation-results/` 发布包为**目标（未落地）**，当前仓库中不存在该目录，`EXPERIMENT/` 也**只有 4/45 个场景**留有产物；
+- **209** 个通用 Agent 原型（finance 195 + market 9 + opinion 5）+ `masim/agents/defines/` 可复用 Agent 档案库（209 份 Markdown 档案与实现 1:1 镜像）；
 - Streamlit 实验回放与分析界面；
-- 每个新场景都以一份**用户/上游 LLM 撰写的目标说明文件** `{domain}-{scenario}.md` 作为唯一上游输入（格式由 `define-simulation-scenario-skill.md` 约束）；
-- 位于 `masim/skills/` 的**设计 / 创建 / 升级** Skill 体系（`define-simulation-scenario-skill.md`、`agent-design-skill.md`、`implement-simulation-skill/`；两条顶层 pipeline：`create-simulation-pipeline.md` 从零新建、`polish-simulation-pipeline.md` 对已存在场景标准化升级）。
+- `masim/skills/` 设计/创建/升级 Skill 体系（`define-simulation-scenario-skill.md`、`agent-design-skill.md`、`implement-simulation-skill/`、`create-simulation-pipeline.md`、`polish-simulation-pipeline.md`）。
 
 ## 2. 核心执行链
 
@@ -29,292 +43,227 @@ YAML 配置
   -> analysis.py 计算指标并生成分析产物
 ```
 
-每轮模拟按拓扑层级执行四个阶段：
-
-1. `execute`：同层 Agent 并行决策；
-2. `collect`：收集行动与待发送信息；
-3. `dispatch`：按拓扑发送信息；
-4. `record`：持久化轮次、消息和市场状态。
-
+每轮按拓扑层级执行三阶段：`execute`（同层并行决策）→ `collect`（汇聚结果与待发消息）→ `dispatch`（按拓扑投递）。这三个 `phase_*` 都是**逐层（per-level）**方法（`masim/simulator/general.py:424/458/497`），并**不存在** `phase_record`。所谓“record”是每轮一次的独立代码块，只做两件事：限流绘制拓扑图（`general.py:631`）与 `write_resume_checkpoint`（`general.py:650`）；真正的数据落盘发生在 `operate()` / `receive_message()` 内部。
 
 ![MASim 总体架构与执行 Pipeline](diagrams/masim-architecture.png)
 
-**Player 生命周期细化**：金融场景 Player 由 `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator`（`masim/agents/_base.py`）派生。每一轮 `perceive → decide → act` 的最后一步由框架实现的 `_apply_fill_and_emit_action` 统一执行：从 `decide()` 返回的 `decision_payload` 中读取 `action / quantity / bid_price`，走 `require_positive_bid_price` 断言、`clip_order_to_liquidity`、更新 `cash / position`，然后调用可选的 `on_fill(action, quantity, bid_price)` 钩子进行 archetype 级 VWAP/cost-basis 更新。所有 archetype 类（含四个变体的 `players.py`）**禁止** override `act()` / `decide()`；如需 per-fill 状态维护，只能覆盖 `on_fill`。完整契约见 `docs/framework-contract.md`。
+**Player 生命周期契约**（**目标（未落地）**：「金融场景 Player 由 canonical 基类派生」；以下同时给出「现状」测量）：框架提供的 canonical 基类为 `CanonicalRulePlayer / CanonicalLLMPlayer / CanonicalRagPlayer / CanonicalMarketCoordinator`（`masim/agents/_base.py`），archetype 只覆盖 `on_fill`，**禁止 override `act()/decide()`**。
 
-## 3. 顶层目录
+- 「现状」：180 个 `examples/*/*/players.py` 分为三类——**1 个**（`examples/AnchoringEffect/Rag/players.py`）在文件内声明派生自 `Canonical*` 的类；**4 个**是**组合式（reuse）**薄模块：不声明任何 player 类，而是从 `masim/agents/` 重导出具体 archetype（`AnchoringEffect/{Rule,LLM,RuleLLM}` 与 `TulipMania/Rule`），这是**目标形态**；**175 个**仍直接派生自 `GeneralPlayer`（legacy，待迁移）。因此 `scripts/audit_scenario_contract.py` 的 `STRUCT-ACT`/`STRUCT-DECIDE`/`STRUCT-PERCEIVE` 检查只对 canonical 子类生效，其“0 findings”对 **175 个 legacy 文件**而言是**空转**；审计报告现已打印该迁移进度（`--scope all`）。
+- 「现状」：`masim/agents/` 下 **200 个** archetype 实现 `decide_order`，**5 个** override `on_fill`，**0 个** override `act`/`decide`/`perceive`。
+- 「现状」：流动性裁剪**不在** `_apply_fill_and_emit_action` 内，而在 `masim/format/finalize.py` 的 `clip_order_to_liquidity`，经 `finalize_rule_order` / `finalize_llm_order` 触达。`_apply_fill_and_emit_action` 自身的职责顺序是：key guard → 正 bid 价 guard → cash/position 变更 → `on_fill` → Action 信封。
+
+完整契约见 `docs/framework-contract.md`。
+
+## 3. 顶层目录（现有）
 
 ```text
 multiagent-simulation/
 |-- masim/                    # 通用模拟框架 + 设计 Skill
-|   |-- agents/              # 209 个 archetype .py + defines/ 行为规格
-|   |   |-- _base.py  _coordinator_base.py  _rag_base.py
-|   |   |-- finance/         # 195 个金融 investor agent (snake_case .py)
-|   |   |-- market/          # 9 个 market coordinator (snake_case .py)
-|   |   |-- opinion/         # 5 个 opinion agent (snake_case .py)
-|   |   `-- defines/         # 可复用 Agent 行为规格档案库（与上面 1:1 镜像）
-|   |       |-- finance/     # 195 个金融 agent 档案 (kebab-case .md)
-|   |       |-- market/      # 9 个 market coordinator 档案
-|   |       |-- opinion/     # 5 个 opinion-propagation 档案
-|   |       `-- agent_images/ # 图标 PNGs + Streamlit Agent Market 资产
-|   |-- communication/  evaluation/  format/
-|   |-- interface/  knowledge/  persona/  player/
-|   |-- proxy/  simulator/  utils/
-|   `-- skills/               # define-simulation-scenario-skill.md, agent-design-skill.md, implement-simulation-skill/, create-simulation-pipeline.md (从零新建), polish-simulation-pipeline.md (升级已有)
-|-- examples/                 # 场景实现与运行入口
-|   |-- {Scenario}/           # 45 个正式场景（Rule/LLM/RuleLLM/Rag 四变体）
-|   |-- CUSTOMIZED_SIMULATION/  # 自定义/未发布场景的工作空间
-|   |-- document-sources/     # RAG 文档原料
-|   `-- __init__.py
-|-- configs/                  # 场景运行配置（与 examples/ 同名目录、四变体并列）
-|-- docs/                     # 架构、场景、实验规范与历史报告
-|-- EXPERIMENT/               # 本地实验产物（运行时生成）
-|-- simulation-results/       # 标准化发布数据包（外部交付）
-|-- third-part/  tests/  build/
-|-- setup.py
-`-- requirements.txt          # 项目依赖
+|   |-- simulator/  player/  persona/  communication/  proxy/
+|   |-- agents/  knowledge/  evaluation/  format/  interface/  utils/
+|   |-- skills/
+|   `-- platform/             # ★ 新增：平台契约层（见 Part 2）
+|-- examples/                 # 场景实现 + _platform-notes/ 深入参考
+|-- configs/                  # 场景运行配置
+|-- docs/                     # 架构、场景、实验规范
+|-- EXPERIMENT/               # 单次运行产物（现状：仅 4/45 个场景有产物）
+|-- simulation-results/       # 发布包（目标，未落地：当前不存在）
+|-- setup.py  requirements.txt
 ```
 
-> `investment-agents/` 是历史遗留目录，新档案统一写入 `masim/agents/defines/<domain>/`。
+## 4. 框架模块（现有）
 
-## 4. 框架模块
-
-| 模块                  | 职责                                 | 主要入口                                                                                                                                     |
-|-----------------------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor；每个 `{V}Simulator` 与其配对的 `{V}SimulationRunner` + 模块级 `run()` CLI 便捷函数**同文件共存**（新模式按同一模板扩展） | `GeneralSimulator` / `GeneralSimulationRunner` / `run(scenario, default_config, ...)` / `BaseSimulationRunner`                                |
-| `masim/player`        | Agent 感知/决策/行动的通用基类       | `GeneralPlayer`                                                                                                                              |
-| `masim/agents`        | 金融场景 canonical 基类 + 29 个 archetype | `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator` / `_apply_fill_and_emit_action` / `on_fill` |
-| `masim/persona`       | 将 Player 包装为 Ray Actor           | `PlayerPersona`                                                                                                                              |
-| `masim/communication` | 消息编码、解码和传输                 | `GeneralCommunicationChannel`                                                                                                                |
-| `masim/proxy`         | 通信、存储、监控和资源代理           | `SendReceiveProxy`、`StorageProxy`                                                                                                           |
-| `masim/knowledge`     | 文档加载、向量索引和 RAG 检索        | `KnowledgeManager`                                                                                                                           |
-| `masim/evaluation`    | 金融指标、有效性验证和可视化         | `finance/*`                                                                                                                                  |
-| `masim/format`        | 通用 prompt / 订单 schema / 订单最终化 | `order.py`、`base_prompts.py`、`finalize.py` (`require_positive_bid_price` / `clip_order_to_liquidity`)                                       |
-| `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                                                                                                                                     |
-| `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`                                                                                                                |
-| `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
-
-职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
-
-
-![MASim 分布式（Ray 集群）执行 Pipeline](diagrams/masim-distributed-pipeline.png)
+| 模块 | 职责 | 主要入口 |
+|------|------|----------|
+| `masim/simulator` | 加载配置、管理轮次/拓扑/Ray Actor | `GeneralSimulator` / `GeneralSimulationRunner` / `run()` |
+| `masim/player` | Agent 感知/决策/行动基类 | `GeneralPlayer` |
+| `masim/agents` | 金融 canonical 基类 + archetype | `CanonicalRulePlayer` 等 / `on_fill` |
+| `masim/persona` | 将 Player 封装为 Ray Actor | `PlayerPersona` |
+| `masim/communication` | 消息编码/解码/传输 | `GeneralCommunicationChannel` / `build_message_from_info` |
+| `masim/proxy` | 通信/存储/监控代理 | `SendReceiveProxy` / `StorageProxy` |
+| `masim/knowledge` | 文档加载、向量索引、RAG | `KnowledgeManager` |
+| `masim/evaluation` | 金融指标、验证、可视化 | `finance/*` |
+| `masim/format` | prompt / 订单 schema / 最终化 | `order.py` / `finalize.py` |
+| `masim/interface` | Streamlit 回放与分析 | `app.py` |
+| `masim/utils` | 配置、拓扑、Ray、结果读取 | `load_config` / `load_results` / `TopologyGraph` |
 
 ## 5. 场景与机制
 
-一个正式场景通常具有四种实现：
+四种机制：`Rule`（纯规则）、`LLM`（大模型直接决策）、`RuleLLM`（规则约束 + LLM）、`Rag`（检索增强）。
 
-| 机制      | 决策方式                             |
-|-----------|--------------------------------------|
-| `Rule`    | 纯规则，通常稳定且可重复             |
-| `LLM`     | 大模型根据市场状态直接决策           |
-| `RuleLLM` | 在显式规则和输出契约约束下调用大模型 |
-| `Rag`     | 在 LLM 决策前检索论文或知识库        |
+场景目录：`examples/{Scenario}/` 含 `{domain}-{scenario}.md`（上游目标说明）、`simulation-bases.md`、`analysis-bases.md`、`{Mechanism}/`；配置在 `configs/{Scenario}/{Mechanism}/`（`simulation.yml` 经 `!include` 引用 `players.yml`/`persona.yml`/`topology.yml`）。
 
-目录采用相同的二级结构：
-
-```text
-examples/{Scenario}/
-|-- __init__.py
-|-- {domain}-{scenario}.md  # 用户/上游 LLM 撰写的目标说明（上游输入；锁定后不可改）
-|-- simulation-build-log.md    # 流水线生成的构建日志（AGENT_POOL 门、研究笔记、待解问题）
-|-- simulation-bases.md     # 9 节理论与设计基线（变体共享）
-|-- analysis-bases.md       # 7 节分析方法学基线（变体共享）
-`-- {Mechanism}/            # 是否包含取决于目标文件 §10.1 的 build matrix
-    |-- players.py        # 市场与投资者实现
-    |-- prompts.py        # LLM 提示词，Rule 模式可能没有
-    |-- run_*.py          # 单实验入口（thin shim → masim.simulator.general.run）
-    |-- analysis.py       # 结果分析（Rule 为权威实现，其余继承）
-    |-- explain.md        # 机制与实现说明（引用 simulation-bases.md §N.M）
-    `-- analysis.md       # 指标说明（引用 analysis-bases.md §N.M）
-
-configs/{Scenario}/{Mechanism}/
-|-- simulation.yml    # 总入口、轮数、Ray、日志和输出路径
-|-- players.yml       # Agent 类、角色、参数和模型配置
-|-- persona.yml       # 存储、监控、通信和资源代理配置
-`-- topology.yml      # Agent 间的有向通信关系
-```
-
-`simulation.yml` 通过 `!include` 引用其余配置。`players.yml` 中的 `class` 指向 `examples/` 内的 Python 类，因此配置目录和实现目录必须同步修改。
+- 45 个场景均具备 `simulation-bases.md` + `analysis-bases.md`，但**有 3 个缺少** `{domain}-{scenario}.md` 目标文件：`examples/HerdingInformation/`、`examples/HindsightBias/`、`examples/MentalAccounting/`。
+- 变体目录并非统一四件套：`Rule` 变体**没有** `prompts.py`，因此 “`players.py`/`prompts.py`/`run_*.py`/`analysis.py`” 的写法对 180 个变体目录中的 **45 个不成立**；`prompts.py` 只出现在需要提示词的 `LLM`/`RuleLLM`/`Rag` 变体中。
 
 ## 6. 消息与状态
 
-框架使用三层消息模型：
+三层消息模型：`Info`（Player 业务内容）→ `Message`（加 sender/recipient/时间/优先级）→ `SimPacket`（可记录可传输的编码包）。所有节点都是 Player；`role: coordinator` 表达协调职责，执行先后与通信方向由 `topology.yml` 决定。
 
-| 层      | 数据类型    | 含义                             |
-|---------|-------------|----------------------------------|
-| Player  | `Info`      | Agent 产生或消费的业务内容       |
-| Proxy   | `Message`   | 加入发送者、接收者、时间和优先级 |
-| Channel | `SimPacket` | 可记录和传输的编码消息           |
+## 7. 实验产物 / 运行入口 / 测试
 
-所有节点都是 Player。市场通过 `role: coordinator` 表达协调职责，普通投资者使用 `role: player`；执行先后和通信方向由 `topology.yml` 决定，而不是由角色类型硬编码。
+- 产物：`EXPERIMENT/{Scenario}/{Mechanism}/`（records/communication/monitoring/analysis）。**现状**：`checkpoints/` 与 `logs/` 虽被文档记录，但代码从未创建（`auto_checkpoint` 不被任何代码读取）；`simulation-results/` 发布包**不存在**；`EXPERIMENT/` 目前**只有 4/45 个场景**留有产物。读取用 `masim.utils.load_results()`。
+- 「目标（未落地）」：`simulation-results/` 作为统一发布包，待产物流水线落地后补齐。
+- 运行：`python examples/{Scenario}/{Mech}/run_*.py -c configs/{Scenario}/{Mech}/simulation.yml`；界面 `streamlit run masim/interface/app.py`。
+  - **续跑策略（fail-loud）**：`setting.record_path` 中若已有完成轮次，默认**拒绝启动**并提示二选一——`--resume`（从已完成轮次 +1 继续；**agent 状态按配置重置**，不从磁盘恢复）或 `--fresh`（删除上一轮的 `records/` `communication/` `monitoring/` `checkpoints/` 后从第 1 轮重跑）。两者互斥。
+  - **产物完整性**：per-agent 记录（`records/<player>/{messages,turns}/`）与 wire 级记录（`communication/`）统一改用「轮次 + 轮内序号」键 `msg_r{round:06d}_{seq:06d}` / `turn_r{round:06d}_{seq:06d}`，不再使用秒级墙钟键。旧键会让同一 agent 在同一秒内的多条记录互相覆盖（`BlockBasedStoreManager` 的重复键语义是 update，不是 add）；序号键同时保证 `--resume` 的新进程不会覆盖上一轮的记录。
+  - **入向轮次标注**：per-agent 入向记录使用**消息自身的**轮次（`Message.extras["round_num"]`），而不是接收者的 `current_round`。level>0 的 agent 在其本轮 `operate()` 之前就收到广播，旧实现会把入向记录标成上一轮（首轮标成 round 0）。
+  - **引导轮（bootstrap round）**：`is_received_ready` 对 level 0 的“不等前驱”豁免，从硬编码的 `round_num == 1` 改为**本次进程执行的第一轮**（Simulator 通过 `bootstrap=True` 下发）。否则 `--resume` 从第 N 轮启动时，level 0 会因等待尚不存在的入向消息而硬失败（`masim/player/general.py`）。
+  - **可选后端**：`import masim` 与契约审计**不需要** `lmbase`；只有真正落盘记录时才需要（缺失时给出带安装指引的 `ImportError`，见 `masim/utils/store_backend.py`）。
+- 测试：`PYTHONPATH=. python3 -m unittest discover -s tests -t tests -p "test_*.py" -v`（`tests/` 已纳入版本库；依赖 `lmbase` 的用例在缺失时自动 skip）。
+- 契约审计：`python scripts/audit_scenario_contract.py --scope {all|scenarios|archetypes}`；CI 对 `AnchoringEffect` 与 archetype 库**强制门禁**，对其余场景语料仅记录基线。
+- 验收三层：运行成功 → 结构成功 → 场景有效（复现目标机制）；进程 `SUCCESS` ≠ 场景有效。
 
-## 7. 实验产物
+## 8. Agent 档案与复用
 
-直接运行场景后，产物通常写入：
+`masim/agents/defines/` 是可复用 Agent 档案库（finance/market/opinion，共 **209** 份 Markdown 档案：finance 195 / market 9 / opinion 5），与 `masim/agents/<domain>/` 下的 `.py` 实现 1:1 镜像（按域做 kebab→snake 归一对应）；新场景先做“复用 vs 新建”三段式匹配。
 
-```text
-EXPERIMENT/{Scenario}/{Mechanism}/
-|-- records/          # 每个 Agent 的逐轮决策和批量时间序列
-|-- communication/    # 原始通信记录
-|-- monitoring/       # 运行监控
-|-- checkpoints/      # 可选检查点
-|-- logs/             # 运行日志
-`-- analysis/         # summary.json 与分析图
-```
+---
 
-推荐通过 `masim.utils.load_results()` 读取结果，不要直接依赖底层 `batch_block_*.json` 和 `turn_block_*.json` 的存储细节。
+# Part 2 · 平台演进设计（领域无关通用基础设施）
 
-`simulation-results/` 是整理后的发布数据包，不等同于本地运行产生的 `EXPERIMENT/`。它包含 180 套实验的配置快照、摘要、质量记录和聚合指标。
+> 这是当前正在推进的设计。**平台 = 领域无关的通用多智能体模拟运行时；金融/社会由使用者实现（D3）。**
 
-## 8. 运行入口
+## 9. 定位与三层边界
 
-单个实验：
+**平台只做“机制”，不做“内容与规则”。** 三层：
 
-```powershell
-python examples/Volmageddon/RuleLLM/run_volmageddon_rulellm.py `
-  -c configs/Volmageddon/RuleLLM/simulation.yml
-```
+- **① 平台自建**：通用机制（agent 抽象、时钟、激活、通信、状态、规模、观测）。
+- **② 复用现成**：LLM 网关（LiteLLM/Portkey）、协议桥（MAF A2A/MCP/AG-UI）、向量库、对象存储。
+- **③ 使用者实现**：领域规则（撮合/传播/感染）、领域 agent 行为、领域消息语义、领域指标、persona。
 
-Web 界面：
+![总体架构图](hybrid-design/diagrams/platform-overall-architecture.png)
 
-```powershell
-streamlit run masim/interface/app.py
-```
+## 10. 21 个平台模块（M1–M21）
 
-LLM 模式通常需要 `ARK_API_KEY`；RAG 还可能需要 `HUNYUAN_API_KEY`、`MINERU_API_KEY` 及可用的知识库目录。
+![平台模块架构](hybrid-design/diagrams/platform-modules.png)
 
-## 9. 测试与验收
+| 组 | 模块 |
+|----|------|
+| 核心运行时 | M1 AgentRuntime · M2 Clock · M3 Scheduler · M4 SynchronizationPolicy · M5 ActivationController · M6 Signal · M7 DecisionEngine · M8 CompositeOrchestrator |
+| 世界结构 | M9 Topology · M10 SharedState |
+| 通信 | M11 MessageBus · M12 ProtocolBridge(②) |
+| 状态 | M13 StateStore · M14 KnowledgeStore(②) · M15 Registry |
+| 规模 | M16 ScalePolicy · M17 LLMGateway(②) |
+| 治理 | M18 Telemetry · M19 Security/Isolation |
+| 实验 | M20 Config · M21 DataCollector |
 
-推荐流程：
+### 10.1 模块依赖关系（谁依赖谁）
 
-```text
-静态契约测试
-  -> 单行 dry-run
-  -> 单个完整轮次实验
-  -> analysis.py
-  -> 结构与数值质量检查
-  -> 小批量或全量矩阵
-```
+![模块依赖关系图](hybrid-design/diagrams/module-dependencies.png)
 
-验收分为三个层次：
+依赖方向：**A → B 表示 A 依赖/调用 B**。四类依赖：
 
-1. 运行成功：进程完成全部配置轮次；
-2. 结构成功：记录完整，无致命错误或大量解析回退；
-3. 场景有效：市场结果确实复现目标机制。
+| 模块 | 依赖（调用/使用） | 被谁依赖 | 类型 |
+|------|------------------|----------|------|
+| Config | — | Scheduler | 控制 |
+| Clock | — | Scheduler | 控制（读时间） |
+| SynchronizationPolicy | — | Scheduler | 控制 |
+| Scheduler | Clock · SyncPolicy · ActivationController · AgentRuntime | Config | 控制 |
+| ActivationController | ActivationPolicy(实现) · Signal | Scheduler | 控制 |
+| Signal | — | ActivationController · Scheduler | 数据 |
+| AgentRuntime | DecisionEngine · CompositeOrchestrator · MessageBus · SharedState · StateStore · Topology · Registry | Scheduler | 控制+数据 |
+| CompositeOrchestrator | Aggregator(实现) · 子 AgentRuntime | AgentRuntime | 控制 |
+| DecisionEngine | LLMGateway(复用) · KnowledgeStore(复用) | AgentRuntime | 控制+复用 |
+| Topology | — | Scheduler · MessageBus | 数据 |
+| SharedState | — | AgentRuntime · DecisionEngine | 数据 |
+| MessageBus | Topology · Registry · ProtocolBridge(复用) | AgentRuntime · Scheduler | 数据 |
+| StateStore | ObjectStore(复用) · KnowledgeStore(复用) | AgentRuntime | 数据 |
+| Registry | IsolationKey | MessageBus · StateStore · Security | 数据 |
+| ScalePolicy | — | ActivationController · DecisionEngine | 横切 |
+| Telemetry | — | 所有模块 | 横切 |
+| Security | Registry · StateStore | MessageBus · ProtocolBridge | 横切 |
+| DataCollector | StateStore · Telemetry | 使用者/控制面 | 横切 |
 
-进程返回 `SUCCESS` 不代表场景有效。完整预检规范见 `docs/experiment-preflight-skill/`，已有场景的修复规范见 `docs/example-revision-guide/`。
+**主依赖链**：`Config → Scheduler → ActivationController → AgentRuntime → DecisionEngine → 数据层`。
+**关键横切**：`ScalePolicy` 控制「谁动/用哪种引擎/降级/配额」；`Telemetry/DataCollector/Security` 贯穿观测与隔离；`DecisionEngine` 复用 LLMGateway，`MessageBus` 复用 ProtocolBridge。
 
-## 10. Agent 档案与 Pool 复用
+## 11. 一轮运行时流程
 
-`masim/agents/defines/` 是 **可复用 Agent 档案库**，所有新场景都必须先经此目录做"复用 vs. 新建"判定，避免重复设计相同行为的 Agent。
-
-```text
-masim/agents/defines/
-|-- finance/                            # 195 个金融领域 Agent 档案（momentum / fundamental / liquidity / ...）
-|-- market/                             # 9 个 market coordinator 档案（price-impact / depeg / ...）
-|-- opinion/                            # 5 个 opinion-propagation 档案（distorting / fact-check / ...）
-|-- agent_images/                       # 头像图标 (icons/) 与设计说明 (design.md)
-`-- README.md
-```
-
-- 单个 Agent 档案严格遵循 `masim/skills/agent-design-skill.md` 的 11 节格式；
-- 文件名采用 kebab-case（如 `momentum-trader.md`、`fundamental-analyst.md`），与 H1 一致；
-- 领域子目录（`finance/`、`market/`、`opinion/`，未来可能的 `epidemics/` 等）由档案的真实领域决定；
-- 每个 `.md` 档案与 `masim/agents/<domain>/` 下的同名（snake_case）`.py` 实现构成 **1:1 镜像映射**（如 `defines/finance/momentum-trader.md` ↔ `agents/finance/momentum_trader.py`）；新增 Agent 必须同时添加 `.md` 规格和 `.py` 实现；
-- 添加新 Agent 之前，必须先按 `masim/skills/create-simulation-pipeline.md`（新建场景时）或 `masim/skills/polish-simulation-pipeline.md`（升级已有场景时）的三段式匹配流程检索是否已有满足要求的档案。
-
-未发布或试验性的自定义场景写入 `examples/CUSTOMIZED_SIMULATION/`，构成熟稳定后再迁入 `examples/<Scenario>/`。
-
-## 11. 设计 Skill 体系
-
-`masim/skills/` 是项目的"创建/升级手册"，**不参与运行时**，只在设计阶段被调用：
+![一轮运行时流程](hybrid-design/diagrams/platform-runtime-flow.png)
 
 ```text
-masim/skills/
-|-- define-simulation-scenario-skill.md   # 上游目标文件 {domain}-{scenario}.md 的格式规范（用户/LLM 撰写）
-|-- agent-design-skill.md                 # 单 Agent 设计规范（领域无关，11 节）
-|-- implement-simulation-skill/           # 单场景的分步方法学（Step 0 - Step 10 子技能库）
-|   |-- 00-overview.md
-|   |-- 01-mandatory-structure.md
-|   |-- 02-root-documents-spec.md
-|   |-- 03-variant-documents-spec.md
-|   |-- 04-step0-load-target.md
-|   |-- 05-step1-research.md
-|   |-- 06-step2-agent-design.md
-|   |-- 07-step3-config.md
-|   |-- 08-step4-implement.md
-|   |-- 09-step5-to-10-review.md
-|   `-- 15-reference-assetbubble.md
-|-- create-simulation-pipeline.md         # 顶层 pipeline #1：从零新建场景（目标文件 → 全套 artefact）
-`-- polish-simulation-pipeline.md         # 顶层 pipeline #2：升级已有场景到当前 skill 基线（审计 + 补丁）
+Config(M20) → Scheduler(M3) 推进一轮 round
+  ├─ Clock(M2) 标记 round/level/step（逻辑时间，非墙钟）
+  ├─ SynchronizationPolicy(M4) 决定“怎么等”（默认 strict）
+  ├─ 对每个拓扑层级 level：
+  │     ActivationController(M5) 判定“谁动”，下发 ActivationSignal(M6)
+  │     AgentRuntime(M1) → DecisionEngine(M7) Rule/LLM/RAG/Composite(M8) 产出决策
+  │     MessageBus(M11) 按 Topology(M9) 投递 → StateStore(M13) 落盘
+  └─ SharedState(M10) 更新共享世界状态（领域规则由使用者挂载）
+→ DataCollector(M21) 采集 · Telemetry(M18) 观测
 ```
 
-两条 pipeline 使用同一套子技能（`define-`、`agent-design-`、`implement-`），
-入口不同，流程差异也不同：`create-` 是**构造流程**（从空目录构建全套 artefact），
-`polish-` 是**审计-补丁流程**（对已存在 artefact 做结构对齐、handbook 校验、AGENT_POOL 重新匹配）。
+## 12. 契约层 `masim/platform/`（只定义不实现）
 
-调用关系 A：从零新建场景（`create-simulation-pipeline.md`）
+依据《框架实现规定》`docs/hybrid-design/FRAMEWORK-IMPLEMENTATION-RULE.md`：每个模块一个 `base.py`，只含 **ABC + `@abstractmethod` + dataclass + 类型标注 + 文档**，方法体为 `...`；实现类继承 base 并按场景增强。改 base = 改契约，须走 `discussion/02-decisions-log.md`。
 
-```text
-用户 / 上游 LLM
-        |
-        |-- 依据 define-simulation-scenario-skill.md 撰写
-        v
-examples/{Scenario}/{domain}-{scenario}.md   (Status: draft)
-        |
-        v
-create-simulation-pipeline.md          (pipeline #1 入口)
-        |
-        |-- Phase 0: 读取并验证目标文件 + §11 校验 ----> examples/{Scenario}/simulation-build-log.md
-        |           (校验通过后将目标文件 Status: draft -> locked)
-        |-- Phase 1: 文献研究（验证/扩展目标 §4-§6-§9）
-        |-- Phase 2: Agent 角色规划（基于目标 §7）
-        |-- Phase 3: AGENT_POOL 复用门
-        |        |-- 复用现有 agent (masim/agents/defines/<domain>/*.md)
-        |        `-- 新建：调用 agent-design-skill.md + 三遍 §6 checklist
-        |              ----> 写入 masim/agents/defines/<domain>/<kebab>.md
-        |-- Phase 4: 切换到 implement-simulation-skill/ 的 02 -> 08，完成 simulation-bases / configs / players.py
-        `-- Phase 5/6: 三遍场景级审查 + 实验执行
-              (闭包时将目标文件与 simulation-build-log.md 一并 released)
-```
+| 契约文件 | 定义内容 |
+|----------|----------|
+| `agent/base.py` | `AgentRuntime`（observe/decide/act/on_fill/children/aggregate）、`Decision`、`Action` |
+| `decision/base.py` | `DecisionEngine`、`EngineKind`、`DecisionContext` |
+| `composite/base.py` | `Aggregator`、`CompositeOrchestrator`、`ChildResult` |
+| `activation/base.py` | `ActivationController`、`ActivationPolicy`、`ActivationSignal/BarrierSignal/DeadlineSignal` |
+| `runtime/base.py` | `Clock`、`LogicalTime`、`SynchronizationPolicy`、`Scheduler` |
+| `message/base.py` | `MessageBus`、`Info/Message/SimPacket`、`RoutePolicy` |
+| `state/base.py` | `StateStore`、`Checkpoint` |
+| `topology/base.py` | `Topology`、`Edge` |
+| `world/base.py` | `SharedState`、`WorldVersion` |
+| `registry/base.py` | `Registry`、`IsolationKey` |
+| `scale/base.py` | `ScalePolicy`、`CachePolicy`、`DegradationPolicy`、`Quota/Usage` |
 
-调用关系 B：升级已有场景（`polish-simulation-pipeline.md`）
+## 13. 关键决策 D1–D10
 
-```text
-现有 examples/{Scenario}/                (已有 simulation-bases.md、analysis-bases.md、Rule/、LLM/ 等)
-        |
-        v
-polish-simulation-pipeline.md          (pipeline #2 入口)
-        |
-        |-- Phase A: 现状盘点，生成 gap list（工作区暂存，不入库）
-        |-- Phase B: 若缺失目标文件则反向工程 {domain}-{scenario}.md
-        |           (§11 三-PASS → Status: locked)
-        |-- Phase C: 根文档审计（simulation-bases.md / analysis-bases.md
-        |             vs implement-simulation-skill/02-root-documents-spec.md）
-        |-- Phase D: 每个 agent 审计（handbook §3.1-§3.11 + AGENT_POOL 三段式重跑）
-        |           每个 agent 通过三遍 handbook §6 才算过关
-        |-- Phase E: 每个 variant artefact 审计（explain.md / analysis.md / players.py / *.yml）
-        |-- Phase F: 场景级三遍审查（复用 09-step5-to-10-review.md）
-        `-- Phase G: 每个 variant smoke test → 目标文件 §0 CHANGELOG 追加一行 → Status: released
-              审计痕迹：目标文件 §0 CHANGELOG + agent §3.11 Provenance + git commit history
-              （**不生成** simulation-build-log.md）
-```
+| # | 结论 |
+|---|------|
+| D1 | 内部通信走总线；跨系统/外部/工具才走 A2A/MCP/AG-UI |
+| D2 | 复合 agent：递归嵌套 + 聚合可插拔 |
+| D3 | 平台无任何领域层；金融/社会由使用者实现 |
+| D4 | 逻辑时间（round/level），不模拟墙钟；低频决策/高频执行 + 截止降级 |
+| D5 | 激活 = 独立模块 ActivationController + ActivationSignal |
+| D6 | 平台只定义时钟/信号/同步策略接口；等待/异步是使用者策略 |
+| D7 | 时间/激活拆成 Clock/Scheduler/SyncPolicy/Activation/Signal 五模块，最小改造 |
+| D8 | Signal 与 Activation 同域 `masim/activation/`；SyncPolicy 默认仅 strict |
+| D9 | 契约规定（base.py 只定义不实现）+ 契约包 `masim/platform/` |
+| D10 | 4–6 按推荐定案：ProtocolBridge 不写 base.py；MessageBus 最简；A2A 鉴权强制；复合 `max_depth=4/max_children=32/max_total=1024`；聚合「统计 + LLM 摘要」；Composite 顺序 + Fan-out；补评估基准与 MoA |
 
-## 12. 常用定位
+完整决策记录与讨论：`docs/hybrid-design/discussion/02-decisions-log.md`。
 
-| 需求               | 首先查看                                                          |
-|--------------------|-------------------------------------------------------------------|
-| 修改 Agent 行为    | `examples/{Scenario}/{Mechanism}/players.py`                      |
-| 修改 LLM 输出      | `prompts.py`、解析器和 `players.yml`                              |
-| 修改轮数或输出路径 | `simulation.yml`                                                  |
-| 增删 Agent 或参数  | `players.yml`                                                     |
-| 修改通信关系       | `topology.yml`                                                    |
-| 修改记录行为       | `persona.yml`                                                     |
-| 分析实验结果       | `analysis.py`、`masim/evaluation/`                                |
-| 排查实验失败       | `docs/example-revision-guide/08-runtime-failure-patterns.md`      |
-| 理解框架契约（act/decide/on_fill 边界） | `docs/framework-contract.md`（唯一权威）                    |
-| 审计场景是否违反契约 | `scripts/audit_scenario_contract.py --scenario {Scenario}`     |
-| 撰写新场景目标文件     | `masim/skills/define-simulation-scenario-skill.md`（{domain}-{scenario}.md 规范）    |
-| 从零创建新场景         | `masim/skills/create-simulation-pipeline.md`（pipeline #1；需先有目标文件）           |
-| 升级已有场景到最新规范 | `masim/skills/polish-simulation-pipeline.md`（pipeline #2；对 examples/ 下已有场景做审计-补丁） |
-| 设计新 Agent       | `masim/skills/agent-design-skill.md` + `masim/agents/defines/`     |
-| 查找可复用 Agent   | `masim/agents/defines/<domain>/`，按文件名/Summary/全文三段式检索  |
+## 14. 现状代码 → 平台契约 落库对照
+
+![落库对照图](hybrid-design/diagrams/migration-mapping.png)
+
+关键结论：**大部分是“重构/抽取/映射”，不是重写**；真正新增只有 `SharedState`、`Registry`、`ScalePolicy`；明确不进平台的有 `Canonical*Player`、`evaluation/`、`format/`（领域层）；复用 `knowledge/`（向量库）与协议桥（MAF）。
+
+映射细节见 `docs/hybrid-design/discussion/11-module-refactor-mapping.md`。
+
+## 15. 深入实现参考
+
+`examples/_platform-notes/`（**10 篇编号笔记（01–10）+ 1 份 README**，只含文档不含代码）：
+`01` 规模化与混合引擎 · `02` 分布式执行 · `03` 市场微观结构 · `04` 金融 LLM agent · `05` 记忆-反思-规划 · `06` 编排范式 · `07` 协议与互操作 · `08` 传统 ABM/GPU · `09` 评估基准与推理增强 · `10` 总映射表（论文→机制→模块→实现要点）。
+
+## 16. 与 Microsoft Agent Framework（MAF）的关系
+
+- MASim 提供**世界侧**（时间/市场/拓扑/消息/状态/Ray）。
+- MAF 提供**能力侧复用**：A2A/MCP/AG-UI 协议桥、Workflow/Harness 复合编排、Session/Isolation、Telemetry 思想。
+- 二者缺口互补、不重叠：MAF 不管“世界推进与大规模扇入扇出”，MASim 不管“标准协议互操作与生产治理”。
+
+![MAF 总体架构](diagrams/maf-architecture.png)
+
+## 17. 文档索引
+
+| 内容 | 位置 |
+|------|------|
+| 总体架构（收敛版） | `docs/hybrid-design/ARCHITECTURE.md` |
+| 框架实现规定 | `docs/hybrid-design/FRAMEWORK-IMPLEMENTATION-RULE.md` |
+| 决策记录 D1–D10 | `docs/hybrid-design/discussion/02-decisions-log.md` |
+| 平台模块清单 | `docs/hybrid-design/discussion/07-platform-modules.md` |
+| 落库映射 | `docs/hybrid-design/discussion/11-module-refactor-mapping.md` |
+| 已有工作审查 | `docs/hybrid-design/existing-work/README.md` |
+| 深入参考 | `examples/_platform-notes/README.md` |
+| 契约代码 | `masim/platform/*/base.py` |
+
+---
+
+> 建议阅读顺序：先看图（§9 总体架构 → §14 落库对照）→ 再看决策（§13 D1–D10）→ 再看契约（§12）与深入参考（§15）。
