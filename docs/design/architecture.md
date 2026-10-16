@@ -294,7 +294,8 @@ M10 契约（`masim/platform/world/base.py`：`get` / `set` / `version` / `snaps
 **边界（必须说清，否则就是把"目标态"写成"现状"）**：
 
 1. 今天是**驱动侧的投影**——协调者把世界发布到消息里，驱动者再投影进 World；**agent 不能直接读写 World**。要让 agent 直接写（订单簿、共享信息池），需要 World actor（或按 actor 复制的视图），这是下一步。
-2. **agent 侧仍只有单一 `market_data` 槽位**（`masim/agents/_base.py:577`：`custom_state["market_data"] = payload`，按到达顺序被覆盖，不使用 `sender_id`）。所以两个市场能同时跑、World 能分开记账，但**参与者目前无法区分两条广播来自哪个市场**。多市场要真正可用，下一步是**按来源的感知状态**（`market_data_by_source[sender_id]` + 默认别名）。
+2. **agent 侧的按来源感知已补齐**：`MarketPerceptionMixin` 把每条市场信号同时记到 `custom_state["market_data_by_source"][sender_id]`（来源取自 `Info.sender_id`），archetype 用 `self.market_data_for("market_b")` 精确取用；`custom_state["market_data"]` 保留为**最后到达者优先的别名**，因此单市场场景与既有 archetype **逐位不变**（seed 42 A/B 已验证）。
+3. **仍缺的是"用起来"**：仓库里还没有内置的**多市场场景**，也没有同时读两个市场的 archetype。平台能力已就绪，下一步是拿一个真实的多市场/跨资产场景把它跑成基线。
 
 ## 9. 配置系统
 

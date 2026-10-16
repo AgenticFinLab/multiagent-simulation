@@ -73,6 +73,11 @@ and raises `NameError` on first import. That is why the import sweep exists.
 - Dispatch batches every message bound for the same recipient into one
   `receive_batch` RPC. Keep `BasePersona.receive_batch` on any new persona; the
   default loops `receive_message`, so per-message handling stays identical.
+- Market signals reach agents **per source**: `Info.sender_id` keys
+  `custom_state["market_data_by_source"]`, read through
+  `self.market_data_for(source_id)`. `custom_state["market_data"]` is kept as a
+  last-wins alias for backwards compatibility — never rely on it in a
+  multi-market scenario.
 - Everything that participates in the simulation is an **agent**, including
   information sources: a news feed is an agent, and a financial entity receives
   it by having a topology edge to it. Do not add a separate "source" concept —
