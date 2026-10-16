@@ -165,6 +165,32 @@ decide_order() / LLM schema
 
 **这一条链是框架最重要的不变量**：`on_fill` 拿到的是**已校验**的 `(action, quantity, bid_price)`，因此"按 0 价静默成交"在构造上不可能发生。Rule 与 LLM 共用同一个 `act()` 实现，两条路径的现金语义不可能漂移。
 
+### 6.1 执行 / 结算接缝（机制与策略分离）
+
+成交**规则**不再硬编码在 agent 里，而是通过一个可插拔的接口注入：
+
+```text
+agent.act()
+  → OrderIntent（请求：action / quantity / bid_price，不改状态）
+  → agent.fill_model.execute([intent], MarketView)      ← 策略，可替换
+  → Fill（成交回报：fill_price / fill_quantity，权威值）
+  → Portfolio.apply_fill(fill)                          ← 唯一的账本变更入口
+  → on_fill(fill.action, fill.fill_quantity, fill.fill_price)
+```
+
+| 归平台（机制） | 归领域（策略） |
+|---|---|
+| `FillModel` 是订单变成成交的**唯一**通道；一笔订单恰好一份回报 | 成交价/量怎么算（市价、统一清算价、订单簿、滑点模型） |
+| `Portfolio.apply_fill()` 是 cash/position 的**唯一**变更入口 | 能否部分成交、排队规则、优先规则、手续费 |
+| 非零成交量的成交价必须 > 0（三层校验） | 市场深度与冲击模型 |
+| 回报可追溯（`model` 字段）+ 可快照 | 对手方选择 |
+
+**默认策略 `SelfFillModel` 与历史行为逐位一致**（成交价 = 报价、全额成交），因此既有实验不受影响；`extras.fill_model` 可指向 `"module:Class"`，或在 archetype 上覆盖 `FILL_MODEL` 类属性。
+
+**为什么重要**：旧实现把一条**策略**（自成交）当成了机制，且市场协调者从不读 `bid_price`（只聚合数量），于是成交价与市价可以无限背离——实测平均 1.14%、最大 4.5%，且**按策略类型系统性偏移**（动量总是高于市价买入、逆势总是低于市价卖出）。所有基于 PnL 的指标都继承了这个偏差，而微观结构类场景在该平台上根本无法表达。接缝落地后，两者都变成"换一个策略"。
+
+**仍未做**（刻意）：延迟结算（市场在下一轮才回报）、订单簿/排队模型。接缝让这两件事变成**加法**而不是重写。
+
 **`InvestorOrder` 带溯源字段**（`masim/format/order.py:104`，frozen dataclass）：`skipped/skipped_reason`、`clipped/clipped_from/clipped_intended_quantity/clipped_reason`，使"被裁剪成 hold"与"显式 hold"在指标层可区分——这是行为指标可信的前提。
 
 ---
@@ -226,6 +252,24 @@ detect_resume_round(record_path)   # 优先读 .masim-progress.json，其次环�
 **仍存在的限制**：`save_state/load_state` 在框架里已实现，但**没有任何调用者**，所以续跑不会恢复现金/仓位。因此 `--resume` 只对"剩余轮次不依赖当前组合状态"的运行安全（见 [`GeneralSimulator.run()`](../../masim/simulator/general.py) 的 docstring）。
 
 ---
+
+### 8.4 规模化观测（run_metrics）
+
+平台此前**无法测量自己**：`ExecutionClock` 只有整轮总时长，`monitoring/` 因为没有任何代码调用 `MonitoringProxy.shutdown()` 而**永远是空的**，也没有 RPC / 消息 / 内存计数。任何"这就是规模瓶颈"的说法都不可证伪。
+
+现在每轮记录（`masim/simulator/metrics.py`，纯观测、不改变行为）：
+
+| 维度 | 字段 |
+|---|---|
+| 阶段耗时 | `wall_ms` / `execute_ms` / `collect_ms` / `dispatch_ms`（collect 来自 `ray.get` 实测） |
+| RPC 与消息 | `operate_calls` / `messages`（扇出后条数）/ `deliveries`（实际投递 RPC 数）/ `max_fanout` |
+| 形状与内存 | `levels` / `agents_active` / `driver_rss_mb` / `object_store_used_mb` |
+
+产物：`monitoring/run_metrics.json`（含 p50/p95/max 汇总），并在运行日志里逐轮打印；`run()` 与 `shutdown()` 都会发布（Streamlit 走的是 `run_round()`，不会经过 `run()`），且发布失败绝不影响仿真。
+
+**首测就以 73% : 2% 定位了瓶颈**：11 agent 的一轮里 dispatch 占 83–89ms，而 agent 自身计算只占 1.2–3.1ms。据此做的按收件人批量投递把投递 RPC 从 20/轮降到 11/轮、dispatch 降到 40–56ms（详见 §4 Batching 说明）。
+
+同时修掉了两个让观测失真的缺陷：`MonitoringProxy` 的缓冲**从未落盘**（现在由 `PlayerPersona.shutdown()` 统一 flush），以及所有 actor 共用一个 `monitoring/` 目录、用同一种索引键写入，导致 11 个 actor 的记录互相覆盖（现在按 player id 命名空间，与 `records/` 一致）。
 
 ## 9. 配置系统
 
@@ -344,9 +388,14 @@ streamlit run masim/interface/app.py
 
 # 质量门禁
 python scripts/check_module_imports.py                       # 真导入（抓签名 NameError）
-PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py"
+PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py"        # 57 单元测试
+PYTHONPATH=. python -m unittest discover -s examples/uTests -t . -p "test_*.py"  # 151 按部分验收
 python scripts/audit_scenario_contract.py --scope archetypes --no-legacy-info
 python scripts/audit_scenario_contract.py --scope scenarios --scenario AnchoringEffect --no-legacy-info
+python scripts/check_diagrams.py docs/design/diagrams        # 图布局（文字重叠）
+
+# 规模化观测
+cat EXPERIMENT/{Scenario}/{Mech}/monitoring/run_metrics.json | head -40
 ```
 
 **排查顺序建议**：先看 `.masim-progress.json` 与 `run_manifest.json` → 再看 `monitoring/` 的轮次耗时 → 再看 `communication/` 的 wire 记录 → 最后看 `records/<player>/`（per-agent 视角）。
@@ -366,6 +415,7 @@ python scripts/audit_scenario_contract.py --scope scenarios --scenario Anchoring
 | A3 | `MessagePriority` 与若干消息配置字段未接线 | `communication/base.py`、`proxy/base.py` | 优先级/压缩/超时是"声明了但没有语义" |
 | A4 | 三种结果读取器并存 | `utils/result_loader.py`、`evaluation/data_loader.py`、`interface/data_loader.py` | 同一份数据三种解析路径，存在口径不一致风险 |
 | A5 | `is_received_ready` 的豁免曾是 `round_num == 1` | 已修为 bootstrap 轮，但"同层边/反馈边"仍需自定义 | 非星型拓扑需要使用者自己写就绪逻辑 |
+| A7 | 默认成交策略仍是**自成交**（`SelfFillModel`） | `masim/execution/self_fill.py` | 账本可信度取决于场景是否换成 `MarketPriceFillModel` 或自定义模型；默认值只保证与历史一致 |
 | A6 | `asyncio` 外壳里全是同步 `ray.get` | `simulator/general.py` 的 phase 方法都是同步函数 | `async def run()` 只是包装；真正的并发在 Ray 侧 |
 
 ---

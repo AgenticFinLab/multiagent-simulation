@@ -86,6 +86,10 @@ multiagent-simulation/
 | `masim/evaluation` | 金融指标、验证、可视化 | `finance/*` |
 | `masim/format` | prompt / 订单 schema / 最终化 | `order.py` / `finalize.py` |
 | `masim/interface` | Streamlit 回放与分析 | `app.py` |
+| `masim/execution` | **执行策略**（默认 `SelfFillModel`、示例 `MarketPriceFillModel`） | `FillModel` |
+| `masim/player/portfolio.py` | **账本唯一变更入口** | `Portfolio.apply_fill()` |
+| `masim/simulator/metrics.py` | **规模化观测**（阶段耗时/RPC/消息/扇出/内存） | `RunMetrics` / `monitoring/run_metrics.json` |
+| `masim/platform/execution/base.py` | 执行/结算**契约**（只定义） | `OrderIntent` / `Fill` / `FillModel` |
 | `masim/utils` | 配置、拓扑、Ray、结果读取 | `load_config` / `load_results` / `TopologyGraph` |
 
 ## 5. 场景与机制
@@ -111,7 +115,10 @@ multiagent-simulation/
   - **入向轮次标注**：per-agent 入向记录使用**消息自身的**轮次（`Message.extras["round_num"]`），而不是接收者的 `current_round`。level>0 的 agent 在其本轮 `operate()` 之前就收到广播，旧实现会把入向记录标成上一轮（首轮标成 round 0）。
   - **引导轮（bootstrap round）**：`is_received_ready` 对 level 0 的“不等前驱”豁免，从硬编码的 `round_num == 1` 改为**本次进程执行的第一轮**（Simulator 通过 `bootstrap=True` 下发）。否则 `--resume` 从第 N 轮启动时，level 0 会因等待尚不存在的入向消息而硬失败（`masim/player/general.py`）。
   - **可选后端**：`import masim` 与契约审计**不需要** `lmbase`；只有真正落盘记录时才需要（缺失时给出带安装指引的 `ImportError`，见 `masim/utils/store_backend.py`）。
-- 测试：`PYTHONPATH=. python3 -m unittest discover -s tests -t tests -p "test_*.py" -v`（`tests/` 已纳入版本库；依赖 `lmbase` 的用例在缺失时自动 skip）。
+- 测试：两套，各司其职。
+  - `tests/`（单元，快速）：`PYTHONPATH=. python3 -m unittest discover -s tests -t tests -p "test_*.py"`
+  - `examples/uTests/<Part>/`（**按平台部分划分的验收测试**，每部分一个模块）：`PYTHONPATH=. python3 -m unittest discover -s examples/uTests -t . -p "test_*.py"`
+  - 依赖 `lmbase` 的用例在缺失时自动 skip；`examples/uTests/` 需要 `.gitignore` 的 `!examples/uTests/` 白名单（`*TEST*` 规则会吃掉它）。
 - 契约审计：`python scripts/audit_scenario_contract.py --scope {all|scenarios|archetypes}`；CI 对 `AnchoringEffect` 与 archetype 库**强制门禁**，对其余场景语料仅记录基线。
 - 验收三层：运行成功 → 结构成功 → 场景有效（复现目标机制）；进程 `SUCCESS` ≠ 场景有效。
 
