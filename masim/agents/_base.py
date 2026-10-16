@@ -332,27 +332,33 @@ def _apply_fill_and_emit_action(
 ) -> Action:
     """Shared ``act()`` implementation for canonical Rule / LLM / RAG bases.
 
-    Historically each canonical base carried its own ~30 line copy of
-    this logic (key-presence guard → positive-``bid_price`` guard →
-    cash/inventory bookkeeping → :class:`Action` construction).  The
-    only inter-class delta was the error-message prefix, which we now
-    thread through ``class_name`` so every bases produces exactly one
-    taxonomy of failures — routed through
-    :func:`~masim.format.finalize.require_positive_bid_price` — and
-    the two bases can never drift on cash-update semantics.
+    Flow (the execution seam):
 
-    Post-fill hook (:meth:`GeneralPlayer.on_fill` on canonical bases,
-    no-op by default) is invoked *after* validation + cash/position
-    mutation, with the already-validated ``(action, quantity, bid_price)``
-    tuple.  This is the single, design-level extension point for
-    archetype-specific bookkeeping (VWAP anchors, entry-time counters,
-    disposition thresholds, …).  Subclasses that need per-fill state
-    updates MUST override ``on_fill`` — they MUST NOT override
-    :meth:`~CanonicalRulePlayer.act`; the raw payload never reaches
-    subclasses so silent-fill against a zero ``bid_price`` (or a
-    ``market_data.price`` fallback) is impossible by construction.
+    1. guard that the payload carries ``action`` / ``quantity`` / ``bid_price``;
+    2. build an :class:`OrderIntent` (a *request*, no state change);
+    3. hand it to the agent's :class:`FillModel`, which decides what actually
+       happened — the model is a policy, so a scenario can plug in a book,
+       a clearing rule or a slippage model without touching agent code;
+    4. validate the returned :class:`Fill` (positive price for a non-zero size);
+    5. book it through :meth:`Portfolio.apply_fill` — the single sanctioned
+       mutation path for cash/position;
+    6. call ``on_fill(fill.action, fill.fill_quantity, fill.fill_price)`` with
+       the *settled* values, so the hook is a genuine post-fill hook.
+
+    The default model is :class:`~masim.execution.self_fill.SelfFillModel`, which
+    trades the full requested size at the quoted price — byte-identical to the
+    historical behaviour, so existing scenarios are unchanged. What changed is
+    that the rule is now pluggable instead of hardcoded, and that the platform
+    no longer mutates the book with a price the agent invented.
+
+    Note:
+        ``on_fill`` receives ``fill.fill_quantity`` rather than the payload's
+        requested quantity. For the default model these are identical for
+        buy/sell; for HOLD the fill quantity is 0, which is the correct
+        settlement value (archetypes filter HOLD out anyway).
     """
     from masim.format.finalize import require_positive_bid_price
+    from masim.platform.execution.base import MarketView, OrderIntent
 
     for required in ("action", "quantity", "bid_price"):
         if required not in decision_payload:
@@ -364,32 +370,61 @@ def _apply_fill_and_emit_action(
     quantity = float(decision_payload["quantity"])
     bid_price = float(decision_payload["bid_price"])
 
-    if action in (BUY, SELL) and quantity > 0:
-        # Defence-in-depth: emit_order_envelope + finalize_* already
-        # invoked require_positive_bid_price on this record. If a
-        # subclass short-circuited the finalizer this second call still
-        # fires with a stable error format so operators can trace the
-        # invariant break to a single site.
-        require_positive_bid_price(
-            bid_price, action, context=f"{class_name}.act"
+    custom_state = agent.state.custom_state
+    market_data = custom_state.get("market_data") or {}
+    view = MarketView(
+        round_num=int(custom_state.get("round", 0) or 0),
+        price=market_data.get("price"),
+        prev_price=market_data.get("prev_price"),
+        extras={"available": market_data.get("volume")},
+    )
+    intent = OrderIntent(
+        investor=agent.identity,
+        strategy=getattr(agent, "STRATEGY", class_name),
+        action=action,
+        quantity=quantity,
+        bid_price=bid_price,
+        round_num=view.round_num,
+    )
+
+    fill_model = getattr(agent, "fill_model", None)
+    if fill_model is None:
+        # Objects without ``BookkeepingMixin`` (test doubles, hand-rolled
+        # players) still honour ``extras.fill_model`` / ``FILL_MODEL`` through
+        # the same precedence chain; the default is the historical self-fill.
+        fill_model = _resolve_fill_model(agent)
+    fills = fill_model.execute([intent], view)
+    if len(fills) != 1:
+        raise RuntimeError(
+            f"{class_name}.act: FillModel {fill_model.model_id!r} returned "
+            f"{len(fills)} fills for 1 order; the contract requires exactly one."
         )
-        fill_price = bid_price
+    fill = fills[0]
 
-        if action == BUY:
-            agent.state.custom_state["cash"] -= quantity * fill_price
-            agent.state.custom_state["position"] += quantity
-        else:  # SELL
-            agent.state.custom_state["cash"] += quantity * fill_price
-            agent.state.custom_state["position"] -= quantity
+    if fill.fill_quantity > 0 and fill.action in (BUY, SELL):
+        # Defence-in-depth: emit_order_envelope + finalize_* already invoked
+        # require_positive_bid_price, and the portfolio re-checks it. This call
+        # keeps one stable error taxonomy at every emit site.
+        require_positive_bid_price(
+            fill.fill_price, action, context=f"{class_name}.act"
+        )
 
-    # Post-fill hook — archetypes update anchor / VWAP / counters here.
-    # ``on_fill`` is a no-op on the canonical bases; only archetypes
-    # that need per-fill bookkeeping override it. The hook always sees
-    # a validated bid_price (``> 0`` for BUY/SELL) or the raw value for
-    # HOLD (which archetypes typically filter out).
+    # Book through the portfolio. ``BookkeepingMixin.portfolio`` is the normal
+    # path; fall back to wrapping ``custom_state`` directly so this helper also
+    # works for objects that do not carry the mixin (lightweight test doubles,
+    # hand-rolled players), without weakening the single-mutation-path rule.
+    portfolio = getattr(agent, "portfolio", None)
+    if portfolio is None:
+        from masim.player.portfolio import Portfolio
+
+        portfolio = Portfolio(custom_state)
+    portfolio.apply_fill(fill)
+
+    # Post-fill hook — archetypes update anchor / VWAP / counters here, with the
+    # settled values. ``on_fill`` is a no-op on the canonical bases.
     on_fill = getattr(agent, "on_fill", None)
     if callable(on_fill):
-        on_fill(action, quantity, bid_price)
+        on_fill(fill.action, fill.fill_quantity, fill.fill_price)
 
     return Action(
         action_type="investor_bid",
@@ -417,12 +452,83 @@ class SeededRngMixin:
         return rng
 
 
+class BookkeepingMixin:
+    """Mixin providing the agent's book and its execution policy.
+
+    ``portfolio`` is the only sanctioned way cash/position change (see
+    :class:`masim.player.portfolio.Portfolio`); ``fill_model`` is the
+    swappable policy that turns an order into an execution report (see
+    :class:`masim.platform.execution.base.FillModel`). Both are resolved
+    lazily so that importing a model costs nothing until the agent trades.
+    """
+
+    @property
+    def portfolio(self):
+        from masim.player.portfolio import Portfolio
+
+        return Portfolio(self.state.custom_state)
+
+    @property
+    def fill_model(self):
+        model = getattr(self, "_fill_model", None)
+        if model is not None:
+            return model
+        model = _resolve_fill_model(self)
+        self._fill_model = model
+        return model
+
+
+def _resolve_fill_model(agent) -> "FillModel":
+    """Resolve an agent's execution policy.
+
+    Order of precedence:
+
+    1. ``extras.fill_model`` — either a ``FillModel`` instance or a
+       ``module:Class`` reference. A scenario uses this to plug in its own
+       settlement rule (order book, uniform clearing, slippage model, …).
+    2. the class attribute ``FILL_MODEL`` on the archetype, for an archetype-wide
+       policy.
+    3. :data:`DEFAULT_FILL_MODEL`, which reproduces the historical agent-side
+       fill so existing scenarios are unaffected.
+    """
+    from masim.execution.self_fill import SelfFillModel
+    from masim.platform.execution.base import FillModel
+
+    # Lightweight agents (test doubles, hand-rolled players) may expose neither
+    # ``config`` nor ``extras``; treat that as "no override configured".
+    extras = getattr(getattr(agent, "config", None), "extras", None) or {}
+    spec = extras.get("fill_model")
+    if spec is not None:
+        if isinstance(spec, FillModel):
+            return spec
+        if isinstance(spec, str):
+            from masim.utils.config import load_class
+
+            cls = load_class(spec)
+            model = cls()
+            if not isinstance(model, FillModel):
+                raise TypeError(
+                    f"extras.fill_model={spec!r} resolved to {type(model).__name__}, "
+                    "which is not a FillModel."
+                )
+            return model
+        raise TypeError(
+            f"extras.fill_model must be a FillModel instance or 'module:Class' "
+            f"reference, got {type(spec).__name__}."
+        )
+
+    class_default = getattr(type(agent), "FILL_MODEL", None)
+    if class_default is not None:
+        return class_default
+    return SelfFillModel()
+
+
 # ---------------------------------------------------------------------------
 # Rule base
 # ---------------------------------------------------------------------------
 
 
-class CanonicalRulePlayer(SeededRngMixin, GeneralPlayer):
+class CanonicalRulePlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
     """Base class for deterministic, formula-driven canonical agents.
 
     Subclasses MUST:
@@ -613,7 +719,7 @@ class CanonicalRulePlayer(SeededRngMixin, GeneralPlayer):
 # ---------------------------------------------------------------------------
 
 
-class CanonicalLLMPlayer(SeededRngMixin, GeneralPlayer):
+class CanonicalLLMPlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
     """Base class for LLM-driven canonical agents.
 
     Reads from ``self.config.extras["llm"]``:
