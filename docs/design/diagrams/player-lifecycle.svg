@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1552" height="736" viewBox="0 0 1552 736" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">Player 生命周期与扩展点契约</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">框架拥有 perceive / decide / act；子类只能通过文档化的钩子扩展 —— 覆盖框架方法会绕过校验与记账</text>
+<rect x="40" y="92" width="1472" height="116" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">四种 canonical 基类（场景 Player 必须由它们派生）</text>
+<rect x="64" y="136" width="340" height="58" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="74" y="153" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">CanonicalRulePlayer</text>
+<text x="74" y="172" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">确定性公式型 investor</text>
+<text x="74" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="8.6" fill="#64748b" font-weight="normal" text-anchor="start">masim/agents/_base.py:430</text>
+<rect x="424" y="136" width="340" height="58" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="434" y="153" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">CanonicalLLMPlayer</text>
+<text x="434" y="172" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">LLM 决策型 investor</text>
+<text x="434" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="8.6" fill="#64748b" font-weight="normal" text-anchor="start">masim/agents/_base.py:621</text>
+<rect x="784" y="136" width="340" height="58" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="794" y="153" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">CanonicalRagPlayer</text>
+<text x="794" y="172" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">LLM + 检索上下文</text>
+<text x="794" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="8.6" fill="#64748b" font-weight="normal" text-anchor="start">masim/agents/_rag_base.py:64</text>
+<rect x="1144" y="136" width="340" height="58" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="1154" y="153" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">CanonicalMarketCoordinator</text>
+<text x="1154" y="172" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">市场 / 价格形成（始终规则执行）</text>
+<text x="1154" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="8.6" fill="#64748b" font-weight="normal" text-anchor="start">masim/agents/_coordinator_base.py:57</text>
+<rect x="64" y="216" width="110" height="118" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.2"/>
+<text x="119.0" y="279.68" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#155e75" font-weight="bold" text-anchor="middle">perceive</text>
+<rect x="188" y="216" width="640" height="118" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.1"/>
+<text x="202" y="238" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#334155" font-weight="bold" text-anchor="start">框架负责（不可绕过）</text>
+<text x="202" y="258" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">写入 custom_state['round'] = observation.round</text>
+<text x="202" y="274" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">惰性初始化 cash / position / rng / price_history</text>
+<text x="202" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">把带 price 的广播写入 custom_state['market_data']</text>
+<text x="202" y="306" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">向 price_history 追加价格，然后回调 on_market_data</text>
+<rect x="842" y="216" width="670" height="118" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="856" y="238" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#1e40af" font-weight="bold" text-anchor="start">子类可覆盖（唯一合法扩展点）</text>
+<text x="856" y="258" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">on_market_data(market_data)</text>
+<text x="856" y="274" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">每次广播到达时维护滚动窗口 / 锚定价</text>
+<text x="856" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">（archetype 参数在首轮由 validate_archetype_extras 预检）</text>
+<line x1="715" y1="334" x2="715" y2="342" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="344" width="110" height="118" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="119.0" y="407.68" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#5b21b6" font-weight="bold" text-anchor="middle">decide</text>
+<rect x="188" y="344" width="640" height="118" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.1"/>
+<text x="202" y="366" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#334155" font-weight="bold" text-anchor="start">框架负责（不可绕过）</text>
+<text x="202" y="386" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Rule：StandardMarketState → decide_order → _finalize_order → _emit</text>
+<text x="202" y="402" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">LLM：prompt → 模型 → 场景 schema 校验 → _finalize_llm_order → _emit</text>
+<text x="202" y="418" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">LLM 失败向上抛出：不伪造 hold、不静默降级</text>
+<text x="202" y="434" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">_noop_order() 仅在无市场数据时用于引导轮</text>
+<rect x="842" y="344" width="670" height="118" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="856" y="366" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#1e40af" font-weight="bold" text-anchor="start">子类可覆盖（唯一合法扩展点）</text>
+<text x="856" y="386" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">decide_order(state)   必需：策略本体</text>
+<text x="856" y="402" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">prompt 类常量 / _format_user_prompt()</text>
+<text x="856" y="418" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">_build_rag_query()（RAG）· advance_market()（coordinator）</text>
+<line x1="715" y1="462" x2="715" y2="470" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="472" width="110" height="118" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="119.0" y="535.68" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#065f46" font-weight="bold" text-anchor="middle">act</text>
+<rect x="188" y="472" width="640" height="118" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.1"/>
+<text x="202" y="494" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#334155" font-weight="bold" text-anchor="start">框架负责（不可绕过）</text>
+<text x="202" y="514" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">_apply_fill_and_emit_action()：Rule / LLM / RAG 共用的唯一实现</text>
+<text x="202" y="530" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">① 键校验 action / quantity / bid_price 必须存在</text>
+<text x="202" y="546" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">② require_positive_bid_price()：非 HOLD 必须 &gt; 0</text>
+<text x="202" y="562" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">③ 更新 cash / position 恰好一次　④ 调用 on_fill　⑤ 构造 Action</text>
+<rect x="842" y="472" width="670" height="118" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="856" y="494" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#1e40af" font-weight="bold" text-anchor="start">子类可覆盖（唯一合法扩展点）</text>
+<text x="856" y="514" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">on_fill(action, quantity, bid_price)</text>
+<text x="856" y="530" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">只用于逐笔状态：VWAP 锚 / 成本基础 / 成交计数</text>
+<text x="856" y="546" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">入参已校验 —— 按 0 价静默成交在构造上不可能发生</text>
+<rect x="40" y="600" width="1472" height="92" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+<text x="56" y="626" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#9f1239" font-weight="bold" text-anchor="start">禁止覆盖（覆盖即违约：审计报 STRUCT-ACT / STRUCT-DECIDE / STRUCT-PERCEIVE，严重度 CRITICAL）</text>
+<text x="56" y="652" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#9f1239" font-weight="bold" text-anchor="start">perceive()  ·  decide()  ·  act()</text>
+<text x="56" y="674" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10" fill="#334155" font-weight="normal" text-anchor="start">理由：这三者持有线格式校验、现金/仓位记账与入向消息 ingest；覆盖它们等于让该 agent 脱离全库不变量（「全库统一」的前提是所有人都不覆盖）。</text>
+<text x="1050" y="652" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#9f1239" font-weight="normal" text-anchor="start">被允许的钩子见上方右列；审计脚本：scripts/audit_scenario_contract.py</text>
+<text x="1050" y="674" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#334155" font-weight="normal" text-anchor="start">当前采用率：archetype 库 209/209 合规；场景层 1/180 声明 canonical，175 个仍为 legacy。</text>
+</svg>

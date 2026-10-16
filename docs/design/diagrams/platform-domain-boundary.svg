@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="812" viewBox="0 0 1520 812" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">平台 / 领域边界与演进路线</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">平台只做机制，不做领域内容与规则；三条互相不能叠加的默认规则必须先拍板</text>
+<rect x="40" y="92" width="1440" height="118" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+<text x="56" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#9f1239" font-weight="bold" text-anchor="start">③ 使用者实现（不进平台）</text>
+<rect x="64" y="132" width="340" height="62" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.1"/>
+<text x="74" y="149" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#9f1239" font-weight="bold" text-anchor="start">领域规则</text>
+<text x="74" y="168" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">撮合 / 传播 / 感染 / 清算</text>
+<rect x="424" y="132" width="340" height="62" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.1"/>
+<text x="434" y="149" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#9f1239" font-weight="bold" text-anchor="start">领域 agent 行为</text>
+<text x="434" y="168" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">策略本体 decide_order / advance_market</text>
+<rect x="784" y="132" width="340" height="62" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.1"/>
+<text x="794" y="149" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#9f1239" font-weight="bold" text-anchor="start">领域消息语义 / 指标</text>
+<text x="794" y="168" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">广播 schema · 场景指标与 validator</text>
+<rect x="1144" y="132" width="312" height="62" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.1"/>
+<text x="1154" y="149" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#9f1239" font-weight="bold" text-anchor="start">persona 模板</text>
+<text x="1154" y="168" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">players.yml / persona.yml 组合</text>
+<rect x="40" y="226" width="1440" height="300" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="252" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">① 平台自建（通用机制）</text>
+<text x="1464" y="252" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#64748b" font-weight="normal" text-anchor="end">14/21 已有契约 · 0 个已接线</text>
+<rect x="64" y="274" width="340" height="56" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="74" y="291" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">M1 AgentRuntime</text>
+<text x="74" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">统一递归 agent：observe/decide/act/on_fill</text>
+<rect x="424" y="274" width="340" height="56" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="434" y="291" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#155e75" font-weight="bold" text-anchor="start">M2-M6 时间与激活</text>
+<text x="434" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Clock / Scheduler / SyncPolicy / Activation / Signal</text>
+<rect x="784" y="274" width="340" height="56" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="794" y="291" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1e40af" font-weight="bold" text-anchor="start">M7-M8 决策与复合</text>
+<text x="794" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">DecisionEngine / CompositeOrchestrator</text>
+<rect x="1144" y="274" width="312" height="56" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="1154" y="291" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f766e" font-weight="bold" text-anchor="start">M9-M11 世界与通信</text>
+<text x="1154" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Topology / SharedState / MessageBus</text>
+<rect x="64" y="342" width="340" height="56" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="74" y="359" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f766e" font-weight="bold" text-anchor="start">M13 StateStore</text>
+<text x="74" y="378" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">冷热分层 + 快照 + 续跑 + 隔离</text>
+<rect x="424" y="342" width="340" height="56" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="434" y="359" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#5b21b6" font-weight="bold" text-anchor="start">M15-M16 Registry / ScalePolicy</text>
+<text x="434" y="378" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">身份隔离键 · 配额 / 缓存 / 降级</text>
+<rect x="784" y="342" width="672" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.1"/>
+<text x="794" y="359" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#9f1239" font-weight="bold" text-anchor="start">M18-M21 治理与实验（缺失）</text>
+<text x="794" y="378" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Telemetry / Security / Config / DataCollector：被列为平台自建，但既无契约也无实现</text>
+<rect x="64" y="414" width="1392" height="96" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="80" y="438" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">现状 vs 目标（本次审计结论）</text>
+<text x="80" y="462" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• masim/platform/ 的 11 个 base.py = 契约已写、零 importer、零实现：与运行框架是两套并行的世界</text>
+<text x="80" y="484" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• 设计决策 D1-D10 已冻结，但 ARCHITECTURE.md 仍把 D9/D10 之外的内容当作未决；契约变更必须走 decisions-log</text>
+<text x="80" y="506" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• 真正新增的只有 SharedState / Registry / ScalePolicy；其余是现有能力的抽取与映射（D7 最小改造）</text>
+<rect x="40" y="540" width="1440" height="106" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+<text x="56" y="566" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="start">② 复用现成（不重复造）</text>
+<rect x="64" y="580" width="340" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="74" y="597" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">LLM 网关</text>
+<text x="74" y="616" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">LiteLLM / Portkey 等（黑盒端点：延迟/吞吐/配额/成本）</text>
+<rect x="424" y="580" width="340" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="434" y="597" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">协议桥 MAF</text>
+<text x="434" y="616" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">A2A / MCP / AG-UI：只用于跨系统与外部工具</text>
+<rect x="784" y="580" width="340" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="794" y="597" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">向量库 / 对象存储</text>
+<text x="794" y="616" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">masim.knowledge（RAG 已实装并使用）</text>
+<rect x="1144" y="580" width="312" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="1154" y="597" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">Ray 运行时</text>
+<text x="1154" y="616" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">actor 调度 / detached 生命周期 / object store</text>
+<rect x="40" y="662" width="1440" height="118" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="56" y="688" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1e40af" font-weight="bold" text-anchor="start">与两套外部方案的关系（docs/hybrid_design_comparison/）</text>
+<text x="56" y="714" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">MASim（本仓库）= 世界侧：时间 / 拓扑 / 消息 / 状态 / Ray 推进 ·　MAF = 能力侧：协议桥 / Workflow 编排 / Session 隔离 / Telemetry 思想</text>
+<text x="56" y="738" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">三者共享「世界与决策分离」，但在状态承载与运行规则上存在实质选择；有三项不能同时叠加：</text>
+<text x="56" y="762" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#9f1239" font-weight="normal" text-anchor="start">(1) 时间与后果顺序（轮次层级 vs 事件阶段）　(2) 生效状态归属（有状态 Actor vs RunStore）　(3) 失败与预算策略（暂停 vs 降级继续）</text>
+</svg>

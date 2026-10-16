@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1552" height="1010" viewBox="0 0 1552 1010" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">一轮（round）执行流程：层级 × 阶段</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">Scheduler 逐层推进 EXECUTE → COLLECT → DISPATCH；轮边界是全层同步屏障；真正的落盘发生在 actor 内部，不在 phase 里</text>
+<rect x="40" y="92" width="1472" height="116" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+<text x="56" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#92400e" font-weight="bold" text-anchor="start">轮入口与循环控制（Simulator 侧）</text>
+<text x="1496" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#64748b" font-weight="normal" text-anchor="end">run_round() 的职责范围 —— 虚线框是一「轮」的起止</text>
+<rect x="64" y="148" width="340" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="74" y="165" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">run_round(n)</text>
+<text x="74" y="184" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">round_clock.tick_start() · current_round = n</text>
+<rect x="424" y="148" width="340" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="434" y="165" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">is_bootstrap_round</text>
+<text x="434" y="184" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">= not _executed_any_round（每进程仅首轮为真）</text>
+<rect x="784" y="148" width="340" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="794" y="165" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">get_execution_levels()</text>
+<text x="794" y="184" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">拓扑 BFS 分层：层内并行、层间屏障</text>
+<rect x="1144" y="148" width="340" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="1154" y="165" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">for level in levels</text>
+<text x="1154" y="184" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">对每层依次执行下面三个阶段</text>
+<line x1="404" y1="172" x2="422" y2="172" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="764" y1="172" x2="782" y2="172" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1124" y1="172" x2="1142" y2="172" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="40" y="226" width="1000" height="270" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="252" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">层循环 · level 0（拓扑发起者，本轮无入向前驱）</text>
+<rect x="56" y="286" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="298" width="96" height="34" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="114.0" y="318.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#065f46" font-weight="bold" text-anchor="middle">EXECUTE</text>
+<text x="178" y="308" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_execute(round, level_handles, bootstrap)</text>
+<text x="178" y="326" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">对本层全部 actor 并发提交，立即返回 futures</text>
+<rect x="676" y="294" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">handle.operate.remote(round, level, bootstrap)</text>
+<text x="688" y="326" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">真正执行在 actor 内：perceive → decide → act</text>
+<rect x="56" y="356" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="368" width="96" height="34" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.2"/>
+<text x="114.0" y="388.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#155e75" font-weight="bold" text-anchor="middle">COLLECT</text>
+<text x="178" y="378" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_collect(execute_result)</text>
+<text x="178" y="396" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">单次 ray.get(refs)：一次 IPC 取回结果与待发消息</text>
+<rect x="676" y="364" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="380" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">返回 (TurnResult, pending_infos)</text>
+<text x="688" y="396" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">TurnResult 汇总进 history</text>
+<rect x="56" y="426" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="438" width="96" height="34" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="114.0" y="458.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#5b21b6" font-weight="bold" text-anchor="middle">DISPATCH</text>
+<text x="178" y="448" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_dispatch(all_info_lists)</text>
+<text x="178" y="466" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">Info → Message → SimPacket，按拓扑投递</text>
+<rect x="676" y="434" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="450" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">target.receive_message.remote(msg)</text>
+<text x="688" y="466" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">保证第 N 层消息先于第 N+1 层到达</text>
+<text x="1064" y="262" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#d97706" font-weight="bold" text-anchor="start">bootstrap=True</text>
+<text x="1064" y="280" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#92400e" font-weight="normal" text-anchor="start">level 0 在本轮免于等待前驱，</text>
+<text x="1064" y="296" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#92400e" font-weight="normal" text-anchor="start">否则续跑从第 N 轮启动时</text>
+<text x="1064" y="312" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#92400e" font-weight="normal" text-anchor="start">会因「缺消息」硬失败。</text>
+<text x="1064" y="352" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1e40af" font-weight="bold" text-anchor="start">重复：level 0 → 1 → … → N</text>
+<text x="1064" y="370" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">每层都走完三阶段，层间是屏障；</text>
+<text x="1064" y="386" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#1e40af" font-weight="normal" text-anchor="start">同层成员并行，互不可见本轮输出。</text>
+<rect x="40" y="498" width="1000" height="270" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="524" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">层循环 · level N（末层：全部层已走完三阶段序列）</text>
+<rect x="56" y="558" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="570" width="96" height="34" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="114.0" y="590.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#065f46" font-weight="bold" text-anchor="middle">EXECUTE</text>
+<text x="178" y="580" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_execute(round, level_handles, bootstrap)</text>
+<text x="178" y="598" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">bootstrap 在本轮为 False（仅首轮为真）</text>
+<rect x="676" y="566" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="582" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">handle.operate.remote(round, level=N)</text>
+<text x="688" y="598" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">末层 actor 自带 mg / cash / position</text>
+<rect x="56" y="628" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="640" width="96" height="34" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.2"/>
+<text x="114.0" y="660.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#155e75" font-weight="bold" text-anchor="middle">COLLECT</text>
+<text x="178" y="650" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_collect(execute_result)</text>
+<text x="178" y="668" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">ray.get 阻塞直至本层全部返回</text>
+<rect x="676" y="636" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="652" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">(TurnResult, pending_infos) 解包</text>
+<text x="688" y="668" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">末层 Action 进入环境 / 市场</text>
+<rect x="56" y="698" width="968" height="58" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="66" y="710" width="96" height="34" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="114.0" y="730.78" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#5b21b6" font-weight="bold" text-anchor="middle">DISPATCH</text>
+<text x="178" y="720" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#0f172a" font-weight="bold" text-anchor="start">phase_dispatch(all_info_lists)</text>
+<text x="178" y="738" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">把末层产出投递给各自的拓扑目标</text>
+<rect x="676" y="706" width="336" height="42" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="688" y="722" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#334155" font-weight="bold" text-anchor="start">record_encoded_message()</text>
+<text x="688" y="738" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.2" fill="#64748b" font-weight="normal" text-anchor="start">wire 级记录：communication/msg_r{round}_{seq}</text>
+<rect x="40" y="748" width="1000" height="108" rx="14" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.4"/>
+<text x="56" y="774" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#0f766e" font-weight="bold" text-anchor="start">once-per-round 尾部（每轮一次，不属于任何 phase）</text>
+<rect x="56" y="804" width="300" height="42" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="66" y="821" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f766e" font-weight="bold" text-anchor="start">save_round_diagram()</text>
+<text x="66" y="840" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">受 save_diagram_interval 节流</text>
+<rect x="376" y="804" width="300" height="42" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="386" y="821" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f766e" font-weight="bold" text-anchor="start">history.append()</text>
+<text x="386" y="840" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">限流后的轮结果追加</text>
+<rect x="696" y="804" width="328" height="42" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="706" y="821" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#0f766e" font-weight="bold" text-anchor="start">write_resume_checkpoint()</text>
+<text x="706" y="840" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">fsync + rename，原子写进度标记</text>
+<rect x="1064" y="430" width="448" height="426" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+<text x="1080" y="456" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#9f1239" font-weight="bold" text-anchor="start">关键不变量与幂等语义</text>
+<text x="1080" y="468" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">1. 层内并行、层间同步：同层成员看不到彼此本轮输出；</text>
+<text x="1080" y="488" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   跨层可见性由「DISPATCH 投递完成」保证。</text>
+<text x="1080" y="508" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">2. 每层 operate() 的入向只可能来自更小 level 的 actor，</text>
+<text x="1080" y="528" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   所以 level 0 在引导轮没有入向是正常状态。</text>
+<text x="1080" y="548" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">3. 记录与消息落盘都在 actor 内部且经过校验，</text>
+<text x="1080" y="568" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   phase 无法伪造或跳过。</text>
+<text x="1080" y="588" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">4. 数据落盘不在 phase 里：真正写盘发生在 operate()</text>
+<text x="1080" y="608" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   与 receive_message() 内部。</text>
+<text x="1080" y="628" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">5. 不存在 phase_record：RECORD 只是轮尾的限流画图</text>
+<text x="1080" y="648" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   + 进度标记，不是第四个阶段。</text>
+<text x="1080" y="668" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">6. anchor：general.py 的 phase_execute / phase_collect /</text>
+<text x="1080" y="688" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   phase_dispatch / run_round。</text>
+<text x="1080" y="708" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">7. 平台契约对应：M3 Scheduler、M4 SynchronizationPolicy、</text>
+<text x="1080" y="728" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">   M11 MessageBus、M13 StateStore。</text>
+</svg>

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="1000" viewBox="0 0 1520 1000" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">消息模型与路由：三层封装 · 拓扑驱动 · 就绪判定</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">Info(player 业务) → Message(路由信封) → SimPacket(线格式)；投递目标由 topology.yml 决定，不是广播</text>
+<rect x="40" y="92" width="1440" height="150" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">① 三层封装（同一次投递的三个视图）</text>
+<rect x="64" y="140" width="300" height="74" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="74" y="157" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">Info</text>
+<text x="74" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">player 层 · 方向无关 · payload/content_type/extras</text>
+<rect x="430" y="140" width="300" height="74" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="440" y="157" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#5b21b6" font-weight="bold" text-anchor="start">Message</text>
+<text x="440" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">+ sender_id / recipient_id / timestamp / priority</text>
+<rect x="796" y="140" width="300" height="74" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="806" y="157" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">SimPacket</text>
+<text x="806" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">wire 信封 · encoded(JSON) / sender / recipient</text>
+<rect x="1160" y="140" width="296" height="74" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="1170" y="157" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#92400e" font-weight="bold" text-anchor="start">MessagePriority</text>
+<text x="1170" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">枚举已定义并序列化，但当前不参与排序/投递</text>
+<line x1="364" y1="177" x2="428" y2="177" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<line x1="730" y1="177" x2="794" y2="177" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<text x="80" y="234" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#1e40af" font-weight="normal" text-anchor="start">转换：build_message_from_info() 把 round_num 写入 Message.extras（general.py:33）  ·  encode_message() 做 json.dumps（general.py:92）  ·  decode_message() 在投递前还原（双向验证线格式）</text>
+<rect x="40" y="258" width="1440" height="196" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="1.4"/>
+<text x="56" y="284" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#065f46" font-weight="bold" text-anchor="start">② 发送路径（Simulator 侧，每个拓扑层级一次）</text>
+<rect x="64" y="306" width="300" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="74" y="323" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#065f46" font-weight="bold" text-anchor="start">phase_execute</text>
+<text x="74" y="342" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">并行 operate(round, level, bootstrap)</text>
+<rect x="420" y="306" width="300" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="430" y="323" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#065f46" font-weight="bold" text-anchor="start">phase_collect</text>
+<text x="430" y="342" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">单次 ray.get → (TurnResult, pending_infos)</text>
+<rect x="776" y="306" width="300" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="786" y="323" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#065f46" font-weight="bold" text-anchor="start">phase_dispatch</text>
+<text x="786" y="342" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">build_message_from_info → encode_and_deliver</text>
+<rect x="1132" y="306" width="324" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="1142" y="323" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#065f46" font-weight="bold" text-anchor="start">receive_message.remote()</text>
+<text x="1142" y="342" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">每个目标一次 Ray RPC（无批处理）</text>
+<line x1="364" y1="336" x2="418" y2="336" stroke="#059669" stroke-width="1.4" marker-end="url(#arrow-emerald)"/>
+<line x1="720" y1="336" x2="774" y2="336" stroke="#059669" stroke-width="1.4" marker-end="url(#arrow-emerald)"/>
+<line x1="1076" y1="336" x2="1130" y2="336" stroke="#059669" stroke-width="1.4" marker-end="url(#arrow-emerald)"/>
+<rect x="64" y="380" width="1392" height="60" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="80" y="402" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">record_encoded_message()：SimPacket 落盘到 communication/，键 msg_r{round:06d}_{seq:06d}（同键=覆盖，故必须唯一）</text>
+<text x="80" y="424" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#9f1239" font-weight="normal" text-anchor="start">未注册的收件人 → encode_and_deliver 立即抛错，绝不静默丢弃（静默丢弃会无痕抹掉消息）</text>
+<line x1="926" y1="366" x2="926" y2="380" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="40" y="468" width="1440" height="180" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="1.4"/>
+<text x="56" y="494" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#155e75" font-weight="bold" text-anchor="start">③ 接收路径（目标 actor 内部）</text>
+<rect x="64" y="516" width="270" height="60" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="74" y="533" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#155e75" font-weight="bold" text-anchor="start">receive_message()</text>
+<text x="74" y="552" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">persona 边界：先落盘再入队</text>
+<rect x="370" y="516" width="320" height="60" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="380" y="533" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#155e75" font-weight="bold" text-anchor="start">handle_incoming()</text>
+<text x="380" y="552" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">Message → Info，合并 extras[round_num]</text>
+<rect x="726" y="516" width="270" height="60" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="736" y="533" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#155e75" font-weight="bold" text-anchor="start">receive_queue</text>
+<text x="736" y="552" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">FIFO list（无优先级队列/无超时）</text>
+<rect x="1032" y="516" width="424" height="60" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="1042" y="533" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#155e75" font-weight="bold" text-anchor="start">operate() 内投递</text>
+<text x="1042" y="552" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">get_received_infos() → player.receive_info()</text>
+<line x1="334" y1="546" x2="368" y2="546" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<line x1="690" y1="546" x2="724" y2="546" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<line x1="996" y1="546" x2="1030" y2="546" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<text x="80" y="600" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#155e75" font-weight="normal" text-anchor="start">记录轮次取自 Message.extras['round_num']（消息自身的轮次），不是接收者的 current_round —— level&gt;0 的 agent 在自己本轮 operate() 之前就收到广播</text>
+<text x="80" y="622" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#155e75" font-weight="normal" text-anchor="start">Info.extras 保留内容 extras 并补入 round_num，使「识别滞后/反馈消息」的扩展点可用</text>
+<rect x="40" y="662" width="1440" height="286" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="56" y="688" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#5b21b6" font-weight="bold" text-anchor="start">④ 拓扑与就绪判定：消息投给谁、何时可以开始</text>
+<rect x="64" y="710" width="330" height="70" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="74" y="727" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#5b21b6" font-weight="bold" text-anchor="start">topology.yml</text>
+<text x="74" y="746" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">显式有向边：sources + connections</text>
+<rect x="430" y="710" width="330" height="70" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="440" y="727" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#5b21b6" font-weight="bold" text-anchor="start">TopologyGraph</text>
+<text x="440" y="746" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">get_targets / get_senders（O(1) 切片下发）</text>
+<rect x="796" y="710" width="330" height="70" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="806" y="727" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#5b21b6" font-weight="bold" text-anchor="start">get_execution_levels()</text>
+<text x="806" y="746" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">BFS 分层 → 层内并行、层间屏障</text>
+<rect x="1162" y="710" width="294" height="70" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="1172" y="727" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#5b21b6" font-weight="bold" text-anchor="start">is_received_ready()</text>
+<text x="1172" y="746" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.5" fill="#475569" font-weight="normal" text-anchor="start">expected_senders ⊆ received_senders</text>
+<line x1="394" y1="745" x2="428" y2="745" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="760" y1="745" x2="794" y2="745" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1126" y1="745" x2="1160" y2="745" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="800" width="1392" height="128" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1" stroke-dasharray="6 4"/>
+<text x="80" y="824" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#5b21b6" font-weight="normal" text-anchor="bold">就绪规则（player/general.py:275）</text>
+<text x="80" y="848" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• level 0 且处于引导轮（本次进程执行的第一轮）→ 直接放行：发起者本轮还没有入向消息可等</text>
+<text x="80" y="870" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• 否则要求所有期望发送者都已到达；不满足则 Persona 抛 RuntimeError（硬门槛，不是「警告后继续」）</text>
+<text x="80" y="892" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#334155" font-weight="normal" text-anchor="start">• 引导轮由 Simulator 用 bootstrap=True 显式下发，因此 --resume 从第 N 轮启动不会被误判为「缺消息」</text>
+<text x="80" y="914" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#9f1239" font-weight="normal" text-anchor="start">• 同层边/反馈边需自定义就绪逻辑：override is_received_ready 并对允许的情形返回 True</text>
+</svg>

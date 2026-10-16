@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="986" viewBox="0 0 1520 986" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">能力现状矩阵：设计意图 vs 可验证实现</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">本项目最大的文档风险是把「目标态」写成「现状」；本表按可验证证据为每项能力定级（截至本次提交）</text>
+<rect x="40" y="92" width="1440" height="870" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+<text x="56" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="start">能力清单（14 项）</text>
+<text x="1464" y="118" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#64748b" font-weight="normal" text-anchor="end">状态口径：已实现 = 有代码且有可复现证据 · 部分 = 主路径可用但有明确缺口 · 仅设计 = 只有契约/文档 · 缺失 = 都还没有</text>
+<text x="64" y="154" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">能力</text>
+<text x="768" y="154" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">状态</text>
+<text x="908" y="154" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">证据 / 锚点</text>
+<line x1="56" y1="164" x2="1464" y2="164" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="64" y="170" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="195" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">四机制决策 Rule / LLM / RuleLLM / Rag</text>
+<rect x="768" y="174" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="195" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="195" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">45 场景 x 4 变体 = 180 个 players.py；209 个 archetype 实现 decide_order()</text>
+<rect x="64" y="224" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="249" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">拓扑层级 + 层间屏障执行</text>
+<rect x="768" y="228" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="249" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="249" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">phase_execute / phase_collect / phase_dispatch（simulator/general.py:471 / 505 / 544）</text>
+<rect x="64" y="278" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="303" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">三层消息模型 + 拓扑路由</text>
+<rect x="768" y="282" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="303" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="303" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">Info(player/base.py:205) -&gt; Message / SimPacket(communication/base.py:112 / 194)</text>
+<rect x="64" y="332" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="357" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">per-agent 记录完整性与轮次标注</text>
+<rect x="768" y="336" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="357" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="357" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">序号键 msg_r{round}_{seq}；实测 60/60 落盘（修复前 33/60），键前缀与 round_num 零失配</text>
+<rect x="64" y="386" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="411" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">断点续跑 --fresh / --resume</text>
+<rect x="768" y="390" width="108" height="30" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+<text x="822" y="411" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#92400e" font-weight="bold" text-anchor="middle">部分</text>
+<text x="896" y="411" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">已显式化 + 引导轮修复（实测可续跑）；agent 状态仍按配置重置，不从磁盘恢复</text>
+<rect x="64" y="440" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="465" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">可复现性（setting.seed 决定论）</text>
+<rect x="768" y="444" width="108" height="30" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+<text x="822" y="465" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#92400e" font-weight="bold" text-anchor="middle">部分</text>
+<text x="896" y="465" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">209/209 archetype 走 seeded RNG；但仅 4/195 个配置设置了 seed</text>
+<rect x="64" y="494" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="519" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">canonical Player 契约采用率</text>
+<rect x="768" y="498" width="108" height="30" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+<text x="822" y="519" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#92400e" font-weight="bold" text-anchor="middle">部分</text>
+<text x="896" y="519" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">archetype 库 209/209 合规；场景层仅 1/180 声明 canonical，175 个仍为 legacy</text>
+<rect x="64" y="548" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="573" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">契约审计与 CI 双门禁</text>
+<rect x="768" y="552" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="573" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="573" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">参考场景 + archetype 库强制门禁；模块导入巡检；40 个单元测试</text>
+<rect x="64" y="602" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="627" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">订单线格式唯一收敛点</text>
+<rect x="768" y="606" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="627" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="627" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">finalize.py:68 / 148 / 226 / 290 / 352，Rule 与 LLM 共用 _apply_fill_and_emit_action</text>
+<rect x="64" y="656" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="681" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">实验产物与分析流水线</text>
+<rect x="768" y="660" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="681" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="681" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">run_manifest + .masim-progress + records/communication；analysis.py 出 summary.json + PNG</text>
+<rect x="64" y="710" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="735" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">三层验收（进程 / 结构 / 有效性）</text>
+<rect x="768" y="714" width="108" height="30" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+<text x="822" y="735" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#92400e" font-weight="bold" text-anchor="middle">部分</text>
+<text x="896" y="735" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">45 个场景仅 8 个有校验钩子（共享 validator 11 个里 7 个从未被调用）；第 3 层无机械化判定</text>
+<rect x="64" y="764" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="789" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">平台契约层 masim/platform（11 个 base.py）</text>
+<rect x="768" y="768" width="108" height="30" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+<text x="822" y="789" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#5b21b6" font-weight="bold" text-anchor="middle">仅设计</text>
+<text x="896" y="789" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">48/50 方法体为 ...；零 importer、零实现，与运行框架尚未接通</text>
+<rect x="64" y="818" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="843" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">M18-M21 Telemetry / Security / Config / DataCollector</text>
+<rect x="768" y="822" width="108" height="30" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2"/>
+<text x="822" y="843" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#9f1239" font-weight="bold" text-anchor="middle">缺失</text>
+<text x="896" y="843" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">被列为「平台自建」，但既无契约文件也无实现（structure.md 已标注）</text>
+<rect x="64" y="872" width="680" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+<text x="76" y="897" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f172a" font-weight="bold" text-anchor="start">Streamlit 多租户实验界面</text>
+<rect x="768" y="876" width="108" height="30" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+<text x="822" y="897" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#065f46" font-weight="bold" text-anchor="middle">已实现</text>
+<text x="896" y="897" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.6" fill="#475569" font-weight="normal" text-anchor="start">team gate + 并发配额 + nginx 限流；面向真实教学部署（8 队共用实例）</text>
+</svg>

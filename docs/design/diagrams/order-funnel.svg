@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1552" height="986" viewBox="0 0 1552 986" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker>
+<marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker>
+<marker id="arrow-emerald" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#059669"/></marker>
+<marker id="arrow-rose" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#e11d48"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">订单收敛漏斗：从决策到成交记账</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">clip → validate → emit 只有一个实现；Rule 与 LLM 共用 act()，两条路径的现金语义不可能漂移</text>
+<rect x="64" y="150" width="900" height="74" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="84" y="180" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#1e40af" font-weight="bold" text-anchor="start">1.  decide_order() / LLM schema</text>
+<text x="84" y="202" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">产出策略意图：Rule 返回 InvestorOrder，LLM 返回通过场景 schema 校验的决策 dict</text>
+<text x="950" y="180" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/agents/_base.py:523</text>
+<rect x="64" y="238" width="900" height="74" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="84" y="268" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#1e40af" font-weight="bold" text-anchor="start">2.  _coerce_to_order()</text>
+<text x="84" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">归一化为 InvestorOrder，并补齐 investor / strategy 等缺失字段</text>
+<text x="950" y="268" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/agents/_base.py:219</text>
+<line x1="514" y1="224" x2="514" y2="236" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="326" width="900" height="74" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="84" y="356" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#155e75" font-weight="bold" text-anchor="start">3.  finalize_rule_order() / finalize_llm_order()</text>
+<text x="84" y="378" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">分类感知终结器：仅 participation_order 允许用 state.price 显式替换 bid_price</text>
+<text x="950" y="356" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/format/finalize.py:226 / 290</text>
+<line x1="514" y1="312" x2="514" y2="324" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="414" width="900" height="74" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="84" y="444" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#155e75" font-weight="bold" text-anchor="start">4.  clip_order_to_liquidity()</text>
+<text x="84" y="466" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">按现金与持仓裁剪数量；裁剪后标记 clipped / clipped_from，使「被裁剪成 hold」可与显式 hold 区分</text>
+<text x="950" y="444" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/format/finalize.py:148</text>
+<line x1="514" y1="400" x2="514" y2="412" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="502" width="900" height="74" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="84" y="532" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#92400e" font-weight="bold" text-anchor="start">5.  require_positive_bid_price()</text>
+<text x="84" y="554" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">非 HOLD 必须严格正价，否则 ValueError；禁止回退到 market_data['price']</text>
+<text x="950" y="532" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/format/finalize.py:68</text>
+<line x1="514" y1="488" x2="514" y2="500" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="590" width="900" height="74" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="84" y="620" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#5b21b6" font-weight="bold" text-anchor="start">6.  emit_order_envelope()</text>
+<text x="84" y="642" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">生成线格式 dict：payload + outbound_messages 信封 + agent_state（真实 cash/position）</text>
+<text x="950" y="620" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/format/finalize.py:352</text>
+<line x1="514" y1="576" x2="514" y2="588" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="64" y="678" width="900" height="74" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="84" y="708" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.4" fill="#065f46" font-weight="bold" text-anchor="start">7.  _apply_fill_and_emit_action()</text>
+<text x="84" y="730" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">纵深防御：二次正价校验 → 更新 cash/position 恰好一次 → on_fill() → 构造 Action</text>
+<text x="950" y="708" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.4" fill="#334155" font-weight="normal" text-anchor="end">masim/agents/_base.py:332</text>
+<line x1="514" y1="664" x2="514" y2="676" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="1000" y="150" width="512" height="376" rx="14" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+<text x="1016" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#9f1239" font-weight="bold" text-anchor="start">禁止（这些就是线上事故的来源）</text>
+<text x="1016" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#9f1239" font-weight="normal" text-anchor="start">• 静默回退：bid_price = market_data['price']</text>
+<text x="1016" y="210" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">  → 缺字段时用市价顶替，等于伪造成交价（SEM-SILENT-FILL）</text>
+<text x="1016" y="230" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#9f1239" font-weight="normal" text-anchor="start">• 在 act() / decide() 里自行改 cash / position</text>
+<text x="1016" y="250" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">  → 与框架记账叠加，形成双重计数（SEM-CASH-MUT）</text>
+<text x="1016" y="270" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#9f1239" font-weight="normal" text-anchor="start">• 覆盖 act() / decide() / perceive()</text>
+<text x="1016" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">  → 绕过校验、记账与 ingest（STRUCT-ACT/DECIDE/PERCEIVE）</text>
+<text x="1016" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#9f1239" font-weight="normal" text-anchor="start">• 在场景 players.py 里复刻 finalize 逻辑</text>
+<text x="1016" y="330" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">  → 两份语义必然漂移，且新场景复制旧错误</text>
+<text x="1016" y="350" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#9f1239" font-weight="normal" text-anchor="start">• 用「先跑起来再说」的默认值掩盖缺字段</text>
+<text x="1016" y="370" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">  → 长跑 3 小时后才发现整批数据不可归因</text>
+<rect x="1000" y="546" width="512" height="310" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+<text x="1016" y="572" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#334155" font-weight="bold" text-anchor="start">为什么收敛点如此重要</text>
+<text x="1016" y="586" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">on_fill(action, quantity, bid_price) 收到的是**已校验**的值。</text>
+<text x="1016" y="606" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">因此「按 0 价静默成交」在构造上不可能发生 —— 这是全库</text>
+<text x="1016" y="626" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">最强的一条不变量。</text>
+<text x="1016" y="646" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start"></text>
+<text x="1016" y="666" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">legacy 场景自行实现的 act() 之所以危险：实测 337 个 act()</text>
+<text x="1016" y="686" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">覆盖中 301 个逐字节相同（最大一族 170 份完全一样），它们</text>
+<text x="1016" y="706" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">只是 Action 信封，既不校验正价也不记账；记账被挪到别处，</text>
+<text x="1016" y="726" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">于是产生 704 处 cash 直接改写（审计 SEM-CASH-MUT）。</text>
+<text x="1016" y="746" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start"></text>
+<text x="1016" y="766" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">INVESTORORDER 溯源字段（masim/format/order.py:104，frozen）：</text>
+<text x="1016" y="786" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#475569" font-weight="normal" text-anchor="start">  skipped / skipped_reason</text>
+<text x="1016" y="806" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#475569" font-weight="normal" text-anchor="start">  clipped / clipped_from / clipped_intended_quantity / clipped_reason</text>
+<text x="1016" y="826" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#334155" font-weight="normal" text-anchor="start">→ 行为指标（action_frequency、decision_entropy）因此可信。</text>
+<rect x="64" y="770" width="1448" height="84" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="1.4"/>
+<text x="80" y="796" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#065f46" font-weight="bold" text-anchor="start">不变量（Invariants）</text>
+<text x="80" y="820" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.4" fill="#334155" font-weight="normal" text-anchor="start">① 非 HOLD 单的正价由框架强制　② cash/position 每笔恰好变更一次　③ 逐笔状态只能写在 on_fill　④ Rule 与 LLM 不可能在语义上分叉</text>
+<text x="80" y="842" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.4" fill="#334155" font-weight="normal" text-anchor="start">违反任一条 → 立即抛错并中断本轮：宁可跑挂，也不要让一批实验结论无法归因（进程 SUCCESS 不等于结果有效）。</text>
+</svg>

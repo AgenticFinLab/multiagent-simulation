@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="500" viewBox="0 0 1560 500" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<rect width="100%" height="100%" fill="#fff"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker><marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker></defs>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">实验产物流水线与三层验收</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">YAML → run_*.py → GeneralSimulator(Ray) → 产物目录 → analysis.py → summary.json + PNG</text>
+<rect x="40" y="120" width="170" height="110" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="50" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#334155" font-weight="bold" text-anchor="start">YAML 配置</text>
+<text x="50" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">configs/{Scenario}/{Mech}/</text>
+<text x="50" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">simulation.yml</text>
+<text x="50" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">!include players/persona/topology</text>
+<rect x="236" y="120" width="170" height="110" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="246" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1e40af" font-weight="bold" text-anchor="start">run_*.py</text>
+<text x="246" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">CLI shim（180 个）</text>
+<text x="246" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">import run from masim.simulator</text>
+<text x="246" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">指定 scenario / variant / config</text>
+<rect x="432" y="120" width="230" height="110" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="442" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#155e75" font-weight="bold" text-anchor="start">GeneralSimulator (Ray)</text>
+<text x="442" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">PlayerPersona actor 池</text>
+<text x="442" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">按拓扑层级 execute→collect→dispatch</text>
+<text x="442" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">逐轮记录 + 进度标记</text>
+<rect x="688" y="120" width="400" height="110" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="698" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#5b21b6" font-weight="bold" text-anchor="start">EXPERIMENT/{Scenario}/{Mech}/</text>
+<text x="698" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">records · communication · monitoring</text>
+<text x="698" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">run_manifest.json：seed / 轮数 / git commit / player 清单</text>
+<text x="698" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">.masim-progress.json：原子进度标记（fsync + rename）</text>
+<rect x="1114" y="120" width="180" height="110" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="1124" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#92400e" font-weight="bold" text-anchor="start">analysis.py</text>
+<text x="1124" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">读产物 → masim/evaluation</text>
+<text x="1124" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">注册指标 + 覆盖度检查</text>
+<text x="1124" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">校验 + 可视化</text>
+<rect x="1320" y="120" width="200" height="110" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="1330" y="146" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#065f46" font-weight="bold" text-anchor="start">summary.json + PNG</text>
+<text x="1330" y="170" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">analysis/summary.json</text>
+<text x="1330" y="189" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">指标摘要 + 面板图</text>
+<text x="1330" y="208" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">files_written 清单</text>
+<line x1="213" y1="175" x2="233" y2="175" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="409" y1="175" x2="429" y2="175" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="665" y1="175" x2="685" y2="175" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1091" y1="175" x2="1111" y2="175" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1297" y1="175" x2="1317" y2="175" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="40" y="272" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" fill="#0f172a" font-weight="bold" text-anchor="start">三层验收（进程 SUCCESS 不等于场景有效）</text>
+<rect x="40" y="292" width="466" height="150" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<rect x="60" y="312" width="32" height="32" rx="16" fill="#ffffff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="76" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" fill="#1e40af" font-weight="bold" text-anchor="middle">1</text>
+<text x="102" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">第 1 层 · 进程 SUCCESS</text>
+<text x="60" y="370" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">runner 正常退出，日志无未捕获异常</text>
+<text x="60" y="390" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">仅日志证据：SUCCESS 不能证明场景有效</text>
+<rect x="60" y="404" width="250" height="26" rx="13" fill="#ffffff" stroke="#2563eb" stroke-width="1"/>
+<text x="72" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#1e40af" font-weight="normal" text-anchor="start">自动化：已有（退出码 / 日志）</text>
+<rect x="547" y="292" width="466" height="150" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="1.4"/>
+<rect x="567" y="312" width="32" height="32" rx="16" fill="#ffffff" stroke="#059669" stroke-width="1.4"/>
+<text x="583" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" fill="#065f46" font-weight="bold" text-anchor="middle">2</text>
+<text x="609" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#065f46" font-weight="bold" text-anchor="start">第 2 层 · 结构成功</text>
+<text x="567" y="370" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">masim/evaluation 指标可计算、覆盖度达标</text>
+<text x="567" y="390" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">覆盖度下限 n_numeric &gt;= 20（coverage_floor_met）</text>
+<rect x="567" y="404" width="250" height="26" rx="13" fill="#ffffff" stroke="#059669" stroke-width="1"/>
+<text x="579" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#065f46" font-weight="normal" text-anchor="start">自动化：已有（指标 + 覆盖度）</text>
+<rect x="1054" y="292" width="466" height="150" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+<rect x="1074" y="312" width="32" height="32" rx="16" fill="#ffffff" stroke="#d97706" stroke-width="1.4"/>
+<text x="1090" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" fill="#92400e" font-weight="bold" text-anchor="middle">3</text>
+<text x="1116" y="334" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#92400e" font-weight="bold" text-anchor="start">第 3 层 · 场景有效</text>
+<text x="1074" y="370" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">目标机制被复现（价格 / 成交量 / 传播等）</text>
+<text x="1074" y="390" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">需要场景级 validator 判定机制是否复现</text>
+<rect x="1074" y="402" width="96" height="28" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.2"/>
+<text x="1122" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#92400e" font-weight="bold" text-anchor="middle">未机械化</text>
+<text x="1182" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">45 个场景中仅 8 个有校验钩子</text>
+<line x1="510" y1="332" x2="543" y2="332" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1017" y1="332" x2="1050" y2="332" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="40" y="478" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#475569" font-weight="normal" text-anchor="start">第 1→2 层已自动化；第 3 层需要场景级 validator，尚未机械化。</text>
+</svg>

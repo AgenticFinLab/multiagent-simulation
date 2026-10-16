@@ -253,8 +253,15 @@ Config(M20) → Scheduler(M3) 推进一轮 round
 
 ## 17. 文档索引
 
+**分工**：本文 = 仓库地图（目录/模块/场景/命令）；`docs/design/` = 设计原理与运行时细节（含图集）；`docs/framework-contract.md` = Player 逐条契约；`docs/hybrid-design/` = 演进设计。
+
 | 内容 | 位置 |
 |------|------|
+| **设计总纲（为什么这样设计 + 能力现状矩阵）** | `docs/design/README.md` |
+| **架构与运行时细节（11 张图）** | `docs/design/architecture.md` |
+| **Player 生命周期契约** | `docs/framework-contract.md` |
+| 设计图集 | `docs/design/diagrams/` |
+| 工作约定（提交规则 / 验收门槛 / 代码约定） | `AGENTS.md` |
 | 总体架构（收敛版） | `docs/hybrid-design/ARCHITECTURE.md` |
 | 框架实现规定 | `docs/hybrid-design/FRAMEWORK-IMPLEMENTATION-RULE.md` |
 | 决策记录 D1–D10 | `docs/hybrid-design/discussion/02-decisions-log.md` |
@@ -266,4 +273,4 @@ Config(M20) → Scheduler(M3) 推进一轮 round
 
 ---
 
-> 建议阅读顺序：先看图（§9 总体架构 → §14 落库对照）→ 再看决策（§13 D1–D10）→ 再看契约（§12）与深入参考（§15）。
+> 建议阅读顺序：先读设计总纲 `docs/design/README.md`（原则与取舍）→ 再看图 `docs/design/architecture.md`（运行时细节）→ 再看本文（仓库地图）→ 改造代码前读 `docs/framework-contract.md` → 推进平台演进读 `docs/hybrid-design/`。

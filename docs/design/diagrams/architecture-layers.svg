@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="810" viewBox="0 0 1560 810" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<rect width="100%" height="100%" fill="#fff"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker><marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker></defs>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">MASim 分层架构与依赖方向</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">上层依赖下层，绝不反向；右侧轨道为横切契约层与平台 / 领域边界</text>
+<rect x="40" y="104" width="1100" height="96" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="128" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1e40af" font-weight="bold" text-anchor="start">① 入口层</text>
+<text x="1124" y="128" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="end">ENTRY</text>
+<rect x="56" y="138" width="340" height="46" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="66" y="156" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">CLI run() shim</text>
+<text x="66" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">examples/*/*/run_*.py（180 个）</text>
+<rect x="420" y="138" width="340" height="46" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="430" y="156" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">Streamlit UI</text>
+<text x="430" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/interface · 选择 / 回放 / 分析</text>
+<rect x="784" y="138" width="340" height="46" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="794" y="156" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">YAML 配置</text>
+<text x="794" y="176" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">configs/{Scenario}/{Mech}/*.yml</text>
+<line x1="90" y1="200" x2="90" y2="236" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="104" y="226" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="start">依赖（上 → 下）</text>
+<rect x="40" y="238" width="1100" height="96" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="1.4"/>
+<text x="56" y="262" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#155e75" font-weight="bold" text-anchor="start">② 编排层</text>
+<text x="1124" y="262" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="end">ORCHESTRATION</text>
+<rect x="56" y="272" width="340" height="46" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="66" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">GeneralSimulator</text>
+<text x="66" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">轮次 · 拓扑层级 · Ray Actor 编排</text>
+<rect x="420" y="272" width="340" height="46" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="430" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">BaseSimulator（ABC）</text>
+<text x="430" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">阶段与生命周期的抽象定义</text>
+<rect x="784" y="272" width="340" height="46" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="794" y="290" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#155e75" font-weight="bold" text-anchor="start">GeneralSimulationRunner</text>
+<text x="794" y="310" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">CLI 装配 · 产物落盘 · 续跑</text>
+<line x1="90" y1="334" x2="90" y2="370" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="40" y="372" width="1100" height="124" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="56" y="396" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#5b21b6" font-weight="bold" text-anchor="start">③ 运行时单元</text>
+<text x="1124" y="396" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="end">RUNTIME UNITS</text>
+<rect x="56" y="404" width="340" height="72" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="66" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#5b21b6" font-weight="bold" text-anchor="start">PlayerPersona（Ray actor）</text>
+<text x="66" y="442" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">将 Player 封装为 actor</text>
+<text x="66" y="460" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/persona</text>
+<rect x="420" y="404" width="340" height="72" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="430" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#5b21b6" font-weight="bold" text-anchor="start">BasePlayer 生命周期</text>
+<text x="430" y="442" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">perceive → decide → act</text>
+<text x="430" y="460" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/player/base.py</text>
+<rect x="784" y="404" width="340" height="72" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="794" y="422" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#5b21b6" font-weight="bold" text-anchor="start">4 个 canonical 基类</text>
+<text x="794" y="442" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Rule / LLM / Rag / MarketCoordinator</text>
+<text x="794" y="460" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/agents/{_base,_rag_base,_coordinator_base}.py</text>
+<line x1="90" y1="496" x2="90" y2="532" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="40" y="534" width="1100" height="96" rx="14" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.4"/>
+<text x="56" y="558" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#0f766e" font-weight="bold" text-anchor="start">④ 基础设施代理</text>
+<text x="1124" y="558" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="end">INFRASTRUCTURE PROXIES</text>
+<rect x="56" y="568" width="340" height="46" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="66" y="586" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">SendReceiveProxy</text>
+<text x="66" y="606" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">拓扑内消息投递</text>
+<rect x="420" y="568" width="340" height="46" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="430" y="586" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">StorageProxy</text>
+<text x="430" y="606" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">逐轮记录落盘</text>
+<rect x="784" y="568" width="340" height="46" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="794" y="586" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#0f766e" font-weight="bold" text-anchor="start">MonitoringProxy</text>
+<text x="794" y="606" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">运行指标与监控</text>
+<line x1="90" y1="630" x2="90" y2="666" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrow)"/>
+<rect x="40" y="668" width="1100" height="96" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+<text x="56" y="692" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#92400e" font-weight="bold" text-anchor="start">⑤ 存储与知识</text>
+<text x="1124" y="692" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#64748b" font-weight="normal" text-anchor="end">STORAGE &amp; KNOWLEDGE</text>
+<rect x="56" y="702" width="340" height="46" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="66" y="720" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#92400e" font-weight="bold" text-anchor="start">HistoryBuffer</text>
+<text x="66" y="740" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">逐轮状态缓冲（masim/utils/history.py）</text>
+<rect x="420" y="702" width="340" height="46" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="430" y="720" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#92400e" font-weight="bold" text-anchor="start">BlockBasedStoreManager</text>
+<text x="430" y="740" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">落盘 · 冷/温/热分层由实现映射</text>
+<rect x="784" y="702" width="340" height="46" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="794" y="720" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#92400e" font-weight="bold" text-anchor="start">masim/knowledge · Ray object store</text>
+<text x="794" y="740" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">RAG 检索 · 跨 actor 对象共享</text>
+<line x1="1160" y1="104" x2="1160" y2="764" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5 5"/>
+<rect x="1180" y="104" width="340" height="44" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+<text x="1196" y="132" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#334155" font-weight="bold" text-anchor="start">横切轨道 · 平台 / 领域 边界</text>
+<rect x="1180" y="160" width="340" height="336" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="1196" y="188" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#1e40af" font-weight="bold" text-anchor="start">契约层 · 平台侧</text>
+<text x="1196" y="214" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1e40af" font-weight="bold" text-anchor="start">masim/platform/*/base.py</text>
+<text x="1196" y="238" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">只定义不实现：ABC + dataclass + 文档</text>
+<text x="1196" y="257" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">方法体为 ... ；改 base 即改契约</text>
+<text x="1196" y="276" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">首批 11 个模块契约：</text>
+<text x="1196" y="295" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">agent / decision / composite / activation</text>
+<text x="1196" y="314" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">runtime / message / state / topology</text>
+<text x="1196" y="333" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">world / registry / scale</text>
+<line x1="1196" y1="366" x2="1504" y2="366" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="1196" y="390" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1e40af" font-weight="bold" text-anchor="start">触达 ② 编排层 · ③ 运行时单元</text>
+<text x="1196" y="412" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">不触达 ① 入口层 · ④ 代理 · ⑤ 存储</text>
+<text x="1196" y="434" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#475569" font-weight="normal" text-anchor="start">抽象边界，不含任何领域规则</text>
+<text x="1196" y="456" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#475569" font-weight="normal" text-anchor="start">D9：契约只定义不实现</text>
+<line x1="1180" y1="286" x2="1144" y2="286" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<line x1="1180" y1="440" x2="1144" y2="440" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<rect x="1180" y="520" width="340" height="180" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="1.4"/>
+<text x="1196" y="548" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="14" fill="#92400e" font-weight="bold" text-anchor="start">领域层 · 使用者实现</text>
+<text x="1196" y="574" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">examples/{Scenario}/</text>
+<text x="1196" y="598" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">领域规则（撮合 / 传播 / 感染）</text>
+<text x="1196" y="617" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">领域 agent 行为 · 领域指标 · persona</text>
+<text x="1196" y="650" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#92400e" font-weight="bold" text-anchor="start">触达 ③ 运行时单元 · ⑤ 存储与知识</text>
+<text x="1196" y="672" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#0f172a" font-weight="normal" text-anchor="start">不触达 ① 入口层 · ② 编排层 · ④ 代理</text>
+<text x="1196" y="692" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.2" fill="#475569" font-weight="normal" text-anchor="start">场景代码不进 masim/ 核心</text>
+<path d="M 1180 540 L 1168 540 L 1168 470 L 1144 470" fill="none" stroke="#d97706" stroke-width="1.4" marker-end="url(#arrow)"/>
+<line x1="1180" y1="690" x2="1144" y2="690" stroke="#d97706" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="40" y="790" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#475569" font-weight="normal" text-anchor="start">依赖方向：上层依赖下层（① → ⑤）；下层不得反向依赖上层</text>
+</svg>

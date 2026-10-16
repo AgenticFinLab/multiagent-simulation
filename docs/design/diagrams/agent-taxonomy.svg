@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="720" viewBox="0 0 1500 720" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<rect width="100%" height="100%" fill="#fff"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#64748b"/></marker><marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><polygon points="0 0, 10 3, 0 6" fill="#2563eb"/></marker></defs>
+<text x="40" y="44" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="25" fill="#0f172a" font-weight="bold" text-anchor="start">决策机制与 Agent 分类</text>
+<text x="40" y="70" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#475569" font-weight="normal" text-anchor="start">四种决策机制 × archetype 库 × 1:1 档案镜像与运行期消费点</text>
+<rect x="40" y="96" width="420" height="504" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="1.4"/>
+<text x="56" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1e40af" font-weight="bold" text-anchor="start">① 四种决策机制</text>
+<text x="444" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10" fill="#64748b" font-weight="normal" text-anchor="end">MECHANISMS</text>
+<rect x="492" y="96" width="460" height="504" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="1.4"/>
+<text x="508" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#155e75" font-weight="bold" text-anchor="start">② Archetype 库（masim/agents）</text>
+<text x="936" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10" fill="#64748b" font-weight="normal" text-anchor="end">ARCHETYPES</text>
+<rect x="984" y="96" width="476" height="504" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.4"/>
+<text x="1000" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#5b21b6" font-weight="bold" text-anchor="start">③ 档案镜像与消费点</text>
+<text x="1444" y="126" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10" fill="#64748b" font-weight="normal" text-anchor="end">DEFINES &amp; CONSUMERS</text>
+<text x="56" y="148" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">同一 Player 契约，不同 decide() 实现</text>
+<rect x="56" y="170" width="388" height="90" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="66" y="194" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1e40af" font-weight="bold" text-anchor="start">Rule · 纯规则</text>
+<text x="66" y="218" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">确定性规则或公式直接产出订单</text>
+<text x="66" y="238" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">无 LLM 调用；可 seeded 复现</text>
+<rect x="56" y="276" width="388" height="90" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="66" y="300" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#5b21b6" font-weight="bold" text-anchor="start">LLM · 大模型直接决策</text>
+<text x="66" y="324" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">prompt → 解析 → 订单</text>
+<text x="66" y="344" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">输出经 wire-format 校验收敛</text>
+<rect x="56" y="382" width="388" height="90" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="66" y="406" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#155e75" font-weight="bold" text-anchor="start">RuleLLM · 规则约束 + LLM</text>
+<text x="66" y="430" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">规则给出边界，LLM 在边界内决策</text>
+<text x="66" y="450" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">可解释性 + 灵活性</text>
+<rect x="56" y="488" width="388" height="90" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="66" y="512" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#0f766e" font-weight="bold" text-anchor="start">Rag · 检索增强</text>
+<text x="66" y="536" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">先检索知识库再决策</text>
+<text x="66" y="556" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/knowledge 提供检索</text>
+<text x="508" y="148" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">209 个原型 · 与 defines 档案 1:1</text>
+<rect x="508" y="170" width="132" height="64" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="518" y="192" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1e40af" font-weight="bold" text-anchor="start">finance</text>
+<text x="518" y="220" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1e40af" font-weight="bold" text-anchor="start">195</text>
+<rect x="656" y="170" width="132" height="64" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.1"/>
+<text x="666" y="192" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#0f766e" font-weight="bold" text-anchor="start">market</text>
+<text x="666" y="220" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#0f766e" font-weight="bold" text-anchor="start">9</text>
+<rect x="804" y="170" width="132" height="64" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="814" y="192" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#92400e" font-weight="bold" text-anchor="start">opinion</text>
+<text x="814" y="220" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="17" fill="#92400e" font-weight="bold" text-anchor="start">5</text>
+<rect x="508" y="250" width="428" height="328" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.1"/>
+<text x="522" y="278" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#155e75" font-weight="bold" text-anchor="start">配对规则：Rule&lt;X&gt; + LLM&lt;X&gt;</text>
+<text x="522" y="304" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">每个 investor 原型提供 Rule 与 LLM 两个实现，</text>
+<text x="522" y="322" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">两者共享同一个 kebab-case STRATEGY 标识，</text>
+<text x="522" y="340" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">运行时配对为一个 AgentEntry。</text>
+<rect x="522" y="366" width="400" height="78" rx="8" fill="#ffffff" stroke="#0891b2" stroke-width="1"/>
+<text x="534" y="390" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#334155" font-weight="bold" text-anchor="start">STRATEGY = "anchored-trader"</text>
+<text x="534" y="412" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">RuleAnchoredTrader / LLMAnchoredTrader</text>
+<text x="534" y="432" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">players.yml -&gt; archetype: anchored-trader</text>
+<text x="522" y="474" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">STRATEGY 是唯一真源，三处同名：</text>
+<text x="522" y="494" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#0f172a" font-weight="normal" text-anchor="start">players.yml · UI marketplace · defines 文件名</text>
+<text x="522" y="514" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">一个原型 = 一个可复用 AgentEntry</text>
+<rect x="1000" y="170" width="444" height="100" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.1"/>
+<text x="1010" y="196" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#5b21b6" font-weight="bold" text-anchor="start">209 份 Markdown 档案</text>
+<text x="1010" y="220" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.8" fill="#0f172a" font-weight="normal" text-anchor="start">finance 195 · market 9 · opinion 5</text>
+<text x="1010" y="240" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">与 .py 实现 1:1 镜像（kebab → snake）</text>
+<text x="1010" y="260" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">masim/agents/defines/{domain}/*.md</text>
+<text x="1000" y="296" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#334155" font-weight="bold" text-anchor="start">运行期消费点</text>
+<rect x="1000" y="314" width="444" height="72" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.1"/>
+<text x="1010" y="340" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#065f46" font-weight="bold" text-anchor="start">① 参数表 → players.yml</text>
+<text x="1010" y="362" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#475569" font-weight="normal" text-anchor="start">archetype 键指向档案；extras 承载参数</text>
+<rect x="1000" y="402" width="444" height="72" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.1"/>
+<text x="1010" y="428" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#92400e" font-weight="bold" text-anchor="start">② UI Agent Marketplace</text>
+<text x="1010" y="450" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#475569" font-weight="normal" text-anchor="start">masim/interface/components/agent_market.py</text>
+<rect x="1000" y="490" width="444" height="72" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.1"/>
+<text x="1010" y="516" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1e40af" font-weight="bold" text-anchor="start">③ Skill 流水线</text>
+<text x="1010" y="538" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="9.8" fill="#475569" font-weight="normal" text-anchor="start">masim/skills/ · 复用 vs 新建三段式匹配</text>
+<text x="1000" y="584" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#475569" font-weight="normal" text-anchor="start">新场景先做「复用 vs 新建」三段式匹配</text>
+<rect x="40" y="628" width="1420" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.1"/>
+<text x="56" y="660" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" fill="#334155" font-weight="bold" text-anchor="start">45 场景 × 4 机制 = 180 个 players.py；对应 180 个 run_*.py 入口</text>
+</svg>
