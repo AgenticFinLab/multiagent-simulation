@@ -651,19 +651,25 @@ class BasePlayer(ABC):
 
         Extension point for non-standard topology scenarios:
         - Default: True when all expected_senders have sent (or no senders expected).
+        - Level 0 in the bootstrap round (the first round this process executes)
+          is always ready: initiators have no inbound to wait for yet. The
+          Simulator signals this with ``kwargs["bootstrap"] = True``.
         - Same-level peers: by design, same-level senders are round-lagged.
           Override to relax the readiness condition for optional peers.
         - Feedback edges: back-edges carry the previous round's message.
-          Override to track which round's message arrived (info.extras["round_num"]).
+          Override to track which round's message arrived — the round is
+          available as ``info.extras["round_num"]`` on received Info units.
         - Partial readiness: override to proceed with a subset of expected senders
           (e.g., quorum-based, timeout-based, or priority-based readiness).
 
-        Note:
-            The Simulator's level-ordered execution model guarantees that
-            all lower-level senders' messages have been delivered before
-            operate() is called. If is_received_ready returns False, the
-            Persona logs a warning and proceeds anyway — it does NOT block.
-            Use this hook to express readiness semantics, not as a blocking gate.
+        Important:
+            This is a HARD GATE, not a hint. The Simulator's level-ordered
+            execution model guarantees that all lower-level senders' messages
+            have been delivered before ``operate()`` is called, so a ``False``
+            result means an unexpected topology/timing condition: the Persona
+            **raises RuntimeError** and aborts the round rather than operating
+            on stale or missing inbound state. A custom override must therefore
+            return ``True`` for every case it intends to allow.
 
         Args:
             round_num: Current round number

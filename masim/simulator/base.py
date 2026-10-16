@@ -304,8 +304,17 @@ class BaseSimulator(ABC):
         ...
 
     @abstractmethod
-    async def run(self) -> List[Dict[str, Any]]:
-        """Run the complete simulation. Returns list of round results."""
+    async def run(
+        self,
+        *,
+        resume: bool = False,
+        fresh: bool = False,
+    ) -> List[Dict[str, Any]]:
+        """Run the complete simulation. Returns list of round results.
+
+        Implementations MUST NOT silently mix a new run into an existing
+        ``record_path``: see :meth:`GeneralSimulator.run` for the contract.
+        """
         ...
 
     @abstractmethod
@@ -523,17 +532,34 @@ class BaseSimulationRunner(ABC):
     # Lifecycle
     # ------------------------------------------------------------------
 
-    async def execute(self) -> List[Dict[str, Any]]:
+    async def execute(
+        self,
+        *,
+        resume: bool = False,
+        fresh: bool = False,
+    ) -> List[Dict[str, Any]]:
         """Run the full scenario lifecycle: preflight → setup → run → shutdown.
 
         Returns the round-result list produced by the underlying simulator's
         ``run()``. Any exception during setup/run is re-raised after
         ``shutdown()`` completes, so Ray actors are always released.
+
+        Parameters
+        ----------
+        resume : bool
+            Continue an interrupted run from the last completed round found
+            under ``setting.record_path``. Agent state is NOT restored, so
+            this only makes sense when the remaining rounds do not depend on
+            the exact portfolio state at the interruption point.
+        fresh : bool
+            Delete the previous run's output directories (records /
+            communication / monitoring / checkpoints) before starting from
+            round 1.
         """
         await self._preflight()
         await self.simulator.setup()
         try:
-            results = await self.simulator.run()
+            results = await self.simulator.run(resume=resume, fresh=fresh)
             return results
         finally:
             await self.simulator.shutdown()

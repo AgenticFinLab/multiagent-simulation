@@ -46,7 +46,7 @@ from masim.proxy.base import (
 )
 from masim.player.base import Info
 from masim.utils.history import HistoryBuffer
-from lmbase.utils.tools import BlockBasedStoreManager
+from masim.utils.store_backend import BlockBasedStoreManager
 
 if TYPE_CHECKING:
     pass
@@ -141,10 +141,21 @@ class SendReceiveProxy(BaseProxy):
         Args:
             message: The proxy-layer Message received from another player
         """
+        # Carry the routing metadata the sender stamped onto the Message into
+        # the Info unit. ``build_message_from_info`` stores the logical round in
+        # ``Message.extras["round_num"]``; without this merge the documented
+        # feedback / same-level hook — "read info.extras['round_num'] to detect a
+        # lagged message" — could never work, because only the *content*
+        # envelope's extras used to be copied across.
+        extras = dict(message.payload.get("extras") or {})
+        message_round = (message.extras or {}).get("round_num")
+        if message_round is not None:
+            extras.setdefault("round_num", message_round)
+
         info = Info(
             payload=message.payload["content"],
             content_type=message.payload["content_type"],
-            extras=message.payload["extras"],
+            extras=extras,
             sender_id=message.sender_id,
             time_received=datetime.now().isoformat(),
         )
@@ -203,6 +214,31 @@ class StorageProxy(BaseProxy):
         self.config: StorageConfig = config
         self._message_stores: Dict[str, BlockBasedStoreManager] = {}
         self._turn_stores: Dict[str, BlockBasedStoreManager] = {}
+        # Monotonic per-(kind, player) record sequence.
+        #
+        # ``BlockBasedStoreManager`` keys block JSON by the record's
+        # ``savename``, and its documented contract is that key uniqueness
+        # decides "add" versus "update".  The previous key embedded a
+        # second-resolution wall-clock stamp, so every message a busy player
+        # received within the same second of the same round collapsed onto one
+        # key and silently overwrote the earlier records (a coordinator with
+        # 10 inbound orders/round persisted 1).
+        #
+        # A per-round ordinal makes every key unique by construction and - as a
+        # bonus - makes the persisted ordering identical to the dispatch order
+        # instead of depending on wall-clock resolution.
+        self._record_seq: Dict[str, int] = {}
+
+    def _next_record_seq(self, kind: str, player_id: str, round_num: int) -> int:
+        """Return the next 1-based record ordinal for one player's round.
+
+        Keyed by ``(kind, player, round)`` so the persisted key mirrors the
+        channel store's ``msg_rRRRRRR_SSSSSS`` shape: the round prefix plus an
+        ordinal that restarts each round.
+        """
+        key = f"{kind}:{player_id}:{round_num}"
+        self._record_seq[key] = self._record_seq.get(key, 0) + 1
+        return self._record_seq[key]
 
     def _get_base_path(self, player_id: str) -> str:
         """Get base path for player storage: {record_path}/{player_id}"""
@@ -250,9 +286,13 @@ class StorageProxy(BaseProxy):
             "timestamp": timestamp.isoformat(),
             "message": serialized_message,
         }
-        # Format: msg_r{round}_{MMDDHHMMSS}
-        # e.g., msg_r000001_0221143052
-        savename = f"msg_r{round_num:06d}_{timestamp.strftime('%m%d%H%M%S')}"
+        # Format: msg_r{round:06d}_{seq:06d}
+        # e.g. msg_r000001_000007 — round prefix plus a per-round ordinal, so
+        # the key is collision-free within a run and across a resumed run in
+        # the same directory. The wall-clock time is preserved inside
+        # ``record["timestamp"]``.
+        seq = self._next_record_seq("message", player_id, round_num)
+        savename = f"msg_r{round_num:06d}_{seq:06d}"
         self._get_message_store(player_id).save(savename=savename, data=record)
 
     def record_turn_result(
@@ -270,19 +310,29 @@ class StorageProxy(BaseProxy):
             "timestamp": timestamp.isoformat(),
             "turn_result": serialized_result,
         }
-        # Format: turn_r{round}_{MMDDHHMMSS}
-        # e.g., turn_r000001_0221143052
-        savename = f"turn_r{round_num:06d}_{timestamp.strftime('%m%d%H%M%S')}"
+        # Format: turn_r{round:06d}_{seq:06d} — see ``record_message`` for why
+        # the ordinal replaced the wall-clock stamp (key collisions silently
+        # overwrote records).
+        seq = self._next_record_seq("turn", player_id, round_num)
+        savename = f"turn_r{round_num:06d}_{seq:06d}"
         self._get_turn_store(player_id).save(savename=savename, data=record)
 
     async def initialize(self) -> None:
         self.is_initialized = True
 
     async def shutdown(self) -> None:
-        for store in self._message_stores.values():
-            store.flush()
-        for store in self._turn_stores.values():
-            store.flush()
+        """Release the per-player record stores.
+
+        ``BlockBasedStoreManager.save()`` is write-through — it rewrites the
+        active block file and its index on every call — so there is nothing to
+        flush here.  (The previous implementation called ``store.flush()``,
+        which does not exist on that class; the resulting ``AttributeError``
+        was never observed only because no caller invoked this method.)
+        Buffered *player-side* time series are flushed by
+        ``GeneralPlayer.shutdown()``, which owns the ``HistoryBuffer`` objects.
+        """
+        self._message_stores.clear()
+        self._turn_stores.clear()
         self.is_initialized = False
 
 

@@ -71,7 +71,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
-from lmbase.utils.tools import BlockBasedStoreManager
+from masim.utils.store_backend import BlockBasedStoreManager
 
 
 # =============================================================================
@@ -259,13 +259,48 @@ class CommunicationChannel(ABC):
         # Set false for large-scale runs (N > ~100 players) to avoid high write volume.
         self.record_messages: bool = config["record_messages"]
 
-        # Initialize message store
-        os.makedirs(self.storage_path, exist_ok=True)
-        self.message_store = BlockBasedStoreManager(
-            folder=self.storage_path,
-            file_format="json",
-            block_size=config["message_block_size"],
-        )
+        # Per-round encoded-message counter.
+        #
+        # ``BlockBasedStoreManager`` keys each block JSON by the record's
+        # ``savename`` and treats a repeated key as an update rather than an
+        # add, so a non-unique name silently drops records.  Wall-clock stamps
+        # are not a safe disambiguator (on Windows the timer granularity is
+        # ~15.6 ms, so many messages share one stamp), and a bare monotonic
+        # counter is not either: a resumed run starts a *new* process whose
+        # counter restarts at 1 and would overwrite the previous run's records
+        # in the same ``storage_path``.  The key therefore carries the logical
+        # round AND a per-round ordinal, which is unique within a run
+        # directory and stable across processes.
+        self._encoded_message_seq: int = 0
+        self._encoded_message_round: Optional[int] = None
+
+        # The block store is created on first write, not here: `lmbase` is an
+        # optional-from-PyPI backend, and a run with `record_messages: false`
+        # (the large-scale default) must neither import it nor touch the disk.
+        self.message_store = None
+
+    def _ensure_message_store(self):
+        """Create the block store on first use and return it."""
+        if self.message_store is None:
+            os.makedirs(self.storage_path, exist_ok=True)
+            self.message_store = BlockBasedStoreManager(
+                folder=self.storage_path,
+                file_format="json",
+                block_size=self.config["message_block_size"],
+            )
+        return self.message_store
+
+    def _next_encoded_message_seq(self, round_num: Optional[int] = None) -> int:
+        """Return the next 1-based ordinal for an encoded wire message.
+
+        The ordinal resets whenever the logical round advances, so keys read as
+        ``msg_r000002_000003`` (round 2, third message of that round).
+        """
+        if round_num != self._encoded_message_round:
+            self._encoded_message_round = round_num
+            self._encoded_message_seq = 0
+        self._encoded_message_seq += 1
+        return self._encoded_message_seq
 
     # =========================================================================
     #                    ABSTRACT METHODS (Must implement)

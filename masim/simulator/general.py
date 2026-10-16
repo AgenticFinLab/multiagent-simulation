@@ -92,6 +92,50 @@ def derive_persona_output_paths(record_root: str) -> Dict[str, Dict[str, str]]:
     }
 
 
+def _clear_run_outputs(record_path: str) -> List[str]:
+    """Delete the output directories of a previous run under the run root.
+
+    The run root is the parent directory of ``setting.record_path``; the
+    sibling directories are those derived by
+    :func:`derive_persona_output_paths` plus the record directory itself.
+
+    Safety: every deletion target is resolved to an absolute path and must
+    live *directly under* the resolved run root (``commonpath`` check), so a
+    malformed or relative ``record_path`` can never remove anything outside
+    the experiment directory. Missing directories are skipped.
+
+    Returns:
+        Names (not paths) of the directories that were removed.
+    """
+    import shutil
+
+    run_root = os.path.abspath(os.path.dirname(record_path.rstrip("/\\")) or ".")
+    candidates: List[str] = []
+    for name in (
+        os.path.basename(record_path.rstrip("/\\")),
+        "records",
+        "communication",
+        "monitoring",
+        "checkpoints",
+    ):
+        if name and name not in candidates:
+            candidates.append(name)
+
+    removed: List[str] = []
+    for name in candidates:
+        target = os.path.abspath(os.path.join(run_root, name))
+        # Refuse anything that is not an immediate child of the run root.
+        if os.path.commonpath([run_root, target]) != run_root:
+            logger.warning("    Skipping unsafe cleanup target: %s", target)
+            continue
+        if target == run_root:
+            continue
+        if os.path.isdir(target):
+            shutil.rmtree(target)
+            removed.append(name)
+    return removed
+
+
 def _write_run_manifest(
     config: "SimulationConfig", simulation_id: str, record_path: str
 ) -> None:
@@ -172,6 +216,9 @@ class GeneralSimulator(BaseSimulator):
             config: Simulation configuration
         """
         super().__init__(config)
+        # Tracks whether this process has executed a round yet; the first one is
+        # the bootstrap round (see run_round()).
+        self._executed_any_round = False
         # Initialize communication channel from config
         comm_config = config.communication
         self.communication = GeneralCommunicationChannel(comm_config)
@@ -593,6 +640,15 @@ class GeneralSimulator(BaseSimulator):
         self.round_clock.tick_start()
         self.current_round = round_num
 
+        # Bootstrap round = the first round THIS process executes. Level-0
+        # initiators have no inbound queue yet in that round (their
+        # predecessors only emit later in the round, or never), so they must
+        # not be required to satisfy the readiness invariant. Hardcoding this
+        # to ``round_num == 1`` broke resumed runs, whose first executed round
+        # is N > 1.
+        is_bootstrap_round = not self._executed_any_round
+        self._executed_any_round = True
+
         # Extension hook: subclasses may mutate self.topology here for dynamic topologies.
         # Default implementation is a no-op (static topology).
         # After any mutation, the subclass must also call self.topology.invalidate_levels_cache()
@@ -611,7 +667,12 @@ class GeneralSimulator(BaseSimulator):
             # ─────────────────────────────────────────────────────────────────
             # PHASE 1: EXECUTE - Players run operate() in parallel
             # ─────────────────────────────────────────────────────────────────
-            execute_result = self.phase_execute(round_num, level_handles, level=level)
+            execute_result = self.phase_execute(
+                round_num,
+                level_handles,
+                level=level,
+                bootstrap=is_bootstrap_round,
+            )
 
             # ─────────────────────────────────────────────────────────────────
             # PHASE 2: COLLECT - Wait for all operate() to complete
@@ -653,21 +714,34 @@ class GeneralSimulator(BaseSimulator):
 
         return round_results
 
-    async def run(self) -> List[Dict[str, Any]]:
-        """
-        Run the complete simulation, resuming from the last completed round
-        if on-disk data already exists (Option A: skip-round resume).
+    async def run(
+        self,
+        *,
+        resume: bool = False,
+        fresh: bool = False,
+    ) -> List[Dict[str, Any]]:
+        """Run the complete simulation.
 
-        Resume behaviour:
-        - Scans record_path for existing batch data to find the highest
-          completed round N.
-        - Starts the loop from round N+1, skipping rounds 1..N entirely.
-        - WARNING: actor custom_state (cash, position, etc.) is re-initialised
-          from config defaults, not restored from disk. This is correct for
-          coordinators (their state is rebuilt from inbound orders each round)
-          but means LLM investor portfolios restart from initial values.
-          Use this only when the remaining rounds are independent of the
-          exact portfolio state at round N (e.g. price-driven strategies).
+        Resume policy (explicit and fail-loud)
+        --------------------------------------
+        A run writes into ``setting.record_path`` and its sibling directories
+        (``communication`` / ``monitoring`` / ``checkpoints``).  Previously the
+        round loop auto-detected completed rounds and silently continued at
+        round N+1, which mixes two datasets in one directory *and* re-creates
+        every actor from config defaults — ``save_state``/``load_state`` exist
+        but no caller restores them, so portfolios and cash restart from their
+        initial values.  The policy is now:
+
+        * default: completed rounds already on disk → raise, so the caller
+          chooses deliberately;
+        * ``fresh=True``: delete the previous run's output directories first,
+          then start at round 1;
+        * ``resume=True``: continue from the last completed round + 1, with the
+          state-reset caveat above.
+
+        Args:
+            resume: continue an interrupted run (see caveat above).
+            fresh: discard previous output and start from round 1.
 
         Returns:
             List of recent round results (from bounded history deque)
@@ -678,12 +752,34 @@ class GeneralSimulator(BaseSimulator):
         total_rounds = self.config.setting["total_rounds"]
         record_path = self.config.setting["record_path"]
 
-        # Detect already-completed rounds from on-disk data
-        start_round = detect_resume_round(record_path) + 1
-        if start_round > 1:
+        if fresh:
+            removed = _clear_run_outputs(record_path)
             logger.info(
-                "    Resume detected: %d round(s) already on disk, starting from round %d",
-                start_round - 1,
+                "    --fresh: cleared %d previous output dir(s): %s",
+                len(removed),
+                ", ".join(removed) if removed else "(nothing to clear)",
+            )
+
+        # Detect already-completed rounds from on-disk data
+        completed_rounds = detect_resume_round(record_path)
+        if completed_rounds > 0 and not resume and not fresh:
+            raise RuntimeError(
+                f"record_path {record_path!r} already holds {completed_rounds} "
+                "completed round(s) from a previous run. Refusing to mix two "
+                "runs in one directory. Choose one explicitly:\n"
+                "  * continue it   : pass resume=True / `--resume` "
+                "(actor state restarts from config defaults)\n"
+                "  * restart clean : pass fresh=True / `--fresh` "
+                "(deletes records/ communication/ monitoring/ checkpoints/)\n"
+                "  * or set setting.record_path to a new directory."
+            )
+
+        start_round = completed_rounds + 1 if resume else 1
+        if resume and completed_rounds > 0:
+            logger.warning(
+                "    Resume: %d completed round(s) on disk → starting at round %d. "
+                "Agent state is re-initialised from config, not restored from disk.",
+                completed_rounds,
                 start_round,
             )
         if start_round > total_rounds:
@@ -921,6 +1017,18 @@ def run(
         When ``True`` (default), call :func:`dotenv.load_dotenv` before
         any preprocessing. Pass ``False`` only for pure-Rule scenarios
         that require no API keys.
+
+    CLI flags
+    ---------
+    ``-c/--config``   config path (defaults to ``default_config``)
+    ``-r/--rounds``   override ``setting.total_rounds``
+    ``--resume``      continue an interrupted run (agent state is reset)
+    ``--fresh``       delete the previous run's output, start at round 1
+                      (mutually exclusive with ``--resume``)
+
+    With neither ``--resume`` nor ``--fresh``, a ``record_path`` that already
+    holds completed rounds makes the run fail with an actionable message
+    instead of silently skipping rounds and mixing two datasets.
     """
     # Delayed imports: keep base module import free of dotenv / argparse
     # side effects so ``from masim.simulator.general import GeneralSimulator``
@@ -949,6 +1057,23 @@ def run(
         "-r", "--rounds", type=int, default=None,
         help="Override total_rounds in the config",
     )
+    resume_group = parser.add_mutually_exclusive_group()
+    resume_group.add_argument(
+        "--resume", action="store_true",
+        help=(
+            "Continue an interrupted run from the last completed round found "
+            "under setting.record_path. Agent state is re-initialised from "
+            "config (portfolios/cash are NOT restored from disk)."
+        ),
+    )
+    resume_group.add_argument(
+        "--fresh", action="store_true",
+        help=(
+            "Delete the previous run's output directories "
+            "(records/ communication/ monitoring/ checkpoints/) and start "
+            "from round 1."
+        ),
+    )
     args = parser.parse_args()
 
     # ── Config load + optional round override ────────────────────────────
@@ -972,7 +1097,7 @@ def run(
     # ── Runner lifecycle ─────────────────────────────────────────────────
     runner = GeneralSimulationRunner(config)
     try:
-        asyncio.run(runner.execute())
+        asyncio.run(runner.execute(resume=args.resume, fresh=args.fresh))
         sep = "=" * _BANNER_WIDTH
         print(f"\n{sep}")
         print(f"Simulation Complete! Rounds: {config.setting['total_rounds']}")

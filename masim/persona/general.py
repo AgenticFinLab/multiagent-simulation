@@ -234,6 +234,10 @@ class PlayerPersona(BasePersona):
             round_num,
             received_senders,
             level=level,
+            # The Simulator marks its first executed round; level-0 initiators
+            # must not wait for predecessors in that round, even when the run
+            # resumes at round N > 1.
+            bootstrap=bool(kwargs.get("bootstrap", False)),
         ):
             raise RuntimeError(
                 f"Actor {self.identity}: is_received_ready=False at operate() "
@@ -425,10 +429,22 @@ class PlayerPersona(BasePersona):
         Args:
             message: The decoded Message object from channel
         """
+        # The recorded round must be the round the message was SENT in, not the
+        # receiver's last-operated round. inbound delivery happens during the
+        # sender's level, so for any agent at level > 0 the broadcast arrives
+        # before its own operate() call for that round — ``self.current_round``
+        # is then still the previous round (0 before the very first operate),
+        # which mislabelled every inbound record with the wrong ``round_num``.
+        # ``build_message_from_info`` stamps the authoritative round into
+        # ``Message.extras["round_num"]``.
+        message_round = (message.extras or {}).get("round_num")
+        if message_round is None:
+            message_round = self.current_round
+
         # Log the received message
         self.storage.record_message(
             player_id=self.identity,
-            round_num=self.current_round,
+            round_num=message_round,
             message=message,
             direction="received",
         )

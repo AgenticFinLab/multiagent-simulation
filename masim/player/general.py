@@ -279,23 +279,33 @@ class GeneralPlayer(BasePlayer):
         Check if player has received enough inbounds to proceed.
 
         Logic:
-        - Level 0 in Round 1: ready immediately (initiators don't wait)
+        - Bootstrap round (the first round this process executes), level 0:
+          ready immediately — initiators have no inbound to wait for.
         - If no expected_senders → ready immediately
         - Otherwise check if all expected senders have sent
+
+        The bootstrap rule used to be hardcoded as ``round_num == 1``, which
+        made a *resumed* run fail: the first executed round is then N > 1, so
+        level-0 initiators demanded every topology predecessor and hard-failed
+        before any message could be produced. The Simulator now marks its first
+        executed round explicitly via ``bootstrap=True``.
 
         Args:
             round_num: Current round number
             received_senders: Set of sender IDs in proxy inbound queue
                               (injected by Persona from proxy.get_received_senders())
-            **kwargs: Additional parameters (level, etc.)
+            **kwargs: Additional parameters (``level``, ``bootstrap``)
 
         Returns:
             True if ready to proceed with decision
         """
         level = kwargs.get("level", 0)
+        is_bootstrap = bool(kwargs.get("bootstrap", False))
 
-        # Level 0 nodes in Round 1 are initiators - they don't wait for messages
-        if round_num == 1 and level == 0:
+        # Initiators (level 0) don't wait for messages in the bootstrap round.
+        # ``round_num == 1`` is kept as a fallback for callers that do not pass
+        # ``bootstrap`` (e.g. direct run_round() embedding).
+        if level == 0 and (is_bootstrap or round_num == 1):
             return True
 
         if not self.expected_senders:

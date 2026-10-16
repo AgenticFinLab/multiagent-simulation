@@ -23,7 +23,7 @@ On-disk layout written by StorageProxy / BlockBasedStoreManager
   {player_id}/
     turns/
       turn-store-information.json     – index (optional, not required for reading)
-      turn_block_N.json               – { turn_rXXXXXX_MMDDHHMMSS :
+      turn_block_N.json               – { turn_rRRRRRR_SSSSSS  (round, ordinal) :
                                            { round_num   : int,
                                              timestamp   : str,
                                              turn_result : {
@@ -40,7 +40,7 @@ On-disk layout written by StorageProxy / BlockBasedStoreManager
                                                tick_step_count           : int }}}
     messages/
       msg-store-information.json      – index (optional)
-      msg_block_N.json                – { msg_rXXXXXX_MMDDHHMMSS :
+      msg_block_N.json                – { msg_rRRRRRR_SSSSSS  (round, ordinal) :
                                            { round_num  : int,
                                              direction  : str ("received"|"sent"),
                                              timestamp  : str,

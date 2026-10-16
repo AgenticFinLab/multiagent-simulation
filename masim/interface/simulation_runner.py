@@ -347,14 +347,20 @@ class SimulationRunner:
             return False
 
     def clear_records(self) -> None:
-        """Remove existing experiment records so the simulation starts fresh.
+        """Remove existing experiment output so the simulation starts fresh.
 
         Can be called BEFORE ``setup()`` — reads ``record_path`` directly from
-        the YAML config file.  Removes the directory tree and recreates it empty.
-        """
-        import shutil
+        the YAML config file.
 
+        Clears *all* derived output directories (records / communication /
+        monitoring / checkpoints) through the simulator's own cleanup helper,
+        not just ``records``.  Clearing only ``records`` used to leave the
+        channel store and monitoring files behind, so a second run of the same
+        scenario appended to the first run's messages.
+        """
         import yaml as _yaml
+
+        from masim.simulator.general import _clear_run_outputs
 
         try:
             with open(self.config_path, "r", encoding="utf-8") as fh:
@@ -375,11 +381,9 @@ class SimulationRunner:
         if not record_path:
             return
         # record_path is relative to project root
-        abs_record = project_root / record_path
-        if abs_record.exists():
-            shutil.rmtree(abs_record)
-            logger.info("Cleared previous records at %s", abs_record)
-        abs_record.mkdir(parents=True, exist_ok=True)
+        removed = _clear_run_outputs(str(project_root / record_path))
+        logger.info("Cleared previous run output: %s", ", ".join(removed) or "(none)")
+        (project_root / record_path).mkdir(parents=True, exist_ok=True)
 
     async def run(
         self, progress_callback: Optional[Callable[[SimulationStatus], None]] = None

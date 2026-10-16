@@ -34,7 +34,7 @@ import os
 from collections import deque
 from typing import Any, List, Optional, Union
 
-from lmbase.utils.tools import BlockBasedStoreManager
+from masim.utils.store_backend import BlockBasedStoreManager
 
 
 class HistoryBuffer:
@@ -91,13 +91,12 @@ class HistoryBuffer:
         # Hot storage (recent data in memory)
         self.hot: deque = deque(maxlen=entry_limit)
 
-        # Cold storage (historical data on disk)
-        os.makedirs(folder, exist_ok=True)
-        self.cold_store = BlockBasedStoreManager(
-            folder=folder,
-            file_format="json",
-            block_size=block_size,
-        )
+        # Cold storage (historical data on disk). Created on first flush rather
+        # than here so that constructing a buffer — which every simulator and
+        # every agent does — does not require the optional ``lmbase`` backend
+        # nor create empty directories for runs that never write.
+        self._cold_folder = folder
+        self.cold_store = None
 
         # Counters
         self.cold_count: int = 0  # Items in cold storage
@@ -133,6 +132,17 @@ class HistoryBuffer:
         self.hot.append(value)
         self.total_count += 1
 
+    def _ensure_cold_store(self):
+        """Create the on-disk block store on first write and return it."""
+        if self.cold_store is None:
+            os.makedirs(self._cold_folder, exist_ok=True)
+            self.cold_store = BlockBasedStoreManager(
+                folder=self._cold_folder,
+                file_format="json",
+                block_size=self.block_size,
+            )
+        return self.cold_store
+
     def _flush_pending(self) -> None:
         """Flush pending cold items to disk."""
         if not self._pending_cold:
@@ -143,7 +153,7 @@ class HistoryBuffer:
         batch_end = batch_start + len(self._pending_cold) - 1
         savename = f"batch_{batch_start:08d}_{batch_end:08d}"
 
-        self.cold_store.save(savename=savename, data=self._pending_cold)
+        self._ensure_cold_store().save(savename=savename, data=self._pending_cold)
         self.cold_count += len(self._pending_cold)
         self._pending_cold = []
 
@@ -241,7 +251,7 @@ class HistoryBuffer:
         savename = f"batch_{batch_start:08d}_{batch_end:08d}"
 
         try:
-            batch_data = self.cold_store.load(savename=savename)
+            batch_data = self._ensure_cold_store().load(savename=savename)
             local_index = index - batch_start
             return batch_data[local_index]
         except Exception:
@@ -278,7 +288,7 @@ class HistoryBuffer:
             batch_end = min(batch_start + self.block_size - 1, self.cold_count - 1)
             savename = f"batch_{batch_start:08d}_{batch_end:08d}"
             try:
-                batch_data = self.cold_store.load(savename=savename)
+                batch_data = self._ensure_cold_store().load(savename=savename)
                 result.extend(batch_data)
             except Exception:
                 pass  # Skip missing batches

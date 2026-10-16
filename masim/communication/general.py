@@ -10,7 +10,7 @@ The communication layer OWNS Message and its enums; proxy consumes them.
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from masim.communication.base import (
     CommunicationChannel,
@@ -118,21 +118,33 @@ class GeneralCommunicationChannel(CommunicationChannel):
         message_dict = json.loads(packet.encoded)
         return Message.from_dict(message_dict)
 
-    def record_encoded_message(self, packet: SimPacket) -> None:
+    def record_encoded_message(
+        self, packet: SimPacket, round_num: Optional[int] = None
+    ) -> None:
         """
         Record a SimPacket with size and timestamp.
 
         Args:
             packet: SimPacket from encode_message()
+            round_num: Logical round the message belongs to. Supplied by
+                ``encode_and_deliver`` from ``Message.extras["round_num"]`` so
+                the persisted key is round-scoped and cannot collide with a
+                previous run's records in the same ``storage_path``.
         """
         timestamp = datetime.now()
         record = {
             "timestamp": timestamp.isoformat(),
             "size_bytes": len(packet.encoded.encode("utf-8")),
             "encoded": packet.encoded,
+            "round_num": round_num,
         }
-        savename = f"msg_{timestamp.strftime('%m%d%H%M%S%f')}"
-        self.message_store.save(savename=savename, data=record)
+        # Format: msg_r{round:06d}_{seq:06d} — the round prefix plus a per-round
+        # ordinal guarantee a unique ``BlockBasedStoreManager`` key, within one
+        # run and across a resumed run in the same directory.
+        seq = self._next_encoded_message_seq(round_num)
+        round_token = 0 if round_num is None else round_num
+        savename = f"msg_r{round_token:06d}_{seq:06d}"
+        self._ensure_message_store().save(savename=savename, data=record)
 
     def encode_and_deliver(
         self,
@@ -184,7 +196,9 @@ class GeneralCommunicationChannel(CommunicationChannel):
 
             # 2. Record the SimPacket (skipped at scale when record_messages=False)
             if self.record_messages:
-                self.record_encoded_message(packet)
+                self.record_encoded_message(
+                    packet, message.extras.get("round_num")
+                )
 
             # 3. Decode SimPacket → Message (proxy layer restored)
             decoded_message = self.decode_message(packet)
