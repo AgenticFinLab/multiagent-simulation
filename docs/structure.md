@@ -83,7 +83,7 @@ multiagent-simulation/
 | `masim/communication` | 消息编码/解码/传输 | `GeneralCommunicationChannel` / `build_message_from_info` |
 | `masim/proxy` | 通信/存储/监控代理 | `SendReceiveProxy` / `StorageProxy` |
 | `masim/knowledge` | 文档加载、向量索引、RAG | `KnowledgeManager` |
-| `masim/evaluation` | 金融指标、验证、可视化 | `finance/*` |
+| `evaluation` | 金融指标、验证、可视化 | `finance/*` |
 | `masim/format` | prompt / 订单 schema / 最终化 | `order.py` / `finalize.py` |
 | `masim/interface` | Streamlit 回放与分析 | `app.py` |
 | `masim/execution` | **执行策略**（默认 `SelfFillModel`、示例 `MarketPriceFillModel`） | `FillModel` |

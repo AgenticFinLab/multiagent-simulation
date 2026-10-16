@@ -6,7 +6,7 @@ MASim's internal storage layout (batch stores, turn payloads, player roles)
 and normalize them into clean {round_num: value} mappings.
 
 Usage:
-    from masim.evaluation.data_loader import (
+    from evaluation.data_loader import (
         load_data,
         batch_to_rounds,
         market_players,
@@ -217,7 +217,7 @@ def aligned_prices_and_fundamentals(data: Dict[str, Any]) -> Tuple[
         If market_prices or fundamentals is empty, or they share no rounds,
         or fundamentals contain zero values.
     """
-    from masim.evaluation.registry import MetricUnavailable
+    from evaluation.registry import MetricUnavailable
 
     market_prices = data.get("market_prices")
     fundamentals = data.get("fundamentals")

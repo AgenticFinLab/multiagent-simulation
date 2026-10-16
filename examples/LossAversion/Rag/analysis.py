@@ -22,7 +22,7 @@ from examples.LossAversion.Rule.analysis import (
     load_simulation_data as load_rule_simulation_data,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/LossAversion/Rag/simulation.yml"
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"

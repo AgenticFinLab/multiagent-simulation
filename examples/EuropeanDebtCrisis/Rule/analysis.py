@@ -54,12 +54,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     calculate_max_drawdown,
     calculate_returns,
     save_figure,
 )
-from masim.evaluation.data_loader import load_data, market_players
+from evaluation.data_loader import load_data, market_players
 from masim.utils import load_config, load_results
 
 

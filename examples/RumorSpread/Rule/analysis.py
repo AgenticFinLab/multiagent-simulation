@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils.config import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 def load_simulation_data(config: dict) -> dict:

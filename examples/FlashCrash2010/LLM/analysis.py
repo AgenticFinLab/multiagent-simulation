@@ -29,7 +29,7 @@ from typing import Any, Dict, List
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from masim.utils import load_config, load_results
-from masim.evaluation.llm_harness import finalize_llm_analysis
+from evaluation.llm_harness import finalize_llm_analysis
 
 from examples.FlashCrash2010.Rule.analysis import (
     STANDARD_OUTPUT_FILES,

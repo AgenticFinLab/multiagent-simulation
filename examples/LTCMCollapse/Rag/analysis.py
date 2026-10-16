@@ -20,7 +20,7 @@ from examples.LTCMCollapse.Rule.analysis import (
     validate_metrics,
 )
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/LTCMCollapse/Rag/simulation.yml"
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"

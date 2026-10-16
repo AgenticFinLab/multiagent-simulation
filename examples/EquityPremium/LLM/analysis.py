@@ -5,7 +5,7 @@ Usage:
     python examples/EquityPremium/LLM/analysis.py -c configs/EquityPremium/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.EquityPremium.Rule.analysis import _load_data, analyze_equity_premium
 

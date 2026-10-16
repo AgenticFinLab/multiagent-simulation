@@ -23,7 +23,7 @@ Academic References:
     - Shiller (1981): Excess volatility
 
 Usage:
-    from masim.evaluation.finance import (
+    from evaluation.finance import (
         # Core Metrics
         calculate_returns,
         calculate_rolling_volatility,
@@ -56,7 +56,7 @@ Usage:
 
 from typing import List
 
-from masim.evaluation.registry import Metric, MetricsRegistry
+from evaluation.registry import Metric, MetricsRegistry
 
 # Time Series Analysis (timeseries.py)
 from .timeseries import (
@@ -211,8 +211,8 @@ def register_standard_metrics(registry: MetricsRegistry) -> None:
 
     This is the canonical entry point for scenario metrics.py files::
 
-        from masim.evaluation.finance import register_standard_metrics
-        from masim.evaluation.registry import MetricsRegistry
+        from evaluation.finance import register_standard_metrics
+        from evaluation.registry import MetricsRegistry
 
         REGISTRY = MetricsRegistry()
         register_standard_metrics(REGISTRY)

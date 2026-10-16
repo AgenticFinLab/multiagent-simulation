@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.DotComBubble.Rule.analysis import (
     bubble_amplitude_index,

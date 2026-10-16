@@ -10,7 +10,7 @@ from typing import Any, Dict
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.EquityPremium.Rule.analysis import analyze_equity_premium, _load_data
 from examples.EquityPremium.Rag.players import _RAG_FALLBACK

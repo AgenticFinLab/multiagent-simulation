@@ -13,7 +13,7 @@ import numpy as np
 
 from masim.utils import load_results
 from masim.utils.config import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.EchoChamber.Rule.analysis import (
     calculate_metrics,

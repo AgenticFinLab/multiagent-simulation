@@ -1160,14 +1160,14 @@ implement):
    variant, its `analysis.py` MUST invoke the universal metric
    aggregator declared in §8.6 exactly once per run:
    ```
-   from masim.evaluation.universal import write_universal_summary
+   from evaluation.universal import write_universal_summary
    write_universal_summary(data, config, output_dir)
    ```
    The resulting `summary.json` MUST contain a `universal_metrics`
    block whose sub-keys mirror the six standard categories
    (`price_dynamics`, `information_efficiency`, `statistical_inference`,
    `tail_risk`, `agent_behaviour`, `microstructure`) and whose entries
-   include every metric in `masim.evaluation.finance.STANDARD_METRICS`
+   include every metric in `evaluation.finance.STANDARD_METRICS`
    that did not raise `MetricUnavailable`. **Minimum coverage floor:**
    at least 20 of the 36 registered metrics MUST report a numeric
    result (i.e., neither `_unavailable` nor `_error`). Fewer than 20
@@ -1214,7 +1214,7 @@ implement):
       retrieval counts and top-`k` provenance IDs.
     - For LLM-flavoured variants: a `llm_action_distribution` block
       inside `summary.json` produced by
-      `masim.evaluation.analyze_action_distribution`, plus a
+      `evaluation.analyze_action_distribution`, plus a
       `04_llm_actions.png` panel.
     - For RuleLLM variants: both the LLM action distribution AND a
       `rule_llm_divergence` block that reports the mean absolute
@@ -1300,7 +1300,7 @@ back the universal (Layer A) baseline.
 
 **Layer A — Universal baseline (36 metrics, reusable across all
 finance-like scenarios).** These metrics are provided by
-`masim.evaluation.finance.STANDARD_METRICS` and computed in one
+`evaluation.finance.STANDARD_METRICS` and computed in one
 call via `write_universal_summary(...)`. Every scenario MUST invoke
 this call. Metrics that raise `MetricUnavailable` for a given data
 shape are silently skipped and recorded under
@@ -1374,7 +1374,7 @@ Category A.6 — `microstructure` (5 metrics).
 
 **Layer B — Scenario-specific metrics (typically 4–10 per scenario,
 authored in `analysis-bases.md §2` and implemented in
-`masim/evaluation/finance/scenario_metrics.py` or in the scenario's
+`evaluation/finance/scenario_metrics.py` or in the scenario's
 own `metrics.py` if truly local).** Layer B rows MUST cite a primary
 source and MUST NOT duplicate Layer A. Typical anchors by family:
 
@@ -1401,7 +1401,7 @@ Rule / LLM / RuleLLM / Rag).**
 | Variant  | Required extra                                                                          | Reference / rationale                                                          |
 |----------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | Rule     | (none beyond Layers A + B)                                                              | Rule variant is the schema baseline for Hook 12 parity.                        |
-| LLM      | `summary.json.llm_action_distribution` + `04_llm_actions.png`                           | `masim.evaluation.analyze_action_distribution`; Bikhchandani et al. (1992)     |
+| LLM      | `summary.json.llm_action_distribution` + `04_llm_actions.png`                           | `evaluation.analyze_action_distribution`; Bikhchandani et al. (1992)     |
 | RuleLLM  | LLM extras + `summary.json.rule_llm_divergence`                                         | Divergence between LLM decision and shadow Rule decision; Christie–Huang (1995)|
 | Rag      | `rag_stats.json` (per-round retrieval count, top-k provenance) + `05_rag_provenance.png`| Lewis, Perez, Piktus et al. (2020) *NeurIPS* 33:9459–9474 (RAG paper)          |
 
@@ -1435,7 +1435,7 @@ of every built variant.
 | Pass | Perspective                       | Anchors in `09-step5-to-10-review.md`                                                                                                                                                                         |
 |------|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1    | Theory–code alignment             | §5.1 Theory-Code Alignment; §5.2 Prompt Fidelity; §5.3 Configuration Validation; §5.4 Diversity                                                                                                               |
-| 2    | Code quality + analysis tools     | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements; `10-evaluation-architecture.md` import compliance (all reusable code from `masim/evaluation/`) |
+| 2    | Code quality + analysis tools     | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements; `10-evaluation-architecture.md` import compliance (all reusable code from `evaluation/`) |
 | 3    | Documentation + final cross-check | §8 Create Documentation; §9 Execute and Debug (dry-run only)                                                                                                                                                  |
 
 Any unchecked item in any pass resets the count for that pass. All
@@ -1447,17 +1447,17 @@ smoke run.
 
 During Pass 2, for every `analysis.py` in every variant, apply this mandatory migration procedure:
 
-1. **Search `masim/evaluation/`** for existing functions that match what the analysis script needs (metrics, data loading, visualization, validation). Use the module responsibility boundaries and placement flowchart in `10-evaluation-architecture.md`.
+1. **Search `evaluation/`** for existing functions that match what the analysis script needs (metrics, data loading, visualization, validation). Use the module responsibility boundaries and placement flowchart in `10-evaluation-architecture.md`.
 
-2. **If a matching function exists in `masim/evaluation/`** → replace the local implementation with an import. Remove the local function definition (or, if other in-scenario code still calls it, alias it: `from masim.evaluation.finance.timeseries import calculate_max_drawdown as _compute_max_drawdown`).
+2. **If a matching function exists in `evaluation/`** → replace the local implementation with an import. Remove the local function definition (or, if other in-scenario code still calls it, alias it: `from evaluation.finance.timeseries import calculate_max_drawdown as _compute_max_drawdown`).
 
-3. **If no matching function exists but the local function is reusable** (would serve other scenarios) → migrate it into the appropriate `masim/evaluation/{domain}/{module}.py` file first, add it to `__init__.py` re-exports, then import it back into the analysis script.
+3. **If no matching function exists but the local function is reusable** (would serve other scenarios) → migrate it into the appropriate `evaluation/{domain}/{module}.py` file first, add it to `__init__.py` re-exports, then import it back into the analysis script.
 
 4. **If the function is truly scenario-specific** (unique logic that no other scenario would use) → keep it local in the analysis script with a comment: `# Scenario-specific: {reason}`.
 
-5. **Data loading** (`_batch_to_rounds`, `_load_data`, `_market_players`, `_market_data_from_payload`) must always come from `masim.evaluation.data_loader`. Remove any local re-implementations of these.
+5. **Data loading** (`_batch_to_rounds`, `_load_data`, `_market_players`, `_market_data_from_payload`) must always come from `evaluation.data_loader`. Remove any local re-implementations of these.
 
-6. **Registry types** (`Metric`, `MetricsRegistry`, `MetricUnavailable`) must always come from `masim.evaluation.registry`.
+6. **Registry types** (`Metric`, `MetricsRegistry`, `MetricUnavailable`) must always come from `evaluation.registry`.
 
 After migration, verify with `python3 -c "import examples.{Scenario}.Rule.analysis"` that all imports resolve.
 

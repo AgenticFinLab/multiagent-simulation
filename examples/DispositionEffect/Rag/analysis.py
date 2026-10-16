@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.DispositionEffect.Rule.analysis import (
     calculate_metrics,

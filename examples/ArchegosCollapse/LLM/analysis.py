@@ -5,7 +5,7 @@ Usage:
     python examples/ArchegosCollapse/LLM/analysis.py -c configs/ArchegosCollapse/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.ArchegosCollapse.Rule.analysis import _load_data, analyze_archegos_collapse
 

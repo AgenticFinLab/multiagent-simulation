@@ -6,7 +6,7 @@ Provides the core types used by scenario-specific metric catalogues:
 - MetricUnavailable: Exception raised when a metric cannot be computed due to missing data
 
 Usage:
-    from masim.evaluation.registry import Metric, MetricsRegistry, MetricUnavailable
+    from evaluation.registry import Metric, MetricsRegistry, MetricUnavailable
 
     REGISTRY = MetricsRegistry()
 

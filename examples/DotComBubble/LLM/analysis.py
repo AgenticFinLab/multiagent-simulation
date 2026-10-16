@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 
 from masim.utils import load_config, load_results
-from masim.evaluation import analyze_action_distribution
-from masim.evaluation.llm_harness import finalize_llm_analysis
+from evaluation import analyze_action_distribution
+from evaluation.llm_harness import finalize_llm_analysis
 
 
 DEFAULT_CONFIG = "configs/DotComBubble/LLM/simulation.yml"

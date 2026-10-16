@@ -3,13 +3,13 @@
 Authoritative reference: ``masim/evaluation/README.md`` (see also
 ``masim/skills/implement-simulation-skill/10-evaluation-architecture.md``).
 This scenario-root module MUST NOT re-implement any function that is already
-provided by ``masim.evaluation``; it may only import + register standard
+provided by ``evaluation``; it may only import + register standard
 metrics and add scenario-specific ones.
 
 This module assembles the complete metric registry for the AnchoringEffect
 scenario by combining:
 
-  1. **36 standard metrics** from ``masim.evaluation.finance`` (distributed
+  1. **36 standard metrics** from ``evaluation.finance`` (distributed
      across ``timeseries.py`` [23], ``behavioral.py`` [8], and
      ``microstructure.py`` [5] — covering price dynamics, information
      efficiency, statistical inference, tail risk, agent behaviour, and
@@ -22,7 +22,7 @@ scenario by combining:
      abstracted into the shared catalogue.
 
 The shared helper ``_returns`` is re-imported from
-``masim.evaluation.finance.timeseries`` to preserve a single-source
+``evaluation.finance.timeseries`` to preserve a single-source
 implementation for arithmetic-return computation.
 
 Data contract (built by ``examples.AnchoringEffect.Rule.analysis._load_data``)::
@@ -48,17 +48,17 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from masim.evaluation.registry import (
+from evaluation.registry import (
     Metric,
     MetricsRegistry,
     MetricUnavailable,
 )
-from masim.evaluation.finance import register_standard_metrics
-from masim.evaluation.data_loader import (
+from evaluation.finance import register_standard_metrics
+from evaluation.data_loader import (
     aligned_prices_and_fundamentals as _aligned_prices_and_fundamentals,
     payload_buy_sell as _payload_buy_sell,
 )
-from masim.evaluation.finance.timeseries import _returns
+from evaluation.finance.timeseries import _returns
 
 
 # ---------------------------------------------------------------------------
@@ -372,7 +372,7 @@ def m_wealth_transfer_direction(data, config):
     _, prices, _ = _aligned_prices_and_fundamentals(data)
     final_price = float(prices[-1])
     # Use data_loader for standard config extraction
-    from masim.evaluation.data_loader import per_agent_initial_cash, per_agent_initial_position
+    from evaluation.data_loader import per_agent_initial_cash, per_agent_initial_position
     initial_cash = per_agent_initial_cash(config)
     initial_positions = per_agent_initial_position(config)
     biased_wealth_change = 0.0

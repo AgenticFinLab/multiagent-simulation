@@ -18,7 +18,7 @@ import numpy as np
 
 from examples.DotComBubble.Rag.players import _RAG_FALLBACK
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/DotComBubble/Rag/simulation.yml"
 

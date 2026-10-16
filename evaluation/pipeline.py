@@ -7,7 +7,7 @@ These functions implement the "standard output contract" that most scenarios
 use as their primary analysis entry point.
 
 Usage:
-    from masim.evaluation.pipeline import run_standard_analysis, analyze_standard_scenario
+    from evaluation.pipeline import run_standard_analysis, analyze_standard_scenario
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import json
 import os
 from typing import Any, Dict, Optional
 
-from masim.evaluation.data_loader import load_data
+from evaluation.data_loader import load_data
 from masim.utils import load_config, load_results
 
 
@@ -113,7 +113,7 @@ def analyze_standard_scenario(
 def calculate_standard_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
     """Compute the standard structural metrics for any finance scenario.
 
-    Uses functions from masim.evaluation.finance to compute:
+    Uses functions from evaluation.finance to compute:
     - Price dynamics (returns, volatility, drawdown, Sharpe)
     - Behavioral signals (bid convergence, directional agreement)
     - Market microstructure (volume, net demand)
@@ -127,14 +127,14 @@ def calculate_standard_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
     -------
     dict of computed metric values (flat key-value pairs).
     """
-    from masim.evaluation.finance.timeseries import (
+    from evaluation.finance.timeseries import (
         calculate_returns,
         calculate_rolling_volatility,
         calculate_max_drawdown,
         calculate_sharpe_ratio,
         calculate_price_deviation,
     )
-    from masim.evaluation.finance.behavioral import (
+    from evaluation.finance.behavioral import (
         calculate_bid_convergence_cv,
         calculate_directional_agreement,
     )
@@ -213,7 +213,7 @@ def create_standard_visualizations(
     -------
     list of file paths written.
     """
-    from masim.evaluation.finance.visualization import (
+    from evaluation.finance.visualization import (
         plot_price_dynamics,
         plot_returns_analysis,
         plot_volatility_analysis,

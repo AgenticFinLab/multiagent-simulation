@@ -33,26 +33,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation.registry import MetricUnavailable
-from masim.evaluation.data_loader import (
+from evaluation.registry import MetricUnavailable
+from evaluation.data_loader import (
     batch_to_rounds as _batch_to_rounds,
     load_data as _load_data,
     market_data_from_payload as _market_data_from_payload,
     market_players as _market_players,
 )
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 from examples.AnchoringEffect.metrics import REGISTRY
 
 
 # ---------------------------------------------------------------------------
 # Evaluation-first architecture (Pass 2 Migration Rule):
-#   * Reusable helpers  → masim.evaluation.data_loader / registry
-#   * Standard metrics  → masim.evaluation.finance.{timeseries,behavioral,microstructure}
+#   * Reusable helpers  → evaluation.data_loader / registry
+#   * Standard metrics  → evaluation.finance.{timeseries,behavioral,microstructure}
 #   * Scenario metrics  → examples.AnchoringEffect.metrics (registry-driven)
 # See ``masim/evaluation/README.md`` for the authoritative catalogue and
 # ``masim/skills/implement-simulation-skill/10-evaluation-architecture.md``
 # for the migration rule.  Nothing in this file re-implements a function
-# that already lives under ``masim.evaluation``.
+# that already lives under ``evaluation``.
 # ---------------------------------------------------------------------------
 
 

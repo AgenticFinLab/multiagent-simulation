@@ -11,7 +11,7 @@ def get_long_description():
         return f.read()
 
 
-def get_requirements():
+def get_requirements(filename: str = "requirements.txt"):
     """Read ``requirements.txt`` as a list of PEP 508 requirement strings.
 
     ``requirements.txt`` is comment-annotated and section-headered, so the raw
@@ -24,7 +24,7 @@ def get_requirements():
     base_dir = os.path.abspath(os.path.dirname(__file__))
     requirements = []
     seen = set()
-    with io.open(os.path.join(base_dir, "requirements.txt"), encoding="utf-8") as f:
+    with io.open(os.path.join(base_dir, filename), encoding="utf-8") as f:
         for raw_line in f:
             requirement = raw_line.split("#", 1)[0].strip()
             if not requirement:
@@ -55,7 +55,13 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires=">=3.11",
     install_requires=get_requirements(),
-    extras_require={"tests": ["pytest"]},
+    extras_require={
+        "tests": ["pytest"],
+        # Optional heavy stack for the Rag variants (document parsing +
+        # embedding/retrieval). The platform core never imports it, so a
+        # Rule/LLM user does not have to install llama-index at all.
+        "rag": get_requirements("requirements-rag.txt"),
+    },
     include_package_data=True,
     options={"bdist_wheel": {"python_tag": "py311"}},
     classifiers=[

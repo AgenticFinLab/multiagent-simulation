@@ -12,13 +12,13 @@ from typing import Any, Dict, Iterable, Tuple
 
 import numpy as np
 
-from masim.evaluation.data_loader import _batch_to_rounds, _load_data
-from masim.evaluation.pipeline import (
+from evaluation.data_loader import _batch_to_rounds, _load_data
+from evaluation.pipeline import (
     calculate_standard_metrics,
     create_standard_visualizations,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 SCENARIO = "LossAversion"

@@ -20,7 +20,7 @@ Metrics (all from ``analysis-bases.md §2``):
         crash_start, crash_end)``
     - ``price_amplification_ratio(observed_max_drop, baseline_max_drop)``
 
-Reusable time-series primitives are imported from ``masim.evaluation.finance``
+Reusable time-series primitives are imported from ``evaluation.finance``
 so scenario code owns only scenario-specific orchestration
 (see ``masim/skills/implement-simulation-skill/09-step5-to-10-review.md §7.1``).
 
@@ -40,18 +40,18 @@ from typing import Any, Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import (
+from evaluation.data_loader import (
     load_data as _load_shared_market_data,
     market_players,
 )
-from masim.evaluation.finance import (
+from evaluation.finance import (
     calculate_max_drawdown,
     calculate_returns,
     calculate_rolling_volatility,
     save_figure,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 # ---------------------------------------------------------------------------
@@ -454,7 +454,7 @@ def calculate_metrics(
     baseline_drop = _rolling_baseline_max_drop(prices, fundamental, window=10)
     amp_ratio = price_amplification_ratio(depth, baseline_drop)
 
-    # Generic price/return metrics via masim.evaluation.finance.
+    # Generic price/return metrics via evaluation.finance.
     prices_arr = np.asarray(prices, dtype=float)
     returns = calculate_returns(prices_arr.tolist())
     if isinstance(returns, np.ndarray) and returns.size:

@@ -25,9 +25,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation.data_loader import batch_to_rounds, load_data
-from masim.evaluation.finance import calculate_autocorrelation
-from masim.evaluation import write_universal_summary
+from evaluation.data_loader import batch_to_rounds, load_data
+
+# Exported for the sibling Rag / RuleLLM analysis modules, which import
+# ``_batch_to_rounds`` from this Rule implementation. The public name is what
+# we import; the underscore alias is the name those shims expect.
+_batch_to_rounds = batch_to_rounds
+
+from evaluation.finance import calculate_autocorrelation
+from evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
 # Data loading (legacy underscore names preserved as thin adapters
@@ -37,7 +43,7 @@ from masim.evaluation import write_universal_summary
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Legacy adapter -> masim.evaluation.data_loader.load_data.
+    """Legacy adapter -> evaluation.data_loader.load_data.
 
     Returns the canonical dict (which is a superset of the previous
     scenario-local shape: adds ``investor_quantities`` while preserving
@@ -83,7 +89,7 @@ def _compute_bias_persistence(
 def _compute_rolling_ac1(returns: np.ndarray, window: int = 10) -> float:
     """Compute maximum rolling lag-1 autocorrelation over any window.
 
-    Thin wrapper around ``masim.evaluation.finance.calculate_autocorrelation``
+    Thin wrapper around ``evaluation.finance.calculate_autocorrelation``
     applied to each sliding window of length ``window`` in the returns
     series; the maximum lag-1 value is returned. Falls back to a single
     full-series lag-1 autocorrelation when the series is shorter than

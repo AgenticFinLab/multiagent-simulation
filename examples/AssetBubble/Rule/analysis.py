@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     calculate_returns,
     calculate_rolling_volatility,
     calculate_price_deviation,
@@ -32,7 +32,7 @@ from masim.evaluation.finance import (
     validate_asset_bubble,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation.data_loader import batch_to_rounds
+from evaluation.data_loader import batch_to_rounds
 
 
 def _market_players(results) -> Dict[str, Any]:

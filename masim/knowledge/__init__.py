@@ -103,18 +103,41 @@ Typical usage in a player perceive() initializer
     rag_context = result.formatted_text   # inject into LLM prompt
 """
 
-from .loader import KnowledgeLoader, resolve_agent_type, DEFAULT_CATALOG_PATH
-from .store import KnowledgeStore
-from .manager import KnowledgeManager
-from .resource_manager import ResourceManager, create_backend
-from .base import (
-    BaseKnowledgeLoader,
-    BaseKnowledgeStore,
-    KnowledgeDocument,
-    KnowledgeQuery,
-    KnowledgeResult,
-    KnowledgeSourceType,
+# The RAG stack (document parsing + embeddings) is an *optional* extra: the
+# platform core never imports this package, so a Rule/LLM user should not have
+# to install llama-index. Turn the raw ModuleNotFoundError into an actionable
+# message instead of a traceback from three frames deep.
+_OPTIONAL_DEPENDENCIES = (
+    "llama_index",
+    "bs4",
+    "huggingface_hub",
+    "litellm",
+    "openai",
 )
+
+try:
+    from .loader import KnowledgeLoader, resolve_agent_type, DEFAULT_CATALOG_PATH
+    from .store import KnowledgeStore
+    from .manager import KnowledgeManager
+    from .resource_manager import ResourceManager, create_backend
+    from .base import (
+        BaseKnowledgeLoader,
+        BaseKnowledgeStore,
+        KnowledgeDocument,
+        KnowledgeQuery,
+        KnowledgeResult,
+        KnowledgeSourceType,
+    )
+except ModuleNotFoundError as exc:  # pragma: no cover - depends on the env
+    missing = (exc.name or "").split(".")[0]
+    if missing not in _OPTIONAL_DEPENDENCIES:
+        raise
+    raise ModuleNotFoundError(
+        f"masim.knowledge needs the optional RAG dependencies, but {missing!r} "
+        "is not installed. Install them with:\n"
+        '    pip install -e ".[rag]"\n'
+        "Pure Rule / LLM scenarios do not need this extra."
+    ) from exc
 
 __all__ = [
     # Concrete implementations

@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Any, Dict, List, Optional
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     # Time Series
     calculate_returns,
     calculate_rolling_volatility,

@@ -5,9 +5,9 @@ to satisfy Polish Hook 9 (universal-baseline coverage) declared in
 ``masim/skills/polish-simulation-pipeline.md §8.3``.
 
 It runs the full 36-metric registered baseline (``STANDARD_METRICS``) from
-``masim.evaluation.finance``, groups the results by category, writes a
+``evaluation.finance``, groups the results by category, writes a
 schema-conformant ``summary.json`` block, and produces the four universal
-PNG dashboards defined by the ``masim.evaluation.pipeline`` visualization
+PNG dashboards defined by the ``evaluation.pipeline`` visualization
 contract.
 
 Design principles:
@@ -44,12 +44,12 @@ import json
 import os
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     STANDARD_METRICS,
     register_standard_metrics,
 )
-from masim.evaluation.pipeline import create_standard_visualizations
-from masim.evaluation.registry import MetricsRegistry
+from evaluation.pipeline import create_standard_visualizations
+from evaluation.registry import MetricsRegistry
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +175,7 @@ def _normalize_data(data: Mapping[str, Any]) -> Dict[str, Any]:
     series (some emit a ``{round: value}`` dict, others a plain list). This
     helper promotes common alternatives into the canonical dict form so that
     :func:`compute_universal_metrics` and
-    :func:`~masim.evaluation.pipeline.create_standard_visualizations` can run
+    :func:`~evaluation.pipeline.create_standard_visualizations` can run
     against either shape without their caller having to reshape upstream.
 
     The caller's dict is not mutated.
@@ -260,7 +260,7 @@ def compute_universal_metrics(
     ----------
     data : Mapping
         The canonical MASim data dict produced by
-        :func:`masim.evaluation.data_loader.load_data`.
+        :func:`evaluation.data_loader.load_data`.
     config : Mapping, optional
         The scenario configuration dict. Passed through to metric functions
         that need parameters (e.g., rolling window sizes). May be ``None``
@@ -305,7 +305,7 @@ def write_universal_summary(
     ----------
     data : Mapping
         Canonical MASim data dict (from
-        :func:`masim.evaluation.data_loader.load_data`).
+        :func:`evaluation.data_loader.load_data`).
     config : Mapping
         The scenario configuration dict. MUST NOT be ``None`` in production
         runs — required for reproducibility (used to hash ``config_hash``).

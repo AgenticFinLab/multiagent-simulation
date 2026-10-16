@@ -5,7 +5,7 @@ Usage:
     python examples/AssetBubble/LLM/analysis.py -c configs/AssetBubble/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.AssetBubble.Rule.analysis import _load_data, analyze_bubble
 

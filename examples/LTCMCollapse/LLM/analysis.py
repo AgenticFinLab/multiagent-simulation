@@ -16,7 +16,7 @@ from examples.LTCMCollapse.Rule.analysis import (
     validate_metrics,
 )
 from masim.utils import load_config
-from masim.evaluation.llm_harness import finalize_llm_analysis
+from evaluation.llm_harness import finalize_llm_analysis
 
 DEFAULT_CONFIG = "configs/LTCMCollapse/LLM/simulation.yml"
 

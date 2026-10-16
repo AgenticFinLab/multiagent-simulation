@@ -19,10 +19,16 @@ from typing import Any, Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import batch_to_rounds, load_data
-from masim.evaluation.finance import calculate_autocorrelation
+from evaluation.data_loader import batch_to_rounds, load_data
+
+# Exported for the sibling Rag / RuleLLM analysis modules, which import
+# ``_batch_to_rounds`` from this Rule implementation. The public name is what
+# we import; the underscore alias is the name those shims expect.
+_batch_to_rounds = batch_to_rounds
+
+from evaluation.finance import calculate_autocorrelation
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 __all__ = [
     "_load_data",
@@ -34,13 +40,13 @@ __all__ = [
 
 
 # ---------------------------------------------------------------------------
-# Data loading (thin adapters over ``masim.evaluation``)
+# Data loading (thin adapters over ``evaluation``)
 # ---------------------------------------------------------------------------
 
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``."""
+    """Legacy alias. Delegates to ``evaluation.data_loader.load_data``."""
     return load_data(results)
 
 
@@ -88,7 +94,7 @@ def _compute_correction_ratio(prices_list: List[float], fundamental: float) -> f
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
     """Lag-N autocorrelation of returns.
 
-    Thin adapter over ``masim.evaluation.finance.calculate_autocorrelation``.
+    Thin adapter over ``evaluation.finance.calculate_autocorrelation``.
     """
     if len(prices_list) < lag + 2:
         return 0.0
@@ -105,7 +111,7 @@ def _compute_rolling_volatility(
 ) -> List[float]:
     """Rolling volatility of returns (percent).
 
-    Kept local because ``masim.evaluation.finance.calculate_rolling_volatility``
+    Kept local because ``evaluation.finance.calculate_rolling_volatility``
     computes std of *prices* (not returns) and does not multiply by 100 — the
     legacy calibration targets require the percent-return convention.
     """

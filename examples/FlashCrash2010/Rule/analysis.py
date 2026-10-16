@@ -41,14 +41,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     calculate_max_drawdown,
     calculate_returns,
     calculate_rolling_volatility,
     save_figure,
     validate_flash_crash,
 )
-from masim.evaluation.data_loader import market_players
+from evaluation.data_loader import market_players
 from masim.utils import load_config, load_results
 
 
@@ -368,7 +368,7 @@ def calculate_metrics(
 ) -> Dict[str, Any]:
     """Assemble the metric dict consumed by ``validate_flashcrash2010``.
 
-    Uses ``masim.evaluation.finance.calculate_max_drawdown`` for the
+    Uses ``evaluation.finance.calculate_max_drawdown`` for the
     peak/trough indices in addition to the analysis-bases ``max_drawdown``
     function so downstream plots can shade the correct phase bands.
     """
@@ -439,7 +439,7 @@ def validate_flashcrash2010(metrics: Dict[str, Any]) -> Dict[str, Any]:
     """Score core metrics against the ``analysis-bases.md §6`` bands.
 
     Also runs the shared ``validate_flash_crash`` from
-    ``masim.evaluation.finance.validation`` so we retain compatibility with
+    ``evaluation.finance.validation`` so we retain compatibility with
     the family-wide validation surface.
     """
     checks: Dict[str, Dict[str, Any]] = {}

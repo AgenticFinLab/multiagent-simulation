@@ -23,8 +23,8 @@ sys.path.insert(0, project_root)
 
 from masim.utils.config import load_config
 from masim.utils import load_results
-from masim.evaluation import analyze_action_distribution
-from masim.evaluation.llm_harness import finalize_llm_analysis
+from evaluation import analyze_action_distribution
+from evaluation.llm_harness import finalize_llm_analysis
 from examples.DispositionEffect.Rule.analysis import (
     _write_standard_named_outputs,
     calculate_metrics,

@@ -9,7 +9,7 @@ with established financial theory. Each scenario has rigorous prompts containing
 This complements the rule-based validation.py with nuanced LLM judgment.
 
 Usage:
-    from masim.evaluation.finance.validation_llm import (
+    from evaluation.finance.validation_llm import (
         LLMValidator,
         validate_with_llm,
     )

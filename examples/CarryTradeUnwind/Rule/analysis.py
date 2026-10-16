@@ -19,13 +19,19 @@ from typing import Any, Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import batch_to_rounds, load_data
-from masim.evaluation.finance import (
+from evaluation.data_loader import batch_to_rounds, load_data
+
+# Exported for the sibling Rag / RuleLLM analysis modules, which import
+# ``_batch_to_rounds`` from this Rule implementation. The public name is what
+# we import; the underscore alias is the name those shims expect.
+_batch_to_rounds = batch_to_rounds
+
+from evaluation.finance import (
     calculate_autocorrelation,
     calculate_max_drawdown,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 __all__ = [
     "_load_data",
@@ -43,13 +49,13 @@ __all__ = [
 
 
 # ---------------------------------------------------------------------------
-# Data loading (thin adapters over ``masim.evaluation``)
+# Data loading (thin adapters over ``evaluation``)
 # ---------------------------------------------------------------------------
 
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``."""
+    """Legacy alias. Delegates to ``evaluation.data_loader.load_data``."""
     return load_data(results)
 
 
@@ -61,7 +67,7 @@ def _load_data(results) -> Dict[str, Any]:
 def _compute_max_drawdown(prices_list: List[float]) -> float:
     """Maximum peak-to-trough drawdown (%, positive value).
 
-    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown`` —
+    Thin adapter over ``evaluation.finance.calculate_max_drawdown`` —
     the shared helper returns *signed* percent so ``abs()`` preserves the
     legacy positive-magnitude semantics.
     """
@@ -130,7 +136,7 @@ def _compute_rolling_volatility(
 ) -> List[float]:
     """Rolling volatility time series (percent std of returns).
 
-    The shared ``masim.evaluation.finance.calculate_rolling_volatility``
+    The shared ``evaluation.finance.calculate_rolling_volatility``
     operates on prices (not returns) and does not multiply by 100, so we
     keep the legacy return-space, percent-scale implementation locally for
     calibration continuity.
@@ -149,7 +155,7 @@ def _compute_rolling_volatility(
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
     """Lag-N autocorrelation of returns.
 
-    Thin adapter over ``masim.evaluation.finance.calculate_autocorrelation``
+    Thin adapter over ``evaluation.finance.calculate_autocorrelation``
     with the same low-variance early return semantics.
     """
     if len(prices_list) < lag + 2:

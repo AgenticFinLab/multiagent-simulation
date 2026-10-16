@@ -33,7 +33,7 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.finance import (
+from evaluation.finance import (
     # Time Series
     calculate_max_drawdown,
     # Visualization
@@ -42,7 +42,7 @@ from masim.evaluation.finance import (
     validate_disposition_effect,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 STANDARD_OUTPUT_FILES = (

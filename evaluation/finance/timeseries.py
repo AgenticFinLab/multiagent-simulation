@@ -41,8 +41,8 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from masim.evaluation.registry import Metric, MetricUnavailable
-from masim.evaluation.data_loader import aligned_prices_and_fundamentals
+from evaluation.registry import Metric, MetricUnavailable
+from evaluation.data_loader import aligned_prices_and_fundamentals
 
 
 # ===========================================================================

@@ -20,10 +20,10 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import _load_data, aligned_prices_and_fundamentals
-from masim.evaluation.finance.timeseries import _returns, calculate_max_drawdown
+from evaluation.data_loader import _load_data, aligned_prices_and_fundamentals
+from evaluation.finance.timeseries import _returns, calculate_max_drawdown
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 __all__ = [
     "ValidationResult",

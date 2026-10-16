@@ -5,7 +5,7 @@ Usage:
     python examples/FramingEffect/LLM/analysis.py -c configs/FramingEffect/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.FramingEffect.Rule.analysis import _load_data, analyze_framingeffect
 

@@ -375,8 +375,8 @@ def detect_herding_episodes(
 # into MetricsRegistry via BEHAVIORAL_METRICS.
 # ===========================================================================
 
-from masim.evaluation.registry import Metric, MetricUnavailable
-from masim.evaluation.data_loader import payload_buy_sell
+from evaluation.registry import Metric, MetricUnavailable
+from evaluation.data_loader import payload_buy_sell
 
 
 # ---------------------------------------------------------------------------
@@ -455,7 +455,7 @@ def m_agent_volume_buy_sell(data, config):
 # Category: agent_behaviour — position/PnL/wealth tracking (5 metrics)
 # ---------------------------------------------------------------------------
 
-from masim.evaluation.data_loader import (
+from evaluation.data_loader import (
     aligned_prices_and_fundamentals,
     per_agent_initial_position,
     per_agent_initial_cash,

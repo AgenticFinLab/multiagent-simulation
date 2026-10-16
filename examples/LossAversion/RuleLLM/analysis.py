@@ -14,7 +14,7 @@ from examples.LossAversion.Rule.analysis import (
     load_simulation_data,
 )
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/LossAversion/RuleLLM/simulation.yml"
 

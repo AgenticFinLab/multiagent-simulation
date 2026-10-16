@@ -14,7 +14,7 @@ import os
 from typing import Any, Dict, List
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.FramingEffect.Rule.analysis import (
     STANDARD_OUTPUT_FILES,

@@ -354,8 +354,8 @@ def calculate_liquidity_metrics(
 # into MetricsRegistry via MICROSTRUCTURE_METRICS.
 # ===========================================================================
 
-from masim.evaluation.registry import Metric, MetricUnavailable
-from masim.evaluation.data_loader import payload_buy_sell
+from evaluation.registry import Metric, MetricUnavailable
+from evaluation.data_loader import payload_buy_sell
 
 
 # ---------------------------------------------------------------------------

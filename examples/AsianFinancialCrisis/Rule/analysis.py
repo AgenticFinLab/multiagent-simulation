@@ -30,22 +30,28 @@ sys.path.insert(
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import batch_to_rounds, load_data
-from masim.evaluation.finance import (
+from evaluation.data_loader import batch_to_rounds, load_data
+
+# Exported for the sibling Rag / RuleLLM analysis modules, which import
+# ``_batch_to_rounds`` from this Rule implementation. The public name is what
+# we import; the underscore alias is the name those shims expect.
+_batch_to_rounds = batch_to_rounds
+
+from evaluation.finance import (
     calculate_autocorrelation,
     calculate_max_drawdown,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
-# Data loading (thin adapters over ``masim.evaluation``)
+# Data loading (thin adapters over ``evaluation``)
 # ---------------------------------------------------------------------------
 
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``.
+    """Legacy alias. Delegates to ``evaluation.data_loader.load_data``.
 
     Preserves the historical return-schema keys used by downstream Rule/LLM
     variants: ``market_prices``, ``fundamentals``, ``investor_bids``,
@@ -104,7 +110,7 @@ def _load_data_from_communication(config: dict) -> Dict[str, Any]:
 def _compute_max_drawdown(prices: np.ndarray) -> float:
     """Peak-to-trough max drawdown as a positive percentage.
 
-    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown``.
+    Thin adapter over ``evaluation.finance.calculate_max_drawdown``.
     That helper returns *signed* percent (negative for a drop); this legacy
     surface returns the positive magnitude to preserve prior calibration.
     """

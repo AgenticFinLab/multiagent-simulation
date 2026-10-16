@@ -13,9 +13,9 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.finance import save_figure
+from evaluation.finance import save_figure
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 STANDARD_OUTPUT_FILES = (

@@ -1,0 +1,14 @@
+# Optional: document parsing + retrieval for the Rag variants.
+#
+# Only needed when a scenario preprocesses documents and builds a retrieval
+# index (``examples/*/Rag``). The platform core imports none of these modules:
+# verified that `import masim`, `masim.format`, `masim.agents` and
+# `masim.simulator.general` do not pull llama_index into ``sys.modules``.
+#
+# Install with:  pip install -e ".[rag]"
+llama-index-core
+llama-index-readers-file
+llama-index-embeddings-huggingface
+llama-index-embeddings-openai
+llama-index-embeddings-litellm
+beautifulsoup4

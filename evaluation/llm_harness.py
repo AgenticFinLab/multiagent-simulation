@@ -3,11 +3,11 @@
 All LLM-variant ``analysis.py`` files share two blocks of duplicated code:
 
 1. **Action-distribution injection** (~10 lines): runs
-   :func:`~masim.evaluation.analyze_action_distribution`, merges into
+   :func:`~evaluation.analyze_action_distribution`, merges into
    ``summary.json``, and attaches to the in-memory summary dict.
 
 2. **Universal-summary tail** (~11 lines): variant-detection from config path
-   + :func:`~masim.evaluation.write_universal_summary` for Layer-A 36-metric
+   + :func:`~evaluation.write_universal_summary` for Layer-A 36-metric
    baseline + four universal PNG dashboards.
 
 This module provides:
@@ -26,10 +26,10 @@ import json
 import os
 from typing import Any, Callable, Dict, Optional
 
-from masim.evaluation.finance.llm_action_distribution import (
+from evaluation.finance.llm_action_distribution import (
     analyze_action_distribution,
 )
-from masim.evaluation.universal import write_universal_summary
+from evaluation.universal import write_universal_summary
 from masim.utils import load_config, load_results
 
 
@@ -69,7 +69,7 @@ def finalize_llm_analysis(
         Scenario-specific metrics dict returned by the ``analyze_*`` function.
     results : optional
         Raw :func:`~masim.utils.load_results` object. If provided, used
-        for :func:`~masim.evaluation.analyze_action_distribution`. If *None*,
+        for :func:`~evaluation.analyze_action_distribution`. If *None*,
         action-distribution audit is skipped.
     config_path : str, optional
         Config file path for variant detection. If omitted, defaults to "LLM".

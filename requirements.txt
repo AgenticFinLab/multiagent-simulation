@@ -50,13 +50,7 @@ streamlit>=1.28
 altair
 
 # ── RAG stack (masim.knowledge / examples/*/Rag) ───────────────────────────
-llama-index-core
-llama-index-readers-file
-llama-index-embeddings-huggingface
-llama-index-embeddings-openai
-llama-index-embeddings-litellm
 PyMuPDF
-beautifulsoup4
 # Optional web-search tool for masim/knowledge/loader.py. The import is
 # guarded, so the rest of the framework works without it; it is listed here so
 # a full `pip install -r requirements.txt` yields a complete environment.

@@ -22,7 +22,7 @@ from examples.RepresentativenessBias.Rule.analysis import (
     create_visualizations,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 DEFAULT_CONFIG = "configs/RepresentativenessBias/Rag/simulation.yml"

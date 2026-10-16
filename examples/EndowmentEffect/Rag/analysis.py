@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 import numpy as np
 
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.EndowmentEffect.Rule.analysis import (
     calculate_metrics as _calculate_rule_metrics,

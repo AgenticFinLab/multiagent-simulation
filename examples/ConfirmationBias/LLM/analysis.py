@@ -5,7 +5,7 @@ Usage:
     python examples/ConfirmationBias/LLM/analysis.py -c configs/ConfirmationBias/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.ConfirmationBias.Rule.analysis import _load_data, analyze_confirmation_bias
 

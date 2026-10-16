@@ -5,7 +5,7 @@ Usage:
     python examples/CarryTradeUnwind/LLM/analysis.py -c configs/CarryTradeUnwind/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.CarryTradeUnwind.Rule.analysis import _load_data, analyze_carry_trade_unwind
 

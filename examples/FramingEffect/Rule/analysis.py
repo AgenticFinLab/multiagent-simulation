@@ -14,7 +14,7 @@ Responsibilities:
        `rational_correction_efficiency`,
        `volatility_amplification_factor`,
        `wealth_distribution_index`) — see analysis-bases.md §2.
-    2. Load raw record data via ``masim.evaluation.data_loader``.
+    2. Load raw record data via ``evaluation.data_loader``.
     3. Compute the six scenario-specific metrics plus standard structural
        metrics (drawdown, volatility, autocorrelation).
     4. Render the 9-panel dashboard specified by analysis-bases.md §7 and
@@ -41,18 +41,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation.data_loader import (
+from evaluation.data_loader import (
     aligned_market_series as _aligned_market_series,
     batch_to_rounds as _batch_to_rounds,
     load_data as _load_data,
     market_data_from_payload as _market_data_from_payload,
     market_players as _market_players,
 )
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
 # Evaluation-first architecture:
-#   * Data loading  → masim.evaluation.data_loader (shared)
+#   * Data loading  → evaluation.data_loader (shared)
 #   * Scenario metrics (framing_*, wealth_distribution_index) — kept
 #     local because they are FramingEffect-specific per analysis-bases.md §2
 # ---------------------------------------------------------------------------
@@ -169,7 +169,7 @@ def wealth_distribution_index(agent_wealth: list[float]) -> float:
 # §2 — Legacy JSON loader / calculate_metrics / create_visualizations
 # =========================================================================
 # Kept for ad-hoc callers and unit tests. The main pipeline uses
-# `_load_data(results)` from `masim.evaluation.data_loader` instead.
+# `_load_data(results)` from `evaluation.data_loader` instead.
 
 
 def load_simulation_data(record_path: str | Path) -> Dict[str, Any]:

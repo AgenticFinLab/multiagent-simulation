@@ -20,13 +20,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation.data_loader import batch_to_rounds, load_data
-from masim.evaluation.finance import (
+from evaluation.data_loader import batch_to_rounds, load_data
+
+# Exported for the sibling Rag / RuleLLM analysis modules, which import
+# ``_batch_to_rounds`` from this Rule implementation. The public name is what
+# we import; the underscore alias is the name those shims expect.
+_batch_to_rounds = batch_to_rounds
+
+from evaluation.finance import (
     calculate_autocorrelation,
     calculate_max_drawdown,
     calculate_rolling_volatility,
 )
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 __all__ = [
     "_load_data",
@@ -43,7 +49,7 @@ __all__ = [
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Legacy adapter delegating to ``masim.evaluation.data_loader.load_data``.
+    """Legacy adapter delegating to ``evaluation.data_loader.load_data``.
 
     Returns the canonical eval-first shape (market_prices, fundamentals,
     investor_quantities, investor_bids, investor_payloads) — extra keys are
@@ -60,7 +66,7 @@ def _load_data(results) -> Dict[str, Any]:
 def _compute_max_drawdown(prices_list: List[float]) -> float:
     """Peak-to-trough drawdown (%, positive value).
 
-    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown``.
+    Thin adapter over ``evaluation.finance.calculate_max_drawdown``.
     """
     if len(prices_list) < 2:
         return 0.0
@@ -95,7 +101,7 @@ def _compute_rolling_volatility(
     """Rolling volatility of percent returns (scenario-specific percent scale).
 
     Uses the same window-expanding convention as
-    ``masim.evaluation.finance.calculate_rolling_volatility`` but reports the
+    ``evaluation.finance.calculate_rolling_volatility`` but reports the
     per-window std of percent returns (returns × 100) to preserve the legacy
     calibration targets in analysis-bases.md.
     """
@@ -113,7 +119,7 @@ def _compute_rolling_volatility(
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
     """Lag-`lag` autocorrelation of simple returns.
 
-    Adapter around ``masim.evaluation.finance.calculate_autocorrelation``.
+    Adapter around ``evaluation.finance.calculate_autocorrelation``.
     """
     if len(prices_list) < lag + 2:
         return 0.0

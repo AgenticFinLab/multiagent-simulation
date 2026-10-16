@@ -23,12 +23,12 @@ Structure:
 
 Usage:
     # Domain-agnostic infrastructure
-    from masim.evaluation.registry import Metric, MetricsRegistry, MetricUnavailable
-    from masim.evaluation.data_loader import load_data, batch_to_rounds, series
-    from masim.evaluation.pipeline import run_standard_analysis
+    from evaluation.registry import Metric, MetricsRegistry, MetricUnavailable
+    from evaluation.data_loader import load_data, batch_to_rounds, series
+    from evaluation.pipeline import run_standard_analysis
 
     # Finance-specific metrics
-    from masim.evaluation.finance import (
+    from evaluation.finance import (
         calculate_returns,
         calculate_sharpe_ratio,
         calculate_bid_convergence_cv,

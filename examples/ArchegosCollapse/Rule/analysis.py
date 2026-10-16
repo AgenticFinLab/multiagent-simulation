@@ -26,19 +26,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation.data_loader import (
+from evaluation.data_loader import (
     aligned_market_series as _aligned_market_series,
     batch_to_rounds as _batch_to_rounds,
     load_data as _load_data,
     market_data_from_payload as _market_data_from_payload,
     market_players as _market_players,
 )
-from masim.evaluation.finance.timeseries import (
+from evaluation.finance.timeseries import (
     calculate_max_drawdown,
     calculate_rolling_volatility,
     calculate_autocorrelation,
 )
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ from masim.evaluation import write_universal_summary
 def _compute_max_drawdown(prices_list: List[float]) -> float:
     """Maximum peak-to-trough drawdown (%, positive value).
 
-    Delegates to ``masim.evaluation.finance.timeseries.calculate_max_drawdown``
+    Delegates to ``evaluation.finance.timeseries.calculate_max_drawdown``
     (Pass 2 Analysis Migration Rule).  Evaluation returns a signed % (negative
     for a drawdown) plus peak/trough indices; this wrapper preserves the
     scenario's positive-magnitude contract.
@@ -100,7 +100,7 @@ def _compute_rolling_volatility(
     Scenario contract: list of rolling std-dev values over the *returns*
     series (Archegos analysis-bases.md).  This wrapper computes the pct
     returns and delegates the rolling std to
-    ``masim.evaluation.finance.timeseries.calculate_rolling_volatility``
+    ``evaluation.finance.timeseries.calculate_rolling_volatility``
     per the Pass 2 Analysis Migration Rule.  Values before the window
     fills are computed with the shorter partial window to preserve the
     pre-refactor length contract.
@@ -124,7 +124,7 @@ def _compute_rolling_volatility(
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
     """Lag-``lag`` autocorrelation of returns.
 
-    Delegates to ``masim.evaluation.finance.timeseries.calculate_autocorrelation``
+    Delegates to ``evaluation.finance.timeseries.calculate_autocorrelation``
     on the returns series (Pass 2 Analysis Migration Rule).  Returns 0.0
     when the series is too short for the requested lag, matching the
     pre-refactor guard.

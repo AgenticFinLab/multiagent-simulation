@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.FlashCrash2010.Rule.analysis import (
     STANDARD_OUTPUT_FILES,

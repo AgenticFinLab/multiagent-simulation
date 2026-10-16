@@ -24,7 +24,7 @@ from examples.StatusQuoBias.Rule.analysis import (
 )
 from examples.standard_rule_analysis import _load_data
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 
 DEFAULT_CONFIG = "configs/StatusQuoBias/Rag/simulation.yml"

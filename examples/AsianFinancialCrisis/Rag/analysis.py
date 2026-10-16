@@ -30,7 +30,7 @@ sys.path.insert(
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from evaluation import write_universal_summary
 
 from examples.AsianFinancialCrisis.Rule.analysis import (
     _batch_to_rounds,

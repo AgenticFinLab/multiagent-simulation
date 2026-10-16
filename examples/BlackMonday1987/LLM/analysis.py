@@ -5,7 +5,7 @@ Usage:
     python examples/BlackMonday1987/LLM/analysis.py -c configs/BlackMonday1987/LLM/simulation.yml
 """
 
-from masim.evaluation.llm_harness import run_llm_analysis
+from evaluation.llm_harness import run_llm_analysis
 
 from examples.BlackMonday1987.Rule.analysis import _load_data, analyze_black_monday
 
