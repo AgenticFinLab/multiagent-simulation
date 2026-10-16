@@ -45,6 +45,9 @@ jobs:
           print("scenario migrated to a canonical base; the rest is migration backlog.")
           PY
 
+      - name: "GATE: diagram layout (SVG text collisions)"
+        run: python scripts/check_diagrams.py docs/design/diagrams
+
       - name: Upload audit baseline
         uses: actions/upload-artifact@v4
         with:

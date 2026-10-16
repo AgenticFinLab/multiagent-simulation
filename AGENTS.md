@@ -24,6 +24,7 @@ python scripts/check_module_imports.py                 # real imports (catches
 PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py"
 python scripts/audit_scenario_contract.py --scope archetypes --no-legacy-info
 python scripts/audit_scenario_contract.py --scope scenarios --scenario AnchoringEffect --no-legacy-info
+python scripts/check_diagrams.py docs/design/diagrams      # SVG text collisions
 ```
 
 `compileall` alone is **not** sufficient: a runtime annotation such as
