@@ -2,8 +2,12 @@
 
 ``masim/platform/world/base.py`` is definitions only: a ``WorldVersion``
 dataclass plus an abstract ``SharedState`` with ``get``/``set``/``version``/
-``snapshot``.  Nothing outside ``masim/platform/`` imports it yet —
-TODO(platform): Part 1 has no world state.
+``snapshot``.
+
+The contract now has exactly one implementation, ``masim/world/shared_state.py``
+(``VersionedSharedState``), which the Simulator holds and commits once per round
+from coordinator broadcasts. The implementation's own semantics are covered in
+``test_versioned_world.py``; this module pins the contract and the wiring.
 """
 
 from __future__ import annotations
@@ -104,10 +108,10 @@ class TestSharedStateContract(unittest.TestCase):
         self.assertEqual(undocumented, [], "every contract method needs a docstring")
 
 
-class TestWorldStateIsUnwired(unittest.TestCase):
-    """TODO(platform): nothing outside masim/platform imports the contract."""
+class TestWorldStateWiring(unittest.TestCase):
+    """Exactly one implementation exists, and the Simulator owns it."""
 
-    def _imports_world(self, path) -> bool:
+    def _imports_world_contract(self, path) -> bool:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
@@ -119,33 +123,43 @@ class TestWorldStateIsUnwired(unittest.TestCase):
                         return True
         return False
 
-    def test_nothing_outside_masim_platform_imports_the_world_contract(self) -> None:
+    def test_only_the_world_package_imports_the_contract(self) -> None:
+        """The contract is consumed by its implementation, not by ad-hoc code."""
+        allowed = {"world", "simulator"}
         offenders = []
         for path in sorted(_MASIM_ROOT.rglob("*.py")):
             if _PLATFORM_ROOT in path.parents:
                 continue
-            if self._imports_world(path):
+            parts = path.relative_to(_MASIM_ROOT).parts
+            if parts and parts[0] in allowed:
+                continue
+            if self._imports_world_contract(path):
                 offenders.append(str(path.relative_to(_MASIM_ROOT)))
-        self.assertEqual(offenders, [])
+        self.assertEqual(
+            offenders,
+            [],
+            "modules outside masim/world and masim/simulator must not reach "
+            "into the world contract directly; go through VersionedSharedState",
+        )
 
-    def test_no_shared_state_implementation_leaks_outside_the_contract_package(
-        self,
-    ) -> None:
-        """TODO(platform): Part 1 has no world state at all yet.
+    def test_the_simulator_owns_a_versioned_world(self) -> None:
+        source = (_MASIM_ROOT / "simulator" / "general.py").read_text(encoding="utf-8")
+        self.assertIn("self.world = VersionedSharedState()", source)
+        self.assertIn("self.world.commit(", source)
 
-        The contract is definitions-only, and any concrete ``SharedState``
-        belongs to ``masim/platform/``; nothing in the rest of the core may
-        bring world state into scope before that seam is designed.
-        """
-        offenders = []
+    def test_shared_state_subclasses_live_only_where_declared(self) -> None:
+        """Every concrete ``SharedState`` is a deliberate, registered choice."""
+        subclasses = []
         for path in sorted(_MASIM_ROOT.rglob("*.py")):
-            if _PLATFORM_ROOT in path.parents:
-                continue
             tree = ast.parse(path.read_text(encoding="utf-8"))
             for node in ast.walk(tree):
                 if not isinstance(node, ast.ClassDef):
                     continue
                 for base in node.bases:
                     if "SharedState" in ast.unparse(base):
-                        offenders.append(f"{path.name}:{node.name}")
-        self.assertEqual(offenders, [])
+                        subclasses.append(str(path.relative_to(_MASIM_ROOT)))
+        self.assertEqual(sorted(set(subclasses)), ["world/shared_state.py"])
+
+
+if __name__ == "__main__":
+    unittest.main()

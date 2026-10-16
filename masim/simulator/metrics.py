@@ -59,6 +59,10 @@ class RoundMetrics:
     max_fanout: int
     driver_rss_mb: Optional[float] = None
     object_store_used_mb: Optional[float] = None
+    # Shared world state: how much of the world this run is tracking.
+    world_keys: int = 0
+    world_scopes: int = 0
+    world_version: str = ""
 
 
 def _percentile(values: List[float], fraction: float) -> float:
@@ -132,6 +136,11 @@ class RunMetrics:
             "total_wall_ms": round(self.total_wall_ms, 3),
             "ray_gets": self.ray_gets,
             "ray_objects_fetched": self.ray_objects_fetched,
+            "world": {
+                "keys": self.rounds[-1].world_keys if self.rounds else 0,
+                "scopes": self.rounds[-1].world_scopes if self.rounds else 0,
+                "version": self.rounds[-1].world_version if self.rounds else "",
+            },
             "totals": {
                 "operate_calls": sum(r.operate_calls for r in self.rounds),
                 "messages": sum(r.messages for r in self.rounds),

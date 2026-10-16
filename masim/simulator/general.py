@@ -59,6 +59,8 @@ from masim.simulator.base import (
     RoundPhase,
 )
 from masim.simulator.metrics import RoundMetrics, RunMetrics
+from masim.platform.world.base import WorldVersion
+from masim.world.shared_state import VersionedSharedState
 from masim.simulator.resume_scanner import (
     detect_resume_round,
     write_resume_checkpoint,
@@ -135,6 +137,7 @@ def _clear_run_outputs(record_path: str) -> List[str]:
         "communication",
         "monitoring",
         "checkpoints",
+        "world",
     ):
         if name and name not in candidates:
             candidates.append(name)
@@ -243,6 +246,12 @@ class GeneralSimulator(BaseSimulator):
         self._metrics_written = False
         # Delivery RPCs issued by the most recent phase_dispatch() call.
         self._last_dispatch_rpcs = 0
+        # Shared world state (M10). Scope-per-coordinator, committed once per
+        # round; see masim/world/shared_state.py for today's boundaries.
+        self.world = VersionedSharedState()
+        # Player ids whose role is "coordinator" — their broadcasts are the
+        # world's inputs.
+        self._coordinator_ids: set = set()
         # Initialize communication channel from config
         comm_config = config.communication
         self.communication = GeneralCommunicationChannel(comm_config)
@@ -377,6 +386,13 @@ class GeneralSimulator(BaseSimulator):
 
         logger.info("    Total players: %d", len(self.player_persona_handles))
         self.status = SimulatorStatus.READY
+
+        # Coordinator ids: their outbound broadcasts populate the shared world.
+        self._coordinator_ids = {
+            pid
+            for pid, cfg in (self.config.players or {}).items()
+            if ((cfg.get("config") or {}).get("role") == "coordinator")
+        }
 
         # Scaling observation: the run's shape is known here, so start the
         # collector and record how many actors / agent classes the run carries.
@@ -769,6 +785,13 @@ class GeneralSimulator(BaseSimulator):
                     targets = info_data.get("target_ids") or []
                     messages += len(targets)
                     max_fanout = max(max_fanout, len(targets))
+                    self._stage_world_update(info_data, round_num, level)
+
+        # Publish this round's world writes as one version. The barrier is the
+        # round: readers never observe a half-applied level.
+        world_version = self.world.commit(
+            WorldVersion(round_num=round_num, level=len(execution_levels))
+        )
 
         if self.metrics is not None:
             self.metrics.record_round(
@@ -788,6 +811,9 @@ class GeneralSimulator(BaseSimulator):
                     max_fanout=max_fanout,
                     driver_rss_mb=RunMetrics.driver_rss_mb(),
                     object_store_used_mb=RunMetrics.object_store_used_mb(),
+                    world_keys=len(self.world),
+                    world_scopes=len(self.world.scopes()),
+                    world_version=f"r{world_version.round_num}.l{world_version.level}",
                 )
             )
 
@@ -923,6 +949,51 @@ class GeneralSimulator(BaseSimulator):
     # reasons.  Call sites now use ``resume_scanner.detect_resume_round``
     # and ``resume_scanner.write_resume_checkpoint`` directly.
 
+    def _stage_world_update(
+        self, info_data: Dict[str, Any], round_num: int, level: int
+    ) -> None:
+        """Stage one coordinator broadcast into the shared world.
+
+        A coordinator's outbound payload *is* its view of the world (price,
+        volume, net demand, …), so the broadcast doubles as the world update. No
+        extra RPC and no behaviour change: agents keep publishing exactly as
+        before, and the driver projects what they published into the world under
+        that coordinator's scope.
+
+        Non-dict payloads are ignored — an investor's order is private intent,
+        not world state.
+        """
+        sender = info_data.get("sender_id")
+        if sender not in self._coordinator_ids:
+            return
+        payload = getattr(info_data.get("info"), "payload", None)
+        if not isinstance(payload, dict):
+            return
+        version = WorldVersion(round_num=round_num, level=level)
+        for key, value in payload.items():
+            self.world.set(key, value, version, scope=sender)
+
+    def _publish_world(self) -> None:
+        """Persist the shared world next to the run's other artifacts."""
+        if not len(self.world):
+            return
+        try:
+            parent = os.path.dirname(
+                self.config.setting["record_path"].rstrip("/\\")
+            ) or "."
+            target = os.path.join(parent, "world", "world_state.json")
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with open(target, "w", encoding="utf-8") as handle:
+                json.dump(self.world.to_dict(), handle, indent=2, default=str)
+            logger.info(
+                "    World state written to %s (%d variables, scopes=%s)",
+                target,
+                len(self.world),
+                ",".join(self.world.scopes()) or "-",
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("Could not persist world state: %s", exc)
+
     def _publish_metrics(self) -> None:
         """Finish the scaling-metrics collector and write it next to the run.
 
@@ -934,6 +1005,7 @@ class GeneralSimulator(BaseSimulator):
             return
         self.metrics.finish_run()
         self.metrics.log_summary()
+        self._publish_world()
         try:
             monitoring_root = derive_persona_output_paths(
                 self.config.setting["record_path"]
