@@ -12,6 +12,7 @@ from typing import Any, Dict
 import numpy as np
 
 from examples.LTCMCollapse.Rule.analysis import (
+    _universal_data,
     _write_summary,
     calculate_metrics,
     create_visualizations,
@@ -77,6 +78,10 @@ def main() -> None:
     rag_stats = analyze_rag_knowledge_effect(data["rag_contexts"])
     with (analysis_path / "rag_stats.json").open("w", encoding="utf-8") as handle:
         json.dump(rag_stats, handle, indent=2)
+    summary = {
+        "metrics": metrics,
+        "validation": validation.to_dict(),
+    }
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -89,9 +94,9 @@ def main() -> None:
                 _variant = _v
                 break
     _universal = write_universal_summary(
-        data,
+        _universal_data(data),
         config,
-        output_dir,
+        analysis_path,
         scenario='LTCMCollapse',
         variant=_variant,
         extra_summary={'scenario_metrics': summary}

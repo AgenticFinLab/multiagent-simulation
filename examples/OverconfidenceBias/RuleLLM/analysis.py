@@ -28,6 +28,7 @@ def main(config_path: str | None = None) -> Dict[str, Any]:
     config = load_config(config_path)
     data = load_simulation_data(config)
     output_dir = config["setting"]["record_path"].rsplit("/", 1)[0] + "/analysis"
+    summary = analyze_overconfidencebias(data, config, output_dir)
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -48,7 +49,7 @@ def main(config_path: str | None = None) -> Dict[str, Any]:
         extra_summary={'scenario_metrics': summary}
             if isinstance(summary, dict) else None,
     )
-    return analyze_overconfidencebias(data, config, output_dir)
+    return summary
 
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]

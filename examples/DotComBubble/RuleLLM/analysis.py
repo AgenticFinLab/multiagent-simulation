@@ -151,8 +151,8 @@ def main() -> Dict[str, Any]:
         output_dir,
         scenario='DotComBubble',
         variant=_variant,
-        extra_summary={'scenario_metrics': summary}
-            if isinstance(summary, dict) else None,
+        extra_summary={'scenario_metrics': metrics}
+            if isinstance(metrics, dict) else None,
     )
     return metrics
 

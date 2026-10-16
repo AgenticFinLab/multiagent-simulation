@@ -44,7 +44,7 @@ import math
 import os
 from typing import Any, Dict, List, Optional
 
-from masim.format.broadcast import validate_broadcast, MarketBroadcast
+from masim.format.broadcast import validate_broadcast
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer

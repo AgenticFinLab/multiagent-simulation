@@ -103,7 +103,7 @@ from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig, SimulatorStatus
 from masim.simulator.config_schema import validate_simulation_config
 from masim.simulator.resume_scanner import detect_resume_round
-from masim.utils.config import load_config, setup_logging
+from masim.utils.config import load_config
 
 
 # ---------------------------------------------------------------------------

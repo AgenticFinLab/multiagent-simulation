@@ -176,6 +176,12 @@ def main() -> Dict[str, Any]:
             f"mean_retrieval_failure_rate = {agg['mean_retrieval_failure_rate']:.3f}"
         )
     print(summary["validation"]["interpretation"])
+    config = load_config(args.config)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+    results = load_results(config)
+    data = load_simulation_data(config, results)
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

@@ -48,12 +48,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 from masim.utils.rng import derive_rng
-from masim.format.order import (
-    BUY,
-    HOLD,
-    SELL,
-    InvestorOrder,
-)
+from masim.format.order import BUY, SELL, InvestorOrder
 from masim.format.finalize import (
     emit_order_envelope,
     finalize_llm_order,

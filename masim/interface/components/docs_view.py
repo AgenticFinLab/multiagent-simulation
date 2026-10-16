@@ -33,10 +33,8 @@ def render_docs_page(scenario_name: str):
     """
     from ..config_loader import (
         get_analysis_bases_content,
-        get_analysis_bases_path,
         get_market_description,
         get_simulation_bases_content,
-        get_simulation_bases_path,
         scenario_display_name,
     )
 

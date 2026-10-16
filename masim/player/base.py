@@ -65,13 +65,9 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Union, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
-
-if TYPE_CHECKING:
-    from masim.communication.base import Message
-
 
 # =============================================================================
 #                           TYPE ALIASES

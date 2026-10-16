@@ -51,9 +51,16 @@ Contract
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+if TYPE_CHECKING:
+    # Referenced only by the ``load_and_validate_config`` return annotation.
+    # ``from __future__ import annotations`` keeps that annotation lazy, so the
+    # import must stay under TYPE_CHECKING (importing base at runtime would
+    # create a cycle), but the name has to exist for tools that resolve hints.
+    from masim.simulator.base import SimulationConfig
 
 
 # ---------------------------------------------------------------------------

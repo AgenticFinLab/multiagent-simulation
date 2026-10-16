@@ -254,12 +254,10 @@ Proxy lifecycle is tied to owner lifecycle through three phases:
 import weakref
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from datetime import datetime
 from dataclasses import dataclass, field
 from typing import (
     Any,
     Dict,
-    List,
     Optional,
     Union,
     Protocol,

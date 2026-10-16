@@ -222,7 +222,7 @@ def main() -> Dict[str, Any]:
     _universal = write_universal_summary(
         data,
         config,
-        output_dir,
+        analysis_dir,
         scenario='EchoChamber',
         variant=_variant,
         extra_summary={'scenario_metrics': summary}

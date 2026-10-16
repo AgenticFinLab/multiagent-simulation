@@ -670,6 +670,12 @@ def get_finance_scenario_content(scenario_key: str) -> Optional[str]:
 # Agent principle descriptions (keyed by class name suffix after ':')
 # Covers all rule-based and LLM variants across every scenario
 # ---------------------------------------------------------------------------
+
+# NOTE: this table is keyed by CLASS NAME only, so two scenarios that reuse a
+# class name with different semantics collide and the LAST entry wins.
+# Duplicates (RuleLLMNoiseTrader, RetailTrader) were removed so no description
+# is silently discarded. If per-scenario descriptions are ever needed, key the
+# table by (scenario, class_name) and update get_agents_info().
 _AGENT_PRINCIPLES: Dict[str, str] = {
     # Coordinator
     "Market": "Rule-based price-clearing coordinator that sets market price each round",
@@ -688,7 +694,6 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     # AssetBubbleRuleLLM (Hybrid Rule + LLM)
     "RuleLLMMomentumSpeculator": "Hybrid rule+LLM speculator following momentum formulas with qualitative adjustments",
     "RuleLLMRationalArbitrageur": "Hybrid rule+LLM arbitrageur exploiting mispricings with cost-aware reasoning",
-    "RuleLLMNoiseTrader": "Hybrid rule+LLM trader following sentiment signals with herding adjustments",
     "RuleLLMValueInvestor": "Hybrid rule+LLM value investor trading infrequently on fundamental deviation",
     "RuleLLMLeveragedBuyer": "Hybrid rule+LLM leveraged buyer with margin-call awareness in reasoning",
     # AssetBubbleRag (RAG + LLM)
@@ -725,7 +730,6 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     "HighFrequencyTrader": "Sub-millisecond quote updates; can trigger liquidity withdrawal",
     "AlgorithmicTrader": "Rule-based algo triggered by price/volume signals",
     "StopLossTrader": "Automatic exit on loss threshold; cascades price drops",
-    "RetailTrader": "Individual investor with delayed reaction; amplifies aftermath",
     "LLMHighFrequencyTrader": "LLM-driven HFT responding to order-book imbalances",
     "LLMFlashMarketMaker": "LLM-driven market maker pulling quotes under stress",
     "LLMStopLossTrader": "LLM-driven stop-loss trader with configurable exit thresholds",

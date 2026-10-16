@@ -29,7 +29,6 @@ from ..config_loader import (
     get_topology_info,
     get_market_type,
     get_market_description,
-    get_market_archetype,
     get_market_icon_path,
     get_diagram_path,
     scenario_display_name,

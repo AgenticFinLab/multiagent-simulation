@@ -35,11 +35,8 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from masim.communication.base import Message
 from masim.proxy.base import (
-    # Types
     OwnerType,
     BaseProxy,
-    ProxyResult,
-    # Configs
     SendReceiveConfig,
     StorageConfig,
     MonitoringConfig,

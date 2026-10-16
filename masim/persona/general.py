@@ -77,14 +77,7 @@ from masim.proxy.general import (
 )
 
 if TYPE_CHECKING:
-    from masim.player.base import (
-        BasePlayer,
-        PlayerConfig,
-        Action,
-        StepResult,
-        TurnResult,
-        PayloadType,
-    )
+    from masim.player.base import TurnResult
 
 
 # =============================================================================

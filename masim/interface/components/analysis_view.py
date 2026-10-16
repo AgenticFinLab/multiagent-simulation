@@ -22,7 +22,6 @@ def render_analysis_page(scenario_name: str):
     from ..config_loader import (
         check_simulation_results,
         get_analysis_path,
-        get_scenario_info,
         scenario_display_name,
     )
 
