@@ -265,8 +265,6 @@ from typing import (
     TYPE_CHECKING,
 )
 
-import numpy as np
-
 # ---------------------------------------------------------------------------
 # Message-layer types are OWNED by the communication layer. We only import
 # `Message` here because BaseProxy.on_message() uses it as a type annotation;

@@ -16,10 +16,20 @@ expose a single ``Market<PascalStem>`` class; they are always
 rule-executed even when participants are LLM-driven.
 """
 
-from masim.format.state import StandardMarketState
-from masim.agents._base import CanonicalRulePlayer, CanonicalLLMPlayer
-from masim.agents._rag_base import CanonicalRagPlayer, RAG_FALLBACK_MESSAGE
-from masim.agents._coordinator_base import CanonicalMarketCoordinator
+# Re-exported public API (see ``_BASE_EXPORTS`` / ``__all__`` below).  The
+# ``X as X`` form marks these as deliberate re-exports: ``__all__`` is built
+# dynamically from the registries, so a static analyser cannot see that the
+# names are used, and every scenario imports them from this package.
+from masim.format.state import StandardMarketState as StandardMarketState
+from masim.agents._base import (
+    CanonicalLLMPlayer as CanonicalLLMPlayer,
+    CanonicalRulePlayer as CanonicalRulePlayer,
+)
+from masim.agents._rag_base import (
+    RAG_FALLBACK_MESSAGE as RAG_FALLBACK_MESSAGE,
+    CanonicalRagPlayer as CanonicalRagPlayer,
+)
+from masim.agents._coordinator_base import CanonicalMarketCoordinator as CanonicalMarketCoordinator
 
 from masim.agents.finance.active_rebalancer import RuleActiveRebalancer, LLMActiveRebalancer
 from masim.agents.finance.aggressive_investor import RuleAggressiveInvestor, LLMAggressiveInvestor
