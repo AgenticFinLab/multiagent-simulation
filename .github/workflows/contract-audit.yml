@@ -100,6 +100,8 @@ jobs:
 
       - name: "GATE: every core module imports (catches NameError in signatures)"
         run: python scripts/check_module_imports.py
+      - name: "GATE: internal re-exports resolve (examples/ shims import from siblings)"
+        run: python scripts/check_example_reexports.py
 
       - name: Run unit tests
         run: PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py" -v

@@ -10,13 +10,13 @@ This module is the **scenario-level** analysis framework that orchestrates:
 - ``summary.json`` + universal summary hook (``analyze_standard_scenario``);
 - extensible metric registry (``MetricsRegistry``).
 
-The lower-level **framework toolkit** lives in :mod:`masim.evaluation`, which
+The lower-level **framework toolkit** lives in :mod:`evaluation`, which
 provides reusable primitives (data loading, metric computation, timeseries
 analysis, finance-specific validation). This module delegates to
-:func:`masim.evaluation.write_universal_summary` for Hook 9/11 compliance.
+:func:`evaluation.write_universal_summary` for Hook 9/11 compliance.
 
 When adding new analysis capabilities:
-- Framework-general utilities → :mod:`masim.evaluation`
+- Framework-general utilities → :mod:`evaluation`
 - Scenario-specific orchestration → this module or per-scenario ``analysis.py``
 """
 
@@ -32,8 +32,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
-from masim.evaluation.data_loader import batch_to_rounds
+from evaluation import write_universal_summary
+from evaluation.data_loader import batch_to_rounds
+
+# Public underscore-prefixed alias kept for the scenario analysis shims that
+# import it from here (``from examples.standard_rule_analysis import
+# _batch_to_rounds``). Without it those 12 modules fail at import time.
+_batch_to_rounds = batch_to_rounds
 
 
 # ---------------------------------------------------------------------------

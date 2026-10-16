@@ -21,6 +21,7 @@ is the authoritative Player lifecycle contract.
 python -m compileall -q masim examples scripts tests   # syntax
 python scripts/check_module_imports.py                 # real imports (catches
                                                        # NameError in signatures)
+python scripts/check_example_reexports.py              # internal re-exports resolve
 PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py"
 PYTHONPATH=. python -m unittest discover -s examples/uTests -t . -p "test_*.py"
 python scripts/audit_scenario_contract.py --scope archetypes --no-legacy-info
