@@ -271,6 +271,31 @@ detect_resume_round(record_path)   # 优先读 .masim-progress.json，其次环�
 
 同时修掉了两个让观测失真的缺陷：`MonitoringProxy` 的缓冲**从未落盘**（现在由 `PlayerPersona.shutdown()` 统一 flush），以及所有 actor 共用一个 `monitoring/` 目录、用同一种索引键写入，导致 11 个 actor 的记录互相覆盖（现在按 player id 命名空间，与 `records/` 一致）。
 
+### 8.5 共享世界状态（World，带版本提交）
+
+M10 契约（`masim/platform/world/base.py`：`get` / `set` / `version` / `snapshot`）此前**零实现**；现在有了唯一实现 `masim/world/shared_state.py: VersionedSharedState`。
+
+```text
+协调者广播（payload 即"它眼中的世界"）
+   → world.set(key, value, version=WorldVersion(round, level), scope=<协调者 id>)   ← 暂存
+   → world.commit(WorldVersion(round, N))                                          ← 轮末原子发布
+   → world/world_state.json（版本 + 作用域 + 变量 + 逐次提交历史）
+```
+
+| 语义 | 说明 |
+|---|---|
+| **暂存 / 提交分离** | `set()` 只暂存；`commit()` 在**轮末一次发布**，因此读到的永远是完整版本，不会看到"半应用"的一层 |
+| **版本** | `WorldVersion(round_num, level, seq)`；每次有变更的提交进历史（哪些键变了、何时变） |
+| **作用域 = 多市场原语** | 键按 `scope.key` 命名空间化：`world.get("price", scope="market_b")`；`world.read_all("price")` 一次读出**所有市场**的同名变量——这正是宏观层跨市场聚合需要的原语 |
+| **快照 / 回滚** | `snapshot()` / `restore()`：世界是框架里**第一个能真正回到过去**的部分，也是 resume 恢复世界状态的前提 |
+
+**实测（首次多市场运行）**：同一拓扑内两个独立协调者（fundamental 100 / 60）同时运行，16 个 player，world 产出 **2 个作用域**：`market.price=110.23`、`market_b.price=66.56`，各自独立演化。
+
+**边界（必须说清，否则就是把"目标态"写成"现状"）**：
+
+1. 今天是**驱动侧的投影**——协调者把世界发布到消息里，驱动者再投影进 World；**agent 不能直接读写 World**。要让 agent 直接写（订单簿、共享信息池），需要 World actor（或按 actor 复制的视图），这是下一步。
+2. **agent 侧仍只有单一 `market_data` 槽位**（`masim/agents/_base.py:577`：`custom_state["market_data"] = payload`，按到达顺序被覆盖，不使用 `sender_id`）。所以两个市场能同时跑、World 能分开记账，但**参与者目前无法区分两条广播来自哪个市场**。多市场要真正可用，下一步是**按来源的感知状态**（`market_data_by_source[sender_id]` + 默认别名）。
+
 ## 9. 配置系统
 
 `configs/{Scenario}/{Mechanism}/` 四个文件，通过 YAML `!include` 组合：

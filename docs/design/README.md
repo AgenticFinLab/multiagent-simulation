@@ -182,6 +182,7 @@ MASim 让大量异构 agent 在共享世界里**持续感知、决策、行动�
 1. **canonical 契约在场景层的采用率是 1/180**（另 4 个是合规的"组合式"薄模块，175 个仍是 legacy）。archetype 库则是 209/209 合规——**库层干净，场景层未迁移**。
 2. **平台契约层（`masim/platform/`）是"仅设计"**：11 个契约文件、零 importer。它描述的是目标，不是现状。
 3. **执行/结算接缝、规模化观测、按收件人批量投递都已落地**（本轮）：默认策略与历史逐位一致，观测首测即定位瓶颈（dispatch 73% vs agent 计算 2%），批处理把投递 RPC 减半且结果逐位不变。
+5. **共享世界状态（World）已落地**：实现 M10 契约，带版本提交与作用域；首次跑通**多市场**（16 player、2 个作用域、价格各自独立演化），`read_all(key)` 提供跨市场聚合原语。
 4. **三层验收几乎没有机械化**。共享校验模块里有 11 个场景专用 validator，但只有 **4 个真的被调用**（AssetBubble / DispositionEffect / EquityPremium / FlashCrash / FlashCrash2010 五个变体），**7 个是死代码**；另 6 个场景自己写了本地 `validate_*`。合计 **45 个场景里只有 8 个有任何校验钩子，37 个完全没有**；第 3 层「机制是否复现」没有任何机械化判定。
 
 ---
@@ -195,6 +196,7 @@ MASim 让大量异构 agent 在共享世界里**持续感知、决策、行动�
 | G3 | 续跑不恢复 agent 状态 | `--resume` 只对"剩余轮次不依赖当前状态"的运行安全 | 实现 `save_state/load_state` 的接线（框架已有方法，无调用者） |
 | G4 | archetype 代码骨架重复（结构重复率 93%，`init_extras` 200 份定义只有 19 种实现） | 改一处默认值要改 73 处；`PARAM_SPECS` 仅 10/209 → 参数校验基本空转 | 声明式 `PARAMS` 参数表 + 基类通用 `init_extras` |
 | G4b | 默认成交策略仍是自成交；没有延迟结算与订单簿模型 | 账本价与市价仍可背离，微观结构结论不可用 | 接缝已就绪：按场景换 `extras.fill_model`，或实现一个撮合模型 |
+| G4c | **多市场的 agent 侧感知**：只有单一 `market_data` 槽位 | 两个市场可同时运行、World 分开记账，但参与者无法区分广播来源 | 按来源的感知状态（`market_data_by_source[sender_id]` + 默认别名），再补多市场 archetype |
 | G5 | `masim/platform/` 零 importer、M18–M21 无契约 | 交付物与运行框架脱节 | 要么接通（D7 最小改造），要么在文档中降级为"提案" |
 | G6 | 三层验收第 3 层无机械化判定 | "进程成功"被误当成"场景有效" | 把 `analysis-bases.md` 的判据变成可执行断言 |
 | G7 | 复合 agent / 共享世界状态 / Registry / ScalePolicy 仅设计 | 无法表达组织、群体、公司等主体 | 按 D2/D10 先落一个最小 `CompositeOrchestrator` |

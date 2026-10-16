@@ -89,6 +89,7 @@ multiagent-simulation/
 | `masim/execution` | **执行策略**（默认 `SelfFillModel`、示例 `MarketPriceFillModel`） | `FillModel` |
 | `masim/player/portfolio.py` | **账本唯一变更入口** | `Portfolio.apply_fill()` |
 | `masim/simulator/metrics.py` | **规模化观测**（阶段耗时/RPC/消息/扇出/内存） | `RunMetrics` / `monitoring/run_metrics.json` |
+| `masim/world/shared_state.py` | **共享世界状态**（版本提交 + 作用域 + 快照） | `VersionedSharedState` / `world/world_state.json` |
 | `masim/platform/execution/base.py` | 执行/结算**契约**（只定义） | `OrderIntent` / `Fill` / `FillModel` |
 | `masim/utils` | 配置、拓扑、Ray、结果读取 | `load_config` / `load_results` / `TopologyGraph` |
 
