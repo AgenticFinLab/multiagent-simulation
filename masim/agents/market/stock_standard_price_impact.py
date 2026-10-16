@@ -125,7 +125,7 @@ class MarketStockStandardPriceImpact(CanonicalMarketCoordinator):
         net_demand = agg["net_demand"]
 
         # 2. Draw noise
-        eps = cs["rng"].gauss(0, sigma) if sigma > 0 else 0.0
+        eps = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
 
         # 3. Compute raw transition
         p_raw = price_t + lam * net_demand + gamma * (fundamental - price_t) + eps

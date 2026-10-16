@@ -27,7 +27,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -66,7 +65,7 @@ class RuleFundamentalist(CanonicalRulePlayer):
         if state.price <= 0 or math.isnan(state.fundamental):
             return hold
 
-        noise = random.gauss(0.0, noise_std) if noise_std > 0 else 0.0
+        noise = self.rng.gauss(0.0, noise_std) if noise_std > 0 else 0.0
         estimated_value = state.fundamental + noise
         deviation = (estimated_value - state.price) / state.price
         raw_quantity = sensitivity * deviation * base

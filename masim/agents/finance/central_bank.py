@@ -30,7 +30,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -71,7 +70,7 @@ class RuleCentralBank(CanonicalRulePlayer):
 
         if state.deviation >= -theta:
             return hold
-        if random.random() >= prob:
+        if self.rng.random() >= prob:
             return hold
         if size <= 0:
             return hold

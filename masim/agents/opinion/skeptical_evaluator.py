@@ -48,7 +48,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -101,7 +100,7 @@ class RuleOpinionSkepticalEvaluator(CanonicalRulePlayer):
         if evidence_quality <= theta_skep:
             return hold
         # Low share probability.
-        if random.random() >= p_share_s:
+        if self.rng.random() >= p_share_s:
             return hold
 
         quantity = p_share_s * base_size

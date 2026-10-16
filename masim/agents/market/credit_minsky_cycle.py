@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 import math
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -313,7 +312,7 @@ class MarketCreditMinskyCycle(CanonicalMarketCoordinator):
         # ------------------------------------------------------------------
         # Step 5: Credit price transition
         # ------------------------------------------------------------------
-        eps_credit = random.gauss(0, sigma) if sigma > 0 else 0.0
+        eps_credit = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
         P_raw = P_t + lam * net_credit_demand + gamma_effective * (F - P_t) + eps_credit
         credit_price_next = max(P_raw, price_floor)
         price_change = credit_price_next - P_t
@@ -322,7 +321,7 @@ class MarketCreditMinskyCycle(CanonicalMarketCoordinator):
         # Step 6: MBS price transition (conditional)
         # ------------------------------------------------------------------
         if mbs_enabled:
-            eps_mbs = random.gauss(0, sigma) if sigma > 0 else 0.0
+            eps_mbs = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
             MBS_raw = (
                 M_t + lam * net_mbs_demand + gamma_effective * (F_mbs - M_t) + eps_mbs
             )

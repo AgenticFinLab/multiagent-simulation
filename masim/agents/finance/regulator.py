@@ -32,7 +32,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -77,7 +76,7 @@ class RuleRegulator(CanonicalRulePlayer):
         if not eligible:
             return hold
 
-        draw = random.random()
+        draw = self.rng.random()
         if draw >= prob:
             return hold
 

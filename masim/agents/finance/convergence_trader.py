@@ -27,7 +27,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -56,16 +55,16 @@ class RuleConvergenceTrader(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
         p_trade = self.state.custom_state["trade_probability"]
-        if random.random() > p_trade:
+        if self.rng.random() > p_trade:
             return hold
 
         min_q = self.state.custom_state["min_quantity"]
         max_q = self.state.custom_state["max_quantity"]
-        quantity = float(random.randint(min_q, max_q))
+        quantity = float(self.rng.randint(min_q, max_q))
         if quantity < 1:
             return hold
 
-        factory = InvestorOrder.buy if random.random() < 0.5 else InvestorOrder.sell
+        factory = InvestorOrder.buy if self.rng.random() < 0.5 else InvestorOrder.sell
         return factory(
             quantity=quantity,
             price=state.price,

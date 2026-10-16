@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 import math
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -271,8 +270,8 @@ class MarketCryptoAlgostableDepeg(CanonicalMarketCoordinator):
         # ----------------------------------------------------------
         # STEP 2: Draw noise (independent per asset)
         # ----------------------------------------------------------
-        epsilon_L = random.gauss(0, sigma)
-        epsilon_U = random.gauss(0, sigma)
+        epsilon_L = self.rng.gauss(0, sigma)
+        epsilon_U = self.rng.gauss(0, sigma)
 
         # ----------------------------------------------------------
         # STEP 3: Raw UST transition (soft peg pull only)

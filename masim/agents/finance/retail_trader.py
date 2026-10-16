@@ -28,7 +28,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -69,7 +68,7 @@ class RuleRetailTrader(CanonicalRulePlayer):
         if state.round % freq != 0:
             return hold
 
-        random_trade = random.gauss(0.0, noise_std)
+        random_trade = self.rng.gauss(0.0, noise_std)
         reversion = -rev * state.position
         raw_quantity = random_trade + reversion
         # Clamp symmetrically to ±max_quantity per profile.

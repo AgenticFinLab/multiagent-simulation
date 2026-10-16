@@ -34,7 +34,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -89,7 +88,7 @@ class RuleInformationTrader(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        if deviation < theta_detect and random.random() < p_detect:
+        if deviation < theta_detect and self.rng.random() < p_detect:
             qty = min(front_run_size, state.position)
             if qty > 0:
                 self.state.custom_state["short_position"] = short_pos + qty

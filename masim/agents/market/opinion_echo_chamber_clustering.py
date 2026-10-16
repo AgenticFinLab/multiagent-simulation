@@ -19,7 +19,6 @@ Transition equation:
 from __future__ import annotations
 
 import logging
-import random
 from typing import Any, Dict, List, Optional
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -199,7 +198,7 @@ class MarketOpinionEchoChamberClustering(CanonicalMarketCoordinator):
         net_polarization = total_polarize - total_depolarize
 
         # 2. Draw noise
-        eps = random.gauss(0, sigma) if sigma > 0 else 0.0
+        eps = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
 
         # 3. Compute raw polarization transition
         p_raw = (

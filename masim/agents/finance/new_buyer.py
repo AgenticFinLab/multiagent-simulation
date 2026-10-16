@@ -31,7 +31,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -60,8 +59,6 @@ class RuleNewBuyer(CanonicalRulePlayer):
         )
         self.state.custom_state["lookback"] = int(extras.get("lookback", 20))
         self.state.custom_state["prices"] = []
-        seed = extras.get("seed")
-        self.state.custom_state["rng"] = random.Random(seed)
 
     def on_market_data(self, market_data: Dict[str, Any]) -> None:
         prices = self.state.custom_state["prices"]
@@ -77,7 +74,7 @@ class RuleNewBuyer(CanonicalRulePlayer):
         sigma = self.state.custom_state["noise_sigma"]
         lookback = self.state.custom_state["lookback"]
         prices = self.state.custom_state["prices"]
-        rng: random.Random = self.state.custom_state["rng"]
+        rng = self.rng
 
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY

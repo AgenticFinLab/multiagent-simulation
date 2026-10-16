@@ -403,12 +403,31 @@ def _apply_fill_and_emit_action(
     )
 
 
+class SeededRngMixin:
+    """Mixin providing the per-agent deterministic RNG.
+
+    The framework injects ``custom_state["rng"]`` (see ``masim/utils/rng.py``)
+    so that two runs with the same ``setting.seed`` draw identical streams.
+    Archetypes MUST draw randomness through this property instead of the
+    unseeded global ``random`` module.
+    """
+
+    @property
+    def rng(self):
+        state = self.state.custom_state
+        rng = state.get("rng")
+        if rng is None:
+            rng = derive_rng(self.config.extras.get("seed"), salt=self.config.identity)
+            state["rng"] = rng
+        return rng
+
+
 # ---------------------------------------------------------------------------
 # Rule base
 # ---------------------------------------------------------------------------
 
 
-class CanonicalRulePlayer(GeneralPlayer):
+class CanonicalRulePlayer(SeededRngMixin, GeneralPlayer):
     """Base class for deterministic, formula-driven canonical agents.
 
     Subclasses MUST:
@@ -599,7 +618,7 @@ class CanonicalRulePlayer(GeneralPlayer):
 # ---------------------------------------------------------------------------
 
 
-class CanonicalLLMPlayer(GeneralPlayer):
+class CanonicalLLMPlayer(SeededRngMixin, GeneralPlayer):
     """Base class for LLM-driven canonical agents.
 
     Reads from ``self.config.extras["llm"]``:

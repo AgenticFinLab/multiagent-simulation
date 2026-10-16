@@ -35,7 +35,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -64,14 +63,12 @@ class RulePassiveFollower(CanonicalRulePlayer):
             extras.get("noise_sigma", 0.05)
         )
         self.state.custom_state["lookback"] = int(extras.get("lookback", 10))
-        seed = extras.get("seed")
-        self.state.custom_state["rng"] = random.Random(seed)
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         consensus_th = self.state.custom_state["consensus_threshold"]
         follow_fraction = self.state.custom_state["follow_fraction"]
         sigma = self.state.custom_state["noise_sigma"]
-        rng: random.Random = self.state.custom_state["rng"]
+        rng = self.rng
 
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY

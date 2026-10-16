@@ -43,7 +43,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -101,7 +100,7 @@ class RuleRetailCoordinator(CanonicalRulePlayer):
             multiplier = 1.0 + cs["si_boost"] * max(
                 0.0, short_interest - cs["si_threshold"]
             )
-            eps = random.gauss(0.0, cs["noise_sigma"])
+            eps = self.rng.gauss(0.0, cs["noise_sigma"])
             raw_qty = (
                 cs["coordination_weight"]
                 * (state.cash / state.price)

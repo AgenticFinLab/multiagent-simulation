@@ -35,7 +35,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -78,7 +77,7 @@ class RuleLiquiditySeeker(CanonicalRulePlayer):
         else:
             adjustment = min(1.0, liquidity_val / base)
 
-        target_raw = random.gauss(0.0, sigma)
+        target_raw = self.rng.gauss(0.0, sigma)
         target_scaled = target_raw * adjustment
         quantity_signed = max(min(target_scaled, cap), -cap)
         magnitude = abs(round(quantity_signed))

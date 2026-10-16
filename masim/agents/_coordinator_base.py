@@ -49,12 +49,12 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 from masim.utils.rng import derive_rng
-from masim.agents._base import validate_archetype_extras
+from masim.agents._base import SeededRngMixin, validate_archetype_extras
 
 logger = logging.getLogger("masim.agents.coordinator")
 
 
-class CanonicalMarketCoordinator(GeneralPlayer):
+class CanonicalMarketCoordinator(SeededRngMixin, GeneralPlayer):
     """Base class for market coordinators (price-formation broadcasters).
 
     Subclasses MUST:

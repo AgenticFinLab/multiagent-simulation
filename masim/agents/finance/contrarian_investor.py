@@ -29,7 +29,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -65,7 +64,7 @@ class RuleContrarianInvestor(CanonicalRulePlayer):
         clip_range = self.state.custom_state["clip_range"]
 
         mispricing = (state.fundamental - state.price) / state.price
-        bid = state.fundamental + random.gauss(0.0, noise_std)
+        bid = state.fundamental + self.rng.gauss(0.0, noise_std)
         if bid <= 0:
             return hold
         raw_qty = beta * mispricing * state.cash / bid

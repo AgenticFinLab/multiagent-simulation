@@ -15,7 +15,7 @@ Theoretical basis: Black (1986) — Noise Trader Risk.
 
 Decision rule:
     With probability ``trade_probability`` (default 0.05) per round, place a
-    random buy or sell of size ``random.uniform(min_order, max_order)``.
+    random buy or sell of size ``self.rng.uniform(min_order, max_order)``.
 
 Parameters (read from ``extras``):
     * ``trade_probability``: float, [0, 1] — chance of trading per round.
@@ -51,7 +51,7 @@ class RuleNoiseTrader(CanonicalRulePlayer):
         self.state.custom_state["max_order"] = float(extras.get("max_order", 500.0))
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
-        rng = self.state.custom_state["rng"]
+        rng = self.rng
         if rng.random() >= self.state.custom_state["trade_probability"]:
             return InvestorOrder.hold(
                 price=state.price,

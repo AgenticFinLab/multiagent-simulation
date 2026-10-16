@@ -58,7 +58,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict, Iterable
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -178,7 +177,7 @@ class RuleInformationEnvironment(CanonicalRulePlayer):
         sharpening = self.state.custom_state["sharpening_rate"]
         noise_std = self.state.custom_state["noise_std"]
 
-        noise = random.gauss(0.0, noise_std) if noise_std > 0 else 0.0
+        noise = self.rng.gauss(0.0, noise_std) if noise_std > 0 else 0.0
         new_belief = belief + spread_impact * net_spread + truth_correction * (
             truth - belief
         ) + noise

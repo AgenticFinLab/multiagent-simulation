@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import logging
 import math
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -257,7 +256,7 @@ class MarketDepositBankRunDiamondDybvig(CanonicalMarketCoordinator):
             # ------------------------------------------------------------------
             # Compute noise
             # ------------------------------------------------------------------
-            eps = random.gauss(0, sigma) if sigma > 0 else 0.0
+            eps = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
 
             # ------------------------------------------------------------------
             # Compute transition

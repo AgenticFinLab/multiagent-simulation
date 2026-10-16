@@ -37,7 +37,6 @@ in ``custom_state["opinion"]`` so downstream tooling can inspect it.
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -63,15 +62,13 @@ class RuleOpinionEnvironment(CanonicalRulePlayer):
         self.state.custom_state["opinion"] = float(
             extras.get("initial_opinion", 0.0)
         )
-        seed = extras.get("seed")
-        self.state.custom_state["rng"] = random.Random(seed)
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         alpha = self.state.custom_state["alpha"]
         beta = self.state.custom_state["beta"]
         sigma = self.state.custom_state["shock_sigma"]
         opinion = float(self.state.custom_state["opinion"])
-        rng: random.Random = self.state.custom_state["rng"]
+        rng = self.rng
 
         momentum = state.price_change if state.price_change == state.price_change else 0.0
         epsilon = rng.gauss(0.0, sigma) if sigma > 0 else 0.0

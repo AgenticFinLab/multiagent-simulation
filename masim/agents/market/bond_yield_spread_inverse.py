@@ -18,7 +18,6 @@ Broadcast: 12 fields — bond_price, prev_bond_price, price_change, fundamental,
 from __future__ import annotations
 
 import logging
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -232,7 +231,7 @@ class MarketBondYieldSpreadInverse(CanonicalMarketCoordinator):
         # ----------------------------------------------------------
         # STEP 4: Draw noise
         # ----------------------------------------------------------
-        epsilon = random.gauss(0, sigma)
+        epsilon = self.rng.gauss(0, sigma)
 
         # ----------------------------------------------------------
         # STEP 5: Compute raw price transition

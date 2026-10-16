@@ -49,7 +49,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -100,7 +99,7 @@ class RuleOpinionGullibleSpreader(CanonicalRulePlayer):
         if emotional_salience <= theta_gull:
             return hold
         # Bernoulli share draw.
-        if random.random() >= p_share:
+        if self.rng.random() >= p_share:
             return hold
 
         quantity = p_share * base_size

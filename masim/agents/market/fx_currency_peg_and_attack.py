@@ -15,7 +15,6 @@ Broadcast: 12 fields — exchange_rate, prev_exchange_rate, fundamental, peg_rat
 from __future__ import annotations
 
 import logging
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -271,7 +270,7 @@ class MarketFxCurrencyPegAndAttack(CanonicalMarketCoordinator):
         # ----------------------------------------------------------
         # STEP 5: Noise draw and raw transition
         # ----------------------------------------------------------
-        epsilon = random.gauss(0, sigma)
+        epsilon = self.rng.gauss(0, sigma)
 
         R_raw = R_t + lam * net_pressure + gamma_eff * (F - R_t) + epsilon
         new_R = max(R_raw, rate_floor)

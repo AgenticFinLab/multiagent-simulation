@@ -43,7 +43,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -123,8 +122,8 @@ class RuleUninformedBystander(CanonicalRulePlayer):
 
         engage_p = self.state.custom_state["engagement_probability"]
         spread_p = self.state.custom_state["spread_probability"]
-        r1 = random.random()
-        r2 = random.random()
+        r1 = self.rng.random()
+        r2 = self.rng.random()
         engaged = r1 < engage_p
         if not engaged or r2 >= spread_p:
             return hold

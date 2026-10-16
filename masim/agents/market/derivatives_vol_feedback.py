@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import logging
 import math
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -245,8 +244,8 @@ class MarketDerivativesVolFeedback(CanonicalMarketCoordinator):
         # ------------------------------------------------------------------
         # Step 3: Draw noise
         # ------------------------------------------------------------------
-        eps_v = random.gauss(0, sigma_v) if sigma_v > 0 else 0.0
-        eps_x = random.gauss(0, sigma_x) if sigma_x > 0 else 0.0
+        eps_v = self.rng.gauss(0, sigma_v) if sigma_v > 0 else 0.0
+        eps_x = self.rng.gauss(0, sigma_x) if sigma_x > 0 else 0.0
 
         # ------------------------------------------------------------------
         # Step 4: Raw VIX transition (no hedge feedback yet)

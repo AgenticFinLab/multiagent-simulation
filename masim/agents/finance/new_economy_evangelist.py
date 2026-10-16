@@ -38,7 +38,6 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -73,8 +72,6 @@ class RuleNewEconomyEvangelist(CanonicalRulePlayer):
         self.state.custom_state["noise_sigma"] = float(
             extras.get("noise_sigma", 0.05)
         )
-        seed = extras.get("seed")
-        self.state.custom_state["rng"] = random.Random(seed)
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         belief_th = self.state.custom_state["belief_threshold"]
@@ -82,7 +79,7 @@ class RuleNewEconomyEvangelist(CanonicalRulePlayer):
         weight = self.state.custom_state["narrative_weight"]
         panic_fraction = self.state.custom_state["panic_fraction"]
         sigma = self.state.custom_state["noise_sigma"]
-        rng: random.Random = self.state.custom_state["rng"]
+        rng = self.rng
 
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY

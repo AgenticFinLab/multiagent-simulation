@@ -19,7 +19,6 @@ Transition equations:
 from __future__ import annotations
 
 import logging
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -179,7 +178,7 @@ class MarketInformationSisContagion(CanonicalMarketCoordinator):
         net_spread = total_spread - total_correction
 
         # 2. Draw noise
-        eps = random.gauss(0, sigma) if sigma > 0 else 0.0
+        eps = self.rng.gauss(0, sigma) if sigma > 0 else 0.0
 
         # 3. Compute belief transition
         b_raw = belief_t + alpha * net_spread + beta * (truth - belief_t) + eps
