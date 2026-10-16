@@ -210,6 +210,8 @@ marimo/_lsp/
 __marimo__/
 .DS_Store
 
+# Simulation run output (records / communication / monitoring / analysis).
+# Runtime artefacts — regenerate with examples/*/*/run_*.py + analysis.py.
 *EXPERIMENT*/
 
 third-part/
@@ -218,7 +220,11 @@ third-part/
 # Local pipeline logs (never committed)
 tmpl/
 
+# Generated test *artefacts* (any path containing "TEST"). Declared files that
+# merely contain the token in their name are re-included explicitly below.
 *TEST*
+# Versioned dependency manifest for the test suite (see requirements-test.txt)
+!requirements-test.txt
 
 # Unit tests are intentionally versioned (unignore the tests/ package)
 !tests/
@@ -235,6 +241,8 @@ docs/slides/**/.cache/
 docs/slides/**/*_files/
 docs/slides/**/*.log
 
+# Web-UI "customized simulation" bundles are per-team runtime workspaces.
+# Authored scenario sources belong in examples/{Scenario}/, not here.
 *CUSTOMIZED_SIMULATION*
 
 
@@ -242,5 +250,7 @@ configs/.team_registry
 
 */slides/*
 
-# Local-only unit tests (kept out of the repo by policy)
+# Legacy local-only test dir — superseded by the versioned `tests/` package
+# (see the `!tests/` / `!tests/**` un-ignore rules above). Kept ignored so a
+# stale checkout copy cannot be re-committed by accident.
 .tests/

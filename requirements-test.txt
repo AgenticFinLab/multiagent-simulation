@@ -1,0 +1,29 @@
+# =============================================================================
+# Minimal dependency set for the unit test suite (tests/)
+# =============================================================================
+# Derived empirically: the suite passes with the web/RAG stack blocked
+# (verified by installing a MetaPathFinder that raises ImportError for
+# streamlit / llama-index / bs4 / fitz / duckduckgo_search / altair / lmbase),
+# so CI does not need to download the heavy optional stack to run it.
+#
+# Contents = the module-level third-party imports reachable from tests/:
+#   numpy       masim/format/state.py, masim/agents/_base.py, ...
+#   ray         masim/simulator/general.py, masim/utils/ray_utils.py
+#   psutil      masim/utils/ray_utils.py
+#   networkx    masim/utils/topology.py
+#   matplotlib  masim/utils/topology.py
+#   pyyaml      masim/utils/config.py
+#   python-dotenv  masim/utils/config.py, masim/simulator/general.py
+#   pydantic    masim/simulator/config_schema.py (imported lazily by tests)
+#
+# See requirements.txt for the full runtime environment.
+# =============================================================================
+
+numpy
+ray
+psutil
+networkx
+matplotlib
+pyyaml
+python-dotenv
+pydantic

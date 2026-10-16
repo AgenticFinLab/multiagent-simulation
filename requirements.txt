@@ -4,7 +4,7 @@
 # Only packages actually imported in `masim/` or `examples/` are listed here.
 # Zombie deps removed on 2026-07-27 after a full codebase audit (torch,
 # transformers, selenium, pyarrow, pydot, datasets, graphviz, tenacity, txtai,
-# h5py, wandb, einops, litellm, duckduckgo-search — all zero-import).
+# h5py, wandb, einops, litellm — all zero-import).
 #
 # NOTE — `lmbase` is a separate GitHub project (`AgenticFinLab/lmbase`) and is
 # NOT on PyPI. `masim` imports it as a HARD dependency in
@@ -14,6 +14,12 @@
 #
 #     git clone https://github.com/AgenticFinLab/lmbase.git /opt/lmbase
 #     pip install -e /opt/lmbase
+#
+# Formatting rules (enforced by setup.py's requirements parser):
+#   * one requirement per line; `#` starts a trailing comment;
+#   * blank lines and comment-only lines are ignored by `get_requirements()`;
+#   * keep the list duplicate-free — setup.py also de-duplicates, but
+#     duplicates here hide version drift between two entries.
 # =============================================================================
 
 # ── Core numeric stack ─────────────────────────────────────────────────────
@@ -26,9 +32,6 @@ ray
 psutil
 filelock
 pydantic
-psutil
-ray
-streamlit
 
 # ── I/O + config ───────────────────────────────────────────────────────────
 python-dotenv
@@ -40,8 +43,11 @@ requests
 matplotlib
 networkx
 
-# ── Web interface ──────────────────────────────────────────────────────────
+# ── Web interface (masim/interface) ────────────────────────────────────────
+# `altair` is used directly by masim/interface/app.py; it is also a Streamlit
+# transitive dependency, so it is pinned here only for explicitness.
 streamlit>=1.28
+altair
 
 # ── RAG stack (masim.knowledge / examples/*/Rag) ───────────────────────────
 llama-index-core
@@ -51,3 +57,7 @@ llama-index-embeddings-openai
 llama-index-embeddings-litellm
 PyMuPDF
 beautifulsoup4
+# Optional web-search tool for masim/knowledge/loader.py. The import is
+# guarded, so the rest of the framework works without it; it is listed here so
+# a full `pip install -r requirements.txt` yields a complete environment.
+duckduckgo-search

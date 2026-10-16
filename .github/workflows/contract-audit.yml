@@ -6,6 +6,15 @@ on:
   pull_request:
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Contract audit. Three tiers:
+  #   1. the fully migrated reference scenario  -> GATED (must stay clean)
+  #   2. the reusable archetype library         -> GATED (must stay clean)
+  #   3. the legacy scenario corpus             -> informational baseline
+  # Tier 3 stays non-gating because 175/180 players.py files still derive from
+  # GeneralPlayer; its counts are printed and uploaded so the migration backlog
+  # is visible and cannot grow unnoticed.
+  # ---------------------------------------------------------------------------
   audit:
     runs-on: ubuntu-latest
     steps:
@@ -15,8 +24,79 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Audit migrated reference scenario (gated)
-        run: PYTHONPATH=. python scripts/audit_scenario_contract.py --scenario AnchoringEffect
+      - name: "GATE: reference scenario (AnchoringEffect)"
+        run: >-
+          PYTHONPATH=. python scripts/audit_scenario_contract.py
+          --scope scenarios --scenario AnchoringEffect --no-legacy-info
 
-      - name: Audit full corpus (informational, migration in progress)
-        run: PYTHONPATH=. python scripts/audit_scenario_contract.py --json > audit.json || true
+      - name: "GATE: reusable archetype library (masim/agents)"
+        run: >-
+          PYTHONPATH=. python scripts/audit_scenario_contract.py
+          --scope archetypes --no-legacy-info
+
+      - name: "BASELINE: legacy scenario corpus (informational)"
+        run: |
+          PYTHONPATH=. python scripts/audit_scenario_contract.py --scope scenarios --no-legacy-info --json > audit.json || true
+          python - <<'PY'
+          import json
+          counts = json.load(open("audit.json"))["counts"]
+          print("legacy corpus baseline:", counts["by_kind"], "total", counts["total"])
+          print("STRUCT-ACT / STRUCT-DECIDE / STRUCT-PERCEIVE must be 0 for any")
+          print("scenario migrated to a canonical base; the rest is migration backlog.")
+          PY
+
+      - name: Upload audit baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-audit-baseline
+          path: audit.json
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Unit tests. The framework core must import and run *without* the optional
+  # `lmbase` backend (it is not on PyPI); the store-dependent tests skip
+  # cleanly. The job still tries to install lmbase from source so the
+  # record-store regression tests execute whenever the repo is reachable.
+  # ---------------------------------------------------------------------------
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-test.txt
+
+      - name: Install lmbase from source (optional)
+        continue-on-error: true
+        run: |
+          git clone --depth 1 https://github.com/AgenticFinLab/lmbase.git /tmp/lmbase
+          python -m pip install -e /tmp/lmbase
+
+      - name: "GATE: framework imports without the optional backend"
+        run: |
+          python - <<'PY'
+          import sys
+          from importlib.abc import MetaPathFinder
+
+          class BlockLmbase(MetaPathFinder):
+              def find_spec(self, name, path=None, target=None):
+                  if name == "lmbase" or name.startswith("lmbase."):
+                      raise ImportError("simulated: lmbase not installed")
+                  return None
+
+          sys.meta_path.insert(0, BlockLmbase())
+          import masim
+          print("import masim OK without lmbase ->", masim.__version__)
+          PY
+
+      - name: "GATE: every core module imports (catches NameError in signatures)"
+        run: python scripts/check_module_imports.py
+
+      - name: Run unit tests
+        run: PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py" -v

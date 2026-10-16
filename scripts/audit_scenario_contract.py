@@ -15,13 +15,17 @@ override ``act()`` or ``decide()`` on the canonical bases
 4. Post-fill anchor updates go through ``on_fill(action, quantity,
    bid_price)`` — never through a shadow ``act()``.
 
-This script walks every ``examples/*/{Rule,LLM,RuleLLM,Rag}/players.py``
-file and reports:
+This script walks every ``examples/*/{Rule,LLM,RuleLLM,Rag}/players.py`` file
+**and** every reusable archetype module under ``masim/agents/{finance,market,
+opinion}/*.py`` (see ``--scope``) and reports:
 
 * **STRUCT-ACT**    — class inheriting a canonical base overrides
                        ``act`` (or ``async def act``).
 * **STRUCT-DECIDE** — class inheriting a canonical base overrides
                        ``decide`` (or ``async def decide``).
+* **STRUCT-PERCEIVE** — class inheriting a canonical base overrides
+                       ``perceive`` (or ``async def perceive``); use
+                       ``on_market_data`` for per-broadcast bookkeeping.
 * **SEM-SILENT-FILL** — file textually contains a silent-fill pattern
                         that assigns / substitutes a fallback bid_price
                         from ``market_data``, ``state.price``, ``price``
@@ -75,6 +79,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "examples"
+AGENTS_DIR = REPO_ROOT / "masim" / "agents"
 
 CANONICAL_BASES = {
     "CanonicalRulePlayer",
@@ -86,6 +91,11 @@ CANONICAL_BASES = {
 LEGACY_BASES = {"GeneralPlayer"}
 
 VARIANT_DIRS = {"Rule", "LLM", "RuleLLM", "Rag"}
+
+# The reusable archetype library. The framework bases themselves
+# (``_base.py`` / ``_coordinator_base.py`` / ``_rag_base.py``) are deliberately
+# NOT scanned: they are the modules that *define* act/decide/perceive.
+ARCHETYPE_DOMAINS = ("finance", "market", "opinion")
 
 # ---------------------------------------------------------------------------
 # Finding model
@@ -133,6 +143,10 @@ SILENT_FILL_ASSIGN = re.compile(
       | md
       | price
     )
+    (?!\s*[-+*/%])                     # ... and is NOT fed through arithmetic.
+                                       # `bid_price = price * (1 + lam * r)` is
+                                       # the sanctioned price-formation rule,
+                                       # `bid_price = price` is a substitution.
     """,
     re.VERBOSE,
 )
@@ -225,6 +239,39 @@ def _enclosing_function(tree: ast.Module, target_line: int) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 
+def _docstring_lines(tree: ast.Module) -> set:
+    """Return the line numbers covered by module/class/function docstrings.
+
+    Docstrings are prose: a decision-rule snippet such as
+    ``bid_price = price * (1 + lambda_price * r)`` documenting the intended
+    formula is not executable code and must not be reported as a silent-fill
+    site. Only the first statement of a body can be a docstring, so each body
+    is inspected for exactly that statement.
+    """
+    covered: set = set()
+
+    def _mark_first_statement(body) -> None:
+        if not body:
+            return
+        first = body[0]
+        if not isinstance(first, ast.Expr):
+            return
+        value = first.value
+        if not isinstance(value, ast.Constant) or not isinstance(value.value, str):
+            return
+        start = getattr(value, "lineno", None)
+        if start is None:
+            return
+        end = getattr(value, "end_lineno", None) or start
+        covered.update(range(start, end + 1))
+
+    _mark_first_statement(getattr(tree, "body", []))
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            _mark_first_statement(node.body)
+    return covered
+
+
 def _classify_bases(bases: Iterable[str]) -> str:
     bset = set(bases)
     if bset & CANONICAL_BASES:
@@ -300,6 +347,14 @@ def audit_file(path: Path) -> List[Finding]:
                 "from LLM response — never emit a raw payload dict with silent "
                 "fallback bid_price.",
             ),
+            (
+                "perceive",
+                "STRUCT-PERCEIVE",
+                "overrides framework perceive(); inbound market broadcasts stop "
+                "being routed into custom_state['market_data'] / price_history and "
+                "the corpus-wide ingest contract breaks. Use on_market_data() "
+                "instead.",
+            ),
         ):
             for defn in _defs_named(node, method_name):
                 # A method defined *directly on this class body* is the
@@ -330,10 +385,19 @@ def audit_file(path: Path) -> List[Finding]:
 
     # -- Silent-fill regex sweep (line-oriented, so we can report line #) --
     lines = text.splitlines()
+    # Prose is not code: never report a docstring or a pure comment line.
+    doc_lines = _docstring_lines(tree)
+
+    def _is_prose(line_no: int) -> bool:
+        if line_no in doc_lines:
+            return True
+        return lines[line_no - 1].strip().startswith("#")
 
     def _find_matches(regex: re.Pattern[str]) -> List[int]:
         hits: List[int] = []
         for idx, line in enumerate(lines, start=1):
+            if _is_prose(idx):
+                continue
             if regex.search(line):
                 hits.append(idx)
         return hits
@@ -341,6 +405,8 @@ def audit_file(path: Path) -> List[Finding]:
     # Multiline SILENT_FILL_IFNOT — scan whole text for span, then map to line.
     for m in SILENT_FILL_IFNOT.finditer(text):
         line_no = text[: m.start()].count("\n") + 1
+        if _is_prose(line_no):
+            continue
         findings.append(
             Finding(
                 severity="HIGH",
@@ -438,6 +504,24 @@ def iter_players_files(scenario_filter: Optional[List[str]]) -> Iterable[Path]:
                 yield candidate
 
 
+def iter_archetype_files() -> Iterable[Path]:
+    """Yield every reusable archetype module under ``masim/agents/<domain>/``.
+
+    The archetype library (209 modules) is where the canonical contract is
+    actually supposed to be honoured, so it must be audited too — previously
+    the STRUCT-* checks only ever saw ``examples/*/players.py``, which meant
+    the 0-findings result covered almost no canonical subclass.
+    """
+    for domain in ARCHETYPE_DOMAINS:
+        domain_dir = AGENTS_DIR / domain
+        if not domain_dir.is_dir():
+            continue
+        for candidate in sorted(domain_dir.glob("*.py")):
+            if candidate.name == "__init__.py":
+                continue
+            yield candidate
+
+
 # ---------------------------------------------------------------------------
 # Reporting
 # ---------------------------------------------------------------------------
@@ -446,7 +530,78 @@ def iter_players_files(scenario_filter: Optional[List[str]]) -> Iterable[Path]:
 SEVERITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "INFO": 3}
 
 
-def render_text(findings: List[Finding], no_legacy_info: bool) -> Tuple[str, int]:
+def classify_file(path: Path) -> str:
+    """Classify one player module for the migration-status banner.
+
+    * ``canonical`` — declares a ``Canonical*`` subclass inline (the base owns
+      the lifecycle, so the STRUCT-* checks apply).
+    * ``reuse`` — declares no player class at all and re-exports concrete
+      archetypes from ``masim/agents``. This is the intended composition form
+      and is *migrated*: the contract lives in the archetype library.
+    * ``legacy`` — declares its own ``GeneralPlayer`` subclass (pre-canonical).
+    * ``other`` — none of the above.
+
+    The distinction matters because the STRUCT-* checks only apply to
+    canonical subclasses: without it, a "CLEAN" report would look like
+    corpus-wide compliance when most files are still legacy.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+    except (OSError, UnicodeDecodeError, SyntaxError):
+        return "other"
+
+    classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+    if not classes:
+        return "reuse" if "masim.agents" in text else "other"
+
+    saw_legacy = False
+    for node in classes:
+        kind = _classify_bases(_base_names(node))
+        if kind == "canonical":
+            return "canonical"
+        if kind == "legacy":
+            saw_legacy = True
+    return "legacy" if saw_legacy else "other"
+
+
+def render_migration_status(status: Dict[str, Counter]) -> List[str]:
+    """Render the per-corpus base-class adoption table."""
+    lines = ["", "Migration status (STRUCT-* only applies to canonical subclasses):"]
+    labels = {
+        "scenarios": "scenario players.py",
+        "archetypes": "archetype modules ",
+    }
+    for key, label in labels.items():
+        counter = status.get(key, Counter())
+        total = sum(counter.values())
+        if not total:
+            continue
+        lines.append(
+            f"  {label}: canonical {counter.get('canonical', 0):>3d} / "
+            f"reuse {counter.get('reuse', 0):>3d} / "
+            f"legacy {counter.get('legacy', 0):>3d} / "
+            f"other {counter.get('other', 0):>3d}   (of {total})"
+        )
+    scenarios = status.get("scenarios", Counter())
+    if scenarios.get("legacy"):
+        lines.append(
+            f"  NOTE: {scenarios['legacy']} scenario module(s) are still legacy, so the"
+        )
+        lines.append(
+            "        STRUCT-ACT/DECIDE/PERCEIVE checks do not apply to them;"
+        )
+        lines.append(
+            "        their overrides are reported as informational only."
+        )
+    return lines
+
+
+def render_text(
+    findings: List[Finding],
+    no_legacy_info: bool,
+    migration: Optional[Dict[str, Counter]] = None,
+) -> Tuple[str, int]:
     filtered = [
         f for f in findings if not (no_legacy_info and f.kind == "LEGACY-BASE")
     ]
@@ -459,12 +614,13 @@ def render_text(findings: List[Finding], no_legacy_info: bool) -> Tuple[str, int
     lines.append("=" * 100)
     lines.append("SCENARIO CONTRACT AUDIT")
     lines.append(
-        f"Contract ref: examples/AnchoringEffect/simulation-bases.md §7.1"
+        "Contract ref: examples/AnchoringEffect/simulation-bases.md §7.1 "
+        "(scenarios) · docs/framework-contract.md §4 (archetypes)"
     )
     lines.append("=" * 100)
     lines.append("")
     lines.append("Summary:")
-    for kind in ("STRUCT-ACT", "STRUCT-DECIDE", "SEM-SILENT-FILL", "SEM-CASH-MUT", "LEGACY-BASE", "PARSE-ERROR", "READ-ERROR"):
+    for kind in ("STRUCT-ACT", "STRUCT-DECIDE", "STRUCT-PERCEIVE", "SEM-SILENT-FILL", "SEM-CASH-MUT", "LEGACY-BASE", "PARSE-ERROR", "READ-ERROR"):
         n = by_kind.get(kind, 0)
         if n:
             lines.append(f"  {kind:<20s} {n}")
@@ -475,8 +631,11 @@ def render_text(findings: List[Finding], no_legacy_info: bool) -> Tuple[str, int
         if n:
             lines.append(f"  {sev:<10s} {n}")
     lines.append("")
+    if migration:
+        lines.extend(render_migration_status(migration))
 
     if not filtered:
+        lines.append("")
         lines.append("[CLEAN] No findings.")
         return "\n".join(lines), 0
 
@@ -536,16 +695,33 @@ def main(argv: Optional[List[str]] = None) -> int:
         action="store_true",
         help="Suppress LEGACY-BASE informational rows in text report",
     )
+    p.add_argument(
+        "--scope",
+        choices=["all", "scenarios", "archetypes"],
+        default="all",
+        help=(
+            "Which corpus to audit: scenario players.py files, the reusable "
+            "archetype library (masim/agents/{finance,market,opinion}), or both "
+            "(default)"
+        ),
+    )
     args = p.parse_args(argv)
 
     all_findings: List[Finding] = []
-    for path in iter_players_files(args.scenario):
-        all_findings.extend(audit_file(path))
+    migration: Dict[str, Counter] = {"scenarios": Counter(), "archetypes": Counter()}
+    if args.scope in ("all", "scenarios"):
+        for path in iter_players_files(args.scenario):
+            all_findings.extend(audit_file(path))
+            migration["scenarios"][classify_file(path)] += 1
+    if args.scope in ("all", "archetypes"):
+        for path in iter_archetype_files():
+            all_findings.extend(audit_file(path))
+            migration["archetypes"][classify_file(path)] += 1
 
     if args.json:
         report, code = render_json(all_findings)
     else:
-        report, code = render_text(all_findings, args.no_legacy_info)
+        report, code = render_text(all_findings, args.no_legacy_info, migration)
     print(report)
     return code
 

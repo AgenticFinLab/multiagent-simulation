@@ -12,8 +12,28 @@ def get_long_description():
 
 
 def get_requirements():
-    with open("requirements.txt") as f:
-        return f.read().splitlines()
+    """Read ``requirements.txt`` as a list of PEP 508 requirement strings.
+
+    ``requirements.txt`` is comment-annotated and section-headered, so the raw
+    lines cannot be handed to ``install_requires``: setuptools/pip reject
+    comment and blank entries (``InvalidRequirement``), which made
+    ``pip install -e .`` fail on a clean checkout. Strip trailing comments and
+    blank lines, then de-duplicate while preserving declaration order so a
+    package that appears twice cannot silently drift between two specs.
+    """
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    requirements = []
+    seen = set()
+    with io.open(os.path.join(base_dir, "requirements.txt"), encoding="utf-8") as f:
+        for raw_line in f:
+            requirement = raw_line.split("#", 1)[0].strip()
+            if not requirement:
+                continue
+            if requirement in seen:
+                continue
+            seen.add(requirement)
+            requirements.append(requirement)
+    return requirements
 
 
 def get_version():
