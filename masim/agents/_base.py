@@ -452,6 +452,40 @@ class SeededRngMixin:
         return rng
 
 
+class MarketPerceptionMixin:
+    """Mixin giving agents per-source market perception.
+
+    Why: ``custom_state["market_data"]`` is a single slot, overwritten by
+    whichever inbound broadcast carrying a ``price`` is processed last. With one
+    market that is exactly right. With several (multi-market / cross-asset) a
+    participant cannot tell the broadcasts apart, so the macro tier could run
+    but not be reasoned about.
+
+    Every market signal is now also recorded per source, and the single slot
+    stays as a **last-wins alias** so existing archetypes and every
+    single-market scenario behave identically.
+    """
+
+    #: Name of the per-source map, exported for archetypes and reports.
+    MARKET_BY_SOURCE_KEY = "market_data_by_source"
+
+    def market_data_for(self, source_id: str, default=None):
+        """Return the latest market signal received from ``source_id``.
+
+        Args:
+            source_id: the sender's player id, as it appears on the inbound
+                ``Info`` (``Info.sender_id``).
+            default: returned when that source has not sent a market signal yet.
+        """
+        sources = self.state.custom_state.get(self.MARKET_BY_SOURCE_KEY) or {}
+        return sources.get(source_id, default)
+
+    def market_sources(self):
+        """Return the ids of every source a market signal has arrived from."""
+        sources = self.state.custom_state.get(self.MARKET_BY_SOURCE_KEY) or {}
+        return sorted(sources)
+
+
 class BookkeepingMixin:
     """Mixin providing the agent's book and its execution policy.
 
@@ -528,7 +562,7 @@ def _resolve_fill_model(agent) -> "FillModel":
 # ---------------------------------------------------------------------------
 
 
-class CanonicalRulePlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
+class CanonicalRulePlayer(MarketPerceptionMixin, BookkeepingMixin, SeededRngMixin, GeneralPlayer):
     """Base class for deterministic, formula-driven canonical agents.
 
     Subclasses MUST:
@@ -571,9 +605,15 @@ class CanonicalRulePlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
             self._initialize_state()
 
         if observation.inbounds:
+            by_source = self.state.custom_state.setdefault(
+                self.MARKET_BY_SOURCE_KEY, {}
+            )
             for inb in observation.inbounds:
                 payload = inb.payload or {}
                 if "price" in payload:
+                    # Record the signal against its sender, then keep the
+                    # single-slot alias in sync (last wins, exactly as before).
+                    by_source[inb.sender_id or "unknown"] = payload
                     self.state.custom_state["market_data"] = payload
                     history = self.state.custom_state.get("price_history")
                     if history is not None:
@@ -719,7 +759,7 @@ class CanonicalRulePlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
 # ---------------------------------------------------------------------------
 
 
-class CanonicalLLMPlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
+class CanonicalLLMPlayer(MarketPerceptionMixin, BookkeepingMixin, SeededRngMixin, GeneralPlayer):
     """Base class for LLM-driven canonical agents.
 
     Reads from ``self.config.extras["llm"]``:
@@ -771,6 +811,10 @@ class CanonicalLLMPlayer(BookkeepingMixin, SeededRngMixin, GeneralPlayer):
             for inb in observation.inbounds:
                 payload = inb.payload or {}
                 if "price" in payload:
+                    by_source = self.state.custom_state.setdefault(
+                        self.MARKET_BY_SOURCE_KEY, {}
+                    )
+                    by_source[inb.sender_id or "unknown"] = payload
                     self.state.custom_state["market_data"] = payload
                     history = self.state.custom_state.get("price_history")
                     if history is not None:
