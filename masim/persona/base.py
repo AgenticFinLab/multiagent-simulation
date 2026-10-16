@@ -173,6 +173,21 @@ class BasePersona(ABC):
         """Receive a message from another player (called remotely)."""
         ...
 
+    def receive_batch(self, messages: List["Message"]) -> None:
+        """Receive several messages in one remote call.
+
+        The channel dispatches every message bound for the same recipient in a
+        dispatch wave through this method instead of issuing one RPC per
+        message, which is what made dispatch dominate round time.
+
+        The default implementation simply loops over ``receive_message``, so a
+        subclass inherits correct behaviour without any change; the win is the
+        reduced number of Ray round-trips, not different per-message handling.
+        Ordering is the dispatch order.
+        """
+        for message in messages:
+            self.receive_message(message)
+
     # =========================================================================
     #                    EXPECTED SENDERS SETUP
     # =========================================================================

@@ -44,6 +44,7 @@ import json
 import logging
 import os
 import subprocess
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -57,6 +58,7 @@ from masim.simulator.base import (
     SimulatorStatus,
     RoundPhase,
 )
+from masim.simulator.metrics import RoundMetrics, RunMetrics
 from masim.simulator.resume_scanner import (
     detect_resume_round,
     write_resume_checkpoint,
@@ -75,20 +77,36 @@ from masim.utils.config import load_class
 logger = logging.getLogger("masim.simulator")
 
 
-def derive_persona_output_paths(record_root: str) -> Dict[str, Dict[str, str]]:
+def derive_persona_output_paths(
+    record_root: str,
+    player_id: Optional[str] = None,
+) -> Dict[str, Dict[str, str]]:
     """Derive persona storage / checkpoint / monitoring paths from the run root.
 
     ``setting.record_path`` is the single source of truth; sibling directories
     (``checkpoints``, ``monitoring``) are computed here so ``players.yml`` and
     ``persona.yml`` no longer repeat paths that inevitably drift apart.
+
+    ``player_id`` namespaces the *per-actor* stores. This is not cosmetic:
+    ``BlockBasedStoreManager`` keys each block by a savename that is derived
+    from the record index, so N actors writing into one shared directory
+    produce N identical keys and all but the last writer are silently dropped
+    (a 4-round, 11-agent run persisted 8 metrics from 1 entity instead of 44
+    across 11). ``records/`` is already namespaced per player for the same
+    reason; monitoring and checkpoints now follow it.
     """
     parent = os.path.dirname(record_root.rstrip("/")) or "."
+    monitoring_root = os.path.join(parent, "monitoring")
+    checkpoint_root = os.path.join(parent, "checkpoints")
+    if player_id:
+        monitoring_root = os.path.join(monitoring_root, player_id)
+        checkpoint_root = os.path.join(checkpoint_root, player_id)
     return {
         "storage": {
             "record_path": record_root,
-            "checkpoint_dir": os.path.join(parent, "checkpoints"),
+            "checkpoint_dir": checkpoint_root,
         },
-        "monitoring": {"record_path": os.path.join(parent, "monitoring")},
+        "monitoring": {"record_path": monitoring_root},
     }
 
 
@@ -219,6 +237,12 @@ class GeneralSimulator(BaseSimulator):
         # Tracks whether this process has executed a round yet; the first one is
         # the bootstrap round (see run_round()).
         self._executed_any_round = False
+        # Scaling observation (created in setup(); None when run_round() is
+        # driven directly, e.g. by the Streamlit runner).
+        self.metrics = None
+        self._metrics_written = False
+        # Delivery RPCs issued by the most recent phase_dispatch() call.
+        self._last_dispatch_rpcs = 0
         # Initialize communication channel from config
         comm_config = config.communication
         self.communication = GeneralCommunicationChannel(comm_config)
@@ -297,7 +321,9 @@ class GeneralSimulator(BaseSimulator):
             persona_config = copy.deepcopy(player_cfg["persona"])
             record_root = self.config.setting["record_path"]
             proxy = persona_config.setdefault("proxy", {})
-            for section, overrides in derive_persona_output_paths(record_root).items():
+            for section, overrides in derive_persona_output_paths(
+                record_root, player_id
+            ).items():
                 proxy.setdefault(section, {}).update(overrides)
 
             actor_name = get_actor_name(self.config.setting["name"], player_id)
@@ -351,6 +377,23 @@ class GeneralSimulator(BaseSimulator):
 
         logger.info("    Total players: %d", len(self.player_persona_handles))
         self.status = SimulatorStatus.READY
+
+        # Scaling observation: the run's shape is known here, so start the
+        # collector and record how many actors / agent classes the run carries.
+        self.metrics = RunMetrics(
+            simulation_id=self.simulation_id,
+            seed=self.config.setting.get("seed"),
+            total_rounds=self.config.setting["total_rounds"],
+        )
+        self.metrics.note_topology_shape(
+            n_actors=len(self.player_persona_handles),
+            n_agent_classes=len(self.config.players),
+        )
+        self.metrics.start_run()
+        # The three setup barriers are one ray.get each (initialize / set_topology
+        # / set_peer_handles), each collecting one object per actor.
+        for _ in range(3):
+            self.metrics.note_ray_get(self.metrics.n_actors)
         logger.info("    Setup complete")
 
     def _setup_topology(self) -> None:
@@ -526,7 +569,11 @@ class GeneralSimulator(BaseSimulator):
 
         # Single ray.get(): each result is (TurnResult, List[Dict])
         refs = list(futures.values())
+        collect_t0 = time.perf_counter()
         all_results = ray.get(refs)
+        collect_ms = (time.perf_counter() - collect_t0) * 1000.0
+        if self.metrics is not None:
+            self.metrics.note_ray_get(len(refs))
 
         turn_results = {}
         all_info_lists = []
@@ -539,6 +586,8 @@ class GeneralSimulator(BaseSimulator):
             "turn_results": turn_results,
             "all_info_lists": all_info_lists,
             "pending_count": 0,
+            # Wall time actually spent blocked in ray.get — the barrier cost.
+            "collect_ms": collect_ms,
         }
 
     def phase_dispatch(
@@ -601,9 +650,17 @@ class GeneralSimulator(BaseSimulator):
                 messages=all_messages,
                 handles=self.player_persona_handles,
             )
-            # Wait for all messages to be delivered before next level starts
+            # One ref per delivery RPC (messages to the same recipient in this
+            # wave share a single batched call). Recorded so the scaling
+            # metrics show the actual RPC count, not the message count.
+            self._last_dispatch_rpcs = len(dispatch_refs)
+            if self.metrics is not None:
+                self.metrics.note_ray_get(len(dispatch_refs))
+            # Wait for all deliveries before the next level starts
             if dispatch_refs:
                 ray.get(dispatch_refs)
+        else:
+            self._last_dispatch_rpcs = 0
 
     async def run_round(self, round_num: int) -> Dict[str, Any]:
         """
@@ -657,16 +714,28 @@ class GeneralSimulator(BaseSimulator):
 
         execution_levels = self.topology.get_execution_levels()
 
+        # Scaling observation for this round (pure timing/counters, no behaviour
+        # change). Phase costs and RPC/message volume are the first questions
+        # when a study asks "what breaks as the agent count grows".
+        round_t0 = time.perf_counter()
+        execute_ms = collect_ms = dispatch_ms = 0.0
+        operate_calls = 0
+        messages = 0
+        deliveries = 0
+        max_fanout = 0
+
         for level, level_players in enumerate(execution_levels):
             level_handles = {
                 pid: self.player_persona_handles[pid]
                 for pid in level_players
                 if pid in self.player_persona_handles
             }
+            operate_calls += len(level_handles)
 
             # ─────────────────────────────────────────────────────────────────
             # PHASE 1: EXECUTE - Players run operate() in parallel
             # ─────────────────────────────────────────────────────────────────
+            phase_t0 = time.perf_counter()
             execute_result = self.phase_execute(
                 round_num,
                 level_handles,
@@ -679,12 +748,48 @@ class GeneralSimulator(BaseSimulator):
             # operate() returns (TurnResult, pending_infos) — both collected here
             # ─────────────────────────────────────────────────────────────────
             collect_result = self.phase_collect(execute_result)
+            phase_t1 = time.perf_counter()
 
             # ─────────────────────────────────────────────────────────────────
             # PHASE 3: DISPATCH - Encode Info→Message→SimPacket, deliver to targets
             # Uses pending_infos bundled into phase_collect result (no extra IPC wave)
             # ─────────────────────────────────────────────────────────────────
             self.phase_dispatch(collect_result["all_info_lists"])
+            phase_t2 = time.perf_counter()
+            deliveries += self._last_dispatch_rpcs
+
+            execute_ms += (phase_t1 - phase_t0) * 1000.0 - (
+                collect_result.get("collect_ms", 0.0)
+            )
+            collect_ms += collect_result.get("collect_ms", 0.0)
+            dispatch_ms += (phase_t2 - phase_t1) * 1000.0
+
+            for info_list in collect_result["all_info_lists"]:
+                for info_data in info_list:
+                    targets = info_data.get("target_ids") or []
+                    messages += len(targets)
+                    max_fanout = max(max_fanout, len(targets))
+
+        if self.metrics is not None:
+            self.metrics.record_round(
+                RoundMetrics(
+                    round=round_num,
+                    wall_ms=(time.perf_counter() - round_t0) * 1000.0,
+                    execute_ms=execute_ms,
+                    collect_ms=collect_ms,
+                    dispatch_ms=dispatch_ms,
+                    levels=len(execution_levels),
+                    agents_active=sum(len(level) for level in execution_levels),
+                    operate_calls=operate_calls,
+                    messages=messages,
+                    # Delivery RPCs actually issued: messages bound for the same
+                    # recipient in one wave share a single batched call.
+                    deliveries=deliveries,
+                    max_fanout=max_fanout,
+                    driver_rss_mb=RunMetrics.driver_rss_mb(),
+                    object_store_used_mb=RunMetrics.object_store_used_mb(),
+                )
+            )
 
         # ─────────────────────────────────────────────────────────────────────
         # PHASE 4: RECORD - Save topology diagram (rate-limited to reduce I/O)
@@ -803,6 +908,7 @@ class GeneralSimulator(BaseSimulator):
         # Flush remaining items (hot deque + pending_cold) to disk so that
         # load_rounds() and count_experiment_rounds() see the complete dataset.
         self.history.flush()
+        self._publish_metrics()
 
         self.status = SimulatorStatus.TERMINATED
         logger.info("Simulation completed successfully")
@@ -817,6 +923,26 @@ class GeneralSimulator(BaseSimulator):
     # reasons.  Call sites now use ``resume_scanner.detect_resume_round``
     # and ``resume_scanner.write_resume_checkpoint`` directly.
 
+    def _publish_metrics(self) -> None:
+        """Finish the scaling-metrics collector and write it next to the run.
+
+        Idempotent: both ``run()`` and ``shutdown()`` call it (the Streamlit
+        runner drives ``run_round()`` directly and never calls ``run()``), and
+        it must never raise — observation must not be able to break a run.
+        """
+        if self.metrics is None or self._metrics_written:
+            return
+        self.metrics.finish_run()
+        self.metrics.log_summary()
+        try:
+            monitoring_root = derive_persona_output_paths(
+                self.config.setting["record_path"]
+            )["monitoring"]["record_path"]
+            self.metrics.write(os.path.join(monitoring_root, "run_metrics.json"))
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("Scaling metrics not persisted: %s", exc)
+        self._metrics_written = True
+
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
         logger.info("Shutting down simulation: %s", self.simulation_id)
@@ -827,6 +953,7 @@ class GeneralSimulator(BaseSimulator):
         # data integrity regardless of the execution path.  The method is
         # idempotent — a double call (from run() + shutdown()) is harmless.
         self.history.flush()
+        self._publish_metrics()
 
         # Personas use detached lifetime, so invoking their shutdown method does
         # not terminate the actor process.  Always kill them afterwards; leaving

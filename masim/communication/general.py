@@ -9,6 +9,7 @@ The communication layer OWNS Message and its enums; proxy consumes them.
 """
 
 import json
+from collections import OrderedDict
 from datetime import datetime
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
@@ -74,6 +75,12 @@ def build_message_from_info(
         timestamp=datetime.now().isoformat(),
         extras={"round_num": round_num},
     )
+
+
+# Messages bound for one recipient in one dispatch wave are delivered in a
+# single RPC. Chunked so the payload stays bounded when a hub receives from
+# tens of thousands of senders in the same level.
+_DISPATCH_BATCH_SIZE = 512
 
 
 class GeneralCommunicationChannel(CommunicationChannel):
@@ -158,19 +165,33 @@ class GeneralCommunicationChannel(CommunicationChannel):
         1. encode_message() → JSON string (wire format)
         2. record_encoded_message() → persist to storage (skipped if record_messages=False)
         3. decode_message() → reconstruct Message from wire format
-        4. Send decoded Message to target actor via Ray remote call
+        4. Deliver decoded Messages to the target actor — batched per recipient
 
-        This simulates a complete wire protocol cycle, validating
-        that encode/decode produces equivalent Messages.
+        Batching
+        --------
+        One Ray RPC per message is what made dispatch dominate a round (measured
+        at 73% of wall time for a 11-agent run, against 2% for the agents' own
+        work). All messages bound for the same recipient in the same dispatch
+        wave are therefore delivered in a single ``receive_batch`` call, chunked
+        so the payload stays bounded at scale.
+
+        This is semantics-preserving: the recipient ends up with exactly the
+        same messages, in the same order, and the caller still waits for all
+        deliveries before the next level starts. It also removes a source of
+        nondeterminism, because the intra-batch order is now the dispatch order
+        rather than whatever order Ray happens to schedule the RPCs in.
 
         Args:
             messages: List of Message objects to send
             handles: Dict mapping recipient_id -> Ray actor handle
 
         Returns:
-            List of Ray ObjectRefs for delivery tracking
+            List of Ray ObjectRefs for delivery tracking (one per batch)
         """
-        refs = []
+        # Group by recipient, preserving first-seen order so the per-recipient
+        # message order is exactly the dispatch order.
+        by_recipient: "OrderedDict[str, List[Message]]" = OrderedDict()
+
         for message in messages:
             recipient_id = message.recipient_id
             # Fail-loud: silent drops here would let messages disappear
@@ -201,12 +222,17 @@ class GeneralCommunicationChannel(CommunicationChannel):
                 )
 
             # 3. Decode SimPacket → Message (proxy layer restored)
-            decoded_message = self.decode_message(packet)
+            by_recipient.setdefault(recipient_id, []).append(
+                self.decode_message(packet)
+            )
 
-            # 4. Deliver to target Persona
+        # 4. Deliver, one RPC (or one chunk) per recipient
+        refs = []
+        for recipient_id, decoded_messages in by_recipient.items():
             target_handle = handles[recipient_id]
-            ref = target_handle.receive_message.remote(decoded_message)
-            refs.append(ref)
+            for start in range(0, len(decoded_messages), _DISPATCH_BATCH_SIZE):
+                chunk = decoded_messages[start : start + _DISPATCH_BATCH_SIZE]
+                refs.append(target_handle.receive_batch.remote(chunk))
 
         return refs
 

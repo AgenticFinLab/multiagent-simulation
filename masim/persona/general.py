@@ -136,12 +136,18 @@ class PlayerPersona(BasePersona):
         """Initialize all proxies from proxy config."""
         proxy_config = self.config["proxy"]
 
-        self.storage = StorageProxy(StorageConfig(**proxy_config["storage"]))
+        # Pass ``owner=self`` so every proxy can stamp records with the
+        # owning entity's identity. Without it ``MonitoringProxy.record_metric``
+        # wrote ``entity_id: null``, which made the persisted metrics
+        # self-identifying only through their directory name.
+        self.storage = StorageProxy(
+            StorageConfig(**proxy_config["storage"]), owner=self
+        )
         self.monitoring = MonitoringProxy(
-            MonitoringConfig(**proxy_config["monitoring"])
+            MonitoringConfig(**proxy_config["monitoring"]), owner=self
         )
         self.message_proxy = SendReceiveProxy(
-            SendReceiveConfig(**proxy_config["communication"])
+            SendReceiveConfig(**proxy_config["communication"]), owner=self
         )
         # NOTE: any ``resource:`` block still present in legacy persona.yml
         # configs is intentionally ignored — the ResourceProxy stub was
@@ -167,6 +173,18 @@ class PlayerPersona(BasePersona):
                 "player_shutdown",
                 {"player_id": self.identity, "steps_completed": step_count},
             )
+
+        # Flush the infrastructure proxies.
+        #
+        # MonitoringProxy buffers metrics/events in HistoryBuffers and only
+        # writes them on ``shutdown()`` — which nothing used to call, so a
+        # short run persisted nothing at all (a 4-round run produced zero
+        # files under ``monitoring/``). That made the platform unable to
+        # measure its own behaviour, which is exactly what a scaling study
+        # needs. Flush after the shutdown event so it is included.
+        for proxy in (self.monitoring, self.storage, self.message_proxy):
+            if proxy is not None:
+                await proxy.shutdown()
 
     # =========================================================================
     #                    MAIN INTERFACE (What Simulator Calls)

@@ -222,9 +222,21 @@ tmpl/
 
 # Generated test *artefacts* (any path containing "TEST"). Declared files that
 # merely contain the token in their name are re-included explicitly below.
+#
+# WARNING: on a case-insensitive filesystem (macOS/APFS, `core.ignorecase=true`)
+# this pattern also matches `uTests`, `UTEST` and similar *source* directories --
+# they silently never enter version control. Anything of that shape must be
+# re-included below.
 *TEST*
 # Versioned dependency manifest for the test suite (see requirements-test.txt)
 !requirements-test.txt
+# Per-part acceptance tests (examples/uTests/<Part>/...)
+# The negations re-include the tree, so the byte-compiled outputs must be
+# excluded again right after them (same pattern as tests/ below).
+!examples/uTests/
+!examples/uTests/**
+examples/uTests/**/__pycache__/
+examples/uTests/**/*.pyc
 
 # Unit tests are intentionally versioned (unignore the tests/ package)
 !tests/
