@@ -27,7 +27,7 @@ MASim 是一个面向金融市场与群体行为研究的多智能体模拟框�
 - 45 个正式场景（`examples/{Scenario}/`），每个场景四种变体；
 - 四种决策机制：`Rule`、`LLM`、`RuleLLM`、`Rag`；
 - 标准化实验产物（`EXPERIMENT/` 单次运行）；`simulation-results/` 发布包为**目标（未落地）**，当前仓库中不存在该目录，`EXPERIMENT/` 也**只有 4/45 个场景**留有产物；
-- **209** 个通用 Agent 原型（finance 195 + market 9 + opinion 5）+ `masim/agents/defines/` 可复用 Agent 档案库（209 份 Markdown 档案与实现 1:1 镜像）；
+- **209** 个通用 Agent 原型（finance 195 + market 9 + opinion 5）+ `agent_library/defines/` 可复用 Agent 档案库（209 份 Markdown 档案与实现 1:1 镜像）；
 - Streamlit 实验回放与分析界面；
 - `masim/skills/` 设计/创建/升级 Skill 体系（`define-simulation-scenario-skill.md`、`agent-design-skill.md`、`implement-simulation-skill/`、`create-simulation-pipeline.md`、`polish-simulation-pipeline.md`）。
 
@@ -49,8 +49,8 @@ YAML 配置
 
 **Player 生命周期契约**（**目标（未落地）**：「金融场景 Player 由 canonical 基类派生」；以下同时给出「现状」测量）：框架提供的 canonical 基类为 `CanonicalRulePlayer / CanonicalLLMPlayer / CanonicalRagPlayer / CanonicalMarketCoordinator`（`masim/agents/_base.py`），archetype 只覆盖 `on_fill`，**禁止 override `act()/decide()`**。
 
-- 「现状」：180 个 `examples/*/*/players.py` 分为三类——**1 个**（`examples/AnchoringEffect/Rag/players.py`）在文件内声明派生自 `Canonical*` 的类；**4 个**是**组合式（reuse）**薄模块：不声明任何 player 类，而是从 `masim/agents/` 重导出具体 archetype（`AnchoringEffect/{Rule,LLM,RuleLLM}` 与 `TulipMania/Rule`），这是**目标形态**；**175 个**仍直接派生自 `GeneralPlayer`（legacy，待迁移）。因此 `scripts/audit_scenario_contract.py` 的 `STRUCT-ACT`/`STRUCT-DECIDE`/`STRUCT-PERCEIVE` 检查只对 canonical 子类生效，其“0 findings”对 **175 个 legacy 文件**而言是**空转**；审计报告现已打印该迁移进度（`--scope all`）。
-- 「现状」：`masim/agents/` 下 **200 个** archetype 实现 `decide_order`，**5 个** override `on_fill`，**0 个** override `act`/`decide`/`perceive`。
+- 「现状」：180 个 `examples/*/*/players.py` 分为三类——**1 个**（`examples/AnchoringEffect/Rag/players.py`）在文件内声明派生自 `Canonical*` 的类；**4 个**是**组合式（reuse）**薄模块：不声明任何 player 类，而是从 `agent_library/` 重导出具体 archetype（`AnchoringEffect/{Rule,LLM,RuleLLM}` 与 `TulipMania/Rule`），这是**目标形态**；**175 个**仍直接派生自 `GeneralPlayer`（legacy，待迁移）。因此 `scripts/audit_scenario_contract.py` 的 `STRUCT-ACT`/`STRUCT-DECIDE`/`STRUCT-PERCEIVE` 检查只对 canonical 子类生效，其“0 findings”对 **175 个 legacy 文件**而言是**空转**；审计报告现已打印该迁移进度（`--scope all`）。
+- 「现状」：`agent_library/` 下 **200 个** archetype 实现 `decide_order`，**5 个** override `on_fill`，**0 个** override `act`/`decide`/`perceive`。
 - 「现状」：流动性裁剪**不在** `_apply_fill_and_emit_action` 内，而在 `masim/format/finalize.py` 的 `clip_order_to_liquidity`，经 `finalize_rule_order` / `finalize_llm_order` 触达。`_apply_fill_and_emit_action` 自身的职责顺序是：key guard → 正 bid 价 guard → cash/position 变更 → `on_fill` → Action 信封。
 
 完整契约见 `docs/framework-contract.md`。
@@ -59,11 +59,16 @@ YAML 配置
 
 ```text
 multiagent-simulation/
-|-- masim/                    # 通用模拟框架 + 设计 Skill
+|-- masim/                    # ★ 平台：运行时 + 契约 + 模板（20.9k 行）
 |   |-- simulator/  player/  persona/  communication/  proxy/
-|   |-- agents/  knowledge/  evaluation/  format/  interface/  utils/
-|   |-- skills/
-|   `-- platform/             # ★ 新增：平台契约层（见 Part 2）
+|   |-- world/  execution/  format/  utils/  knowledge/
+|   |-- agents/               # 只放**模板**（四个 canonical 基类 + mixins，1.8k 行）
+|   |-- platform/             # 平台契约层（12 个契约）
+|   `-- skills/
+|-- agent_library/            # ★ 具体 archetype 库（209 实现 + 211 档案 + 图标，29.2k 行）
+|   `-- finance/  market/  opinion/  defines/
+|-- app/                      # ★ 面向外部的接口：Streamlit 应用（19.0k 行）
+|-- evaluation/               # ★ 分析库：指标/验证/可视化（9.2k 行，运行时 0 引用）
 |-- examples/                 # 场景实现 + _platform-notes/ 深入参考
 |-- configs/                  # 场景运行配置
 |-- docs/                     # 架构、场景、实验规范
@@ -78,7 +83,9 @@ multiagent-simulation/
 |------|------|----------|
 | `masim/simulator` | 加载配置、管理轮次/拓扑/Ray Actor | `GeneralSimulator` / `GeneralSimulationRunner` / `run()` |
 | `masim/player` | Agent 感知/决策/行动基类 | `GeneralPlayer` |
-| `masim/agents` | 金融 canonical 基类 + archetype | `CanonicalRulePlayer` 等 / `on_fill` |
+| `masim/agents` | **平台模板**：四个 canonical 基类 + mixins | `CanonicalRulePlayer` 等 / `on_fill` |
+| `agent_library` | **具体 archetype 库**（209）+ 档案 + 图标 | `finance/` `market/` `opinion/` `defines/` |
+| `app` | 面向外部的接口（Streamlit 应用） | `app.py` / `components/` / `customized/` |
 | `masim/persona` | 将 Player 封装为 Ray Actor | `PlayerPersona` |
 | `masim/communication` | 消息编码/解码/传输 | `GeneralCommunicationChannel` / `build_message_from_info` |
 | `masim/proxy` | 通信/存储/监控代理 | `SendReceiveProxy` / `StorageProxy` |
@@ -126,7 +133,7 @@ multiagent-simulation/
 
 ## 8. Agent 档案与复用
 
-`masim/agents/defines/` 是可复用 Agent 档案库（finance/market/opinion，共 **209** 份 Markdown 档案：finance 195 / market 9 / opinion 5），与 `masim/agents/<domain>/` 下的 `.py` 实现 1:1 镜像（按域做 kebab→snake 归一对应）；新场景先做“复用 vs 新建”三段式匹配。
+`agent_library/defines/` 是可复用 Agent 档案库（finance/market/opinion，共 **209** 份 Markdown 档案：finance 195 / market 9 / opinion 5），与 `agent_library/<domain>/` 下的 `.py` 实现 1:1 镜像（按域做 kebab→snake 归一对应）；新场景先做“复用 vs 新建”三段式匹配。
 
 ---
 

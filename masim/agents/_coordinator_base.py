@@ -32,7 +32,7 @@ Format contract:
   :class:`~masim.format.broadcast.BroadcastSchema` (see
   :data:`~masim.format.broadcast.BROADCAST_SCHEMAS`).  The schema is
   mechanically derived from the coordinator profile in
-  ``masim/agents/defines/market/<stem>.md`` and enforces required fields,
+  ``agent_library/defines/market/<stem>.md`` and enforces required fields,
   types, ranges, and enum constraints.  Emission via ``outbound_messages``
   with ``content_type="market_price"`` carries the validated payload.
 """
@@ -59,7 +59,7 @@ class CanonicalMarketCoordinator(BookkeepingMixin, SeededRngMixin, GeneralPlayer
 
     Subclasses MUST:
       * declare ``STRATEGY`` (kebab-case archetype identifier matching the
-        ``masim/agents/defines/market/<stem>.md`` filename).
+        ``agent_library/defines/market/<stem>.md`` filename).
       * implement :meth:`init_market_state`.
       * implement :meth:`advance_market`.
 

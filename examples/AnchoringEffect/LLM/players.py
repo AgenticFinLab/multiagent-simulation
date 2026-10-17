@@ -31,7 +31,7 @@ preserve those exact names, so no yaml or bundle edit is required.
 from __future__ import annotations
 
 from masim.agents import CanonicalLLMPlayer as LLMInvestor
-from masim.agents import (
+from agent_library import (
     LLMAnchoredTrader,
     LLMContrarianTrader,
     LLMDispositionTrader,

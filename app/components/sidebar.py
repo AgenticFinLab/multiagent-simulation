@@ -15,9 +15,8 @@ matplotlib.use("Agg")
 
 # Agent icon library (kebab-case PNGs keyed by player base id).
 ICON_ROOT = (
-    Path(__file__).resolve().parents[3]
-    / "masim"
-    / "agents"
+    Path(__file__).resolve().parents[2]
+    / "agent_library"
     / "defines"
     / "agent_images"
     / "icons"
@@ -43,7 +42,7 @@ from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
 def _try_relative_to_project(path: Path) -> str:
     """Format a Path relative to the project root for compact display."""
     try:
-        project_root = Path(__file__).resolve().parents[3]
+        project_root = Path(__file__).resolve().parents[2]
         return str(path.resolve().relative_to(project_root))
     except (ValueError, OSError):
         return str(path)
@@ -349,7 +348,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                         plt.close(fig)
 
         # Market coordinator profile — click to open the archetype .md
-        # (masim/agents/defines/market/{stem}.md) in a modal, mirroring the
+        # (agent_library/defines/market/{stem}.md) in a modal, mirroring the
         # drill-through available on the "Choose how to run it" page.
         if st.button(
             "📄 View market profile",
@@ -501,7 +500,7 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
     config_fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
     # Cache in a project-local .cache directory (lightweight, gitignore-safe)
-    _project_root = Path(__file__).resolve().parents[3]
+    _project_root = Path(__file__).resolve().parents[2]
     safe_name = scenario_name.replace("/", "_").replace("\\", "_")
     preview_dir = _project_root / ".cache" / "topology" / safe_name
     preview_path = preview_dir / "topology_preview.png"
@@ -624,7 +623,7 @@ def _icon_for_base(base_key: str, scenario_name: Optional[str] = None) -> Option
                 # ``examples/...``; resolve against the project root so it
                 # matches the absolute paths used elsewhere.
                 abs_p = (
-                    Path(__file__).resolve().parents[3] / p
+                    Path(__file__).resolve().parents[2] / p
                     if not p.is_absolute()
                     else p
                 )
@@ -668,7 +667,7 @@ def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
     fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
     # Cache in a project-local .cache directory (lightweight, gitignore-safe)
-    _project_root = Path(__file__).resolve().parents[3]
+    _project_root = Path(__file__).resolve().parents[2]
     safe_name = scenario_name.replace("/", "_").replace("\\", "_")
     preview_dir = _project_root / ".cache" / "topology" / safe_name
     preview_path = preview_dir / "topology_icons.png"

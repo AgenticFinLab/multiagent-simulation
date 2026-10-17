@@ -29,7 +29,7 @@ from ..customized.team_namespace import (
 from .team_gate import current_team
 
 # Project root: app/components/welcome.py → up 4 levels.
-_PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+_PROJECT_ROOT = Path(__file__).parent.parent.parent
 _LOGO_PATH = _PROJECT_ROOT / "logo.jpg"
 _EXAMPLES_DIR = _PROJECT_ROOT / "examples"
 _CUSTOMIZED_CONFIGS_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"

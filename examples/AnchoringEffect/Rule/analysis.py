@@ -60,7 +60,7 @@ def _get_adjustment_factor(config: dict) -> float:
     """Return the anchoring ``alpha`` from the first player config.
 
     The behaviour-driving key is the archetype-canonical ``alpha`` (see
-    ``masim.agents.finance.anchored_trader.RuleAnchoredTrader``).  The legacy
+    ``agent_library.finance.anchored_trader.RuleAnchoredTrader``).  The legacy
     scenario-domain spelling ``adjustment_factor`` is still accepted as a
     fallback so older bundles keep working, but new configs must use ``alpha``
     so that the same value actually reaches the archetype.

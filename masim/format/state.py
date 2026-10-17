@@ -239,7 +239,7 @@ class StandardMarketState:
         """Return ``raw[key]`` or ``default`` if absent.
 
         Use this only for scenario broadcast fields that the archetype
-        profile ("masim/agents/defines/<domain>/<stem>.md") documents as
+        profile ("agent_library/defines/<domain>/<stem>.md") documents as
         optional with a named default.  The intent-baring name distinguishes
         this from bare ``state.raw.get(...)`` at code-review time.
 

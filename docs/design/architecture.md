@@ -333,11 +333,11 @@ simulation.yml
 | `RuleLLM` | 规则约束下的 LLM 决策 | 是 |
 | `Rag` | LLM + 检索上下文（`_build_rag_query()`） | 是 |
 
-**archetype 库**（`masim/agents/`，209 个）：
+**archetype 库**（`agent_library/`，209 个）：
 
 - `finance/` 195 个 investor、`market/` 9 个价格形成协调者、`opinion/` 5 个信息传播 agent。
 - 每个 investor 是 **`Rule<X>` + `LLM<X>` 配对**，共享同一个 kebab-case `STRATEGY` 标识；协调者是单个 `Market<X>`。
-- 每个实现与 `masim/agents/defines/<domain>/<kebab>.md` 档案**1:1 镜像**（209/209，已用规范化 stem 核对）。
+- 每个实现与 `agent_library/defines/<domain>/<kebab>.md` 档案**1:1 镜像**（209/209，已用规范化 stem 核对）。
 - 档案不是纯文档：`## Parameters` 表会被解析成参数规格，用于生成 `players.yml` 的 `extras` 和 UI 的参数编辑器。
 
 **场景与库的关系**：`examples/{Scenario}/{Mechanism}/players.py` 有两种合法形态——**组合式**（只 re-export archetype，约 60 行，是目标形态）与 **legacy**（自己实现 `perceive/decide/act`）。当前 180 个变体中：1 个声明 canonical、4 个组合式、**175 个 legacy**。

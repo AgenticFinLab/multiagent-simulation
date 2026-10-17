@@ -16,7 +16,7 @@ Contract
 
 from __future__ import annotations
 
-from masim.agents import (
+from agent_library import (
     MarketStockStandardPriceImpact as Market,
     RuleEarlyExitTrader as EarlyExitTrader,
     RuleIntrinsicValueTrader as IntrinsicValueTrader,

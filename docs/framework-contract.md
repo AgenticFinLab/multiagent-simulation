@@ -4,7 +4,7 @@
 > `masim/player/general.py` 的 `on_fill` 文档、以及 `scripts/audit_scenario_contract.py` 的检查项都引用本文件。
 >
 > 适用范围：所有金融场景的 `players.py`（`examples/{Scenario}/{Rule,LLM,RuleLLM,Rag}/`）与所有可复用
-> archetype（`masim/agents/{finance,market,opinion}/`）。
+> archetype（`agent_library/{finance,market,opinion}/`）。
 >
 > 术语：**契约（contract）**= 框架保证；**扩展点（hook）**= 子类被允许覆盖的方法。
 
@@ -182,7 +182,7 @@ perceive()   decide()   act()
 | `LEGACY-BASE` | 直接继承 `GeneralPlayer` | INFO |
 
 扫描范围：`--scope scenarios`（`examples/*/{Rule,LLM,RuleLLM,Rag}/players.py`）、`--scope archetypes`
-（`masim/agents/{finance,market,opinion}/*.py`）或 `--scope all`（默认）。
+（`agent_library/{finance,market,opinion}/*.py`）或 `--scope all`（默认）。
 
 **CI 门禁**（`.github/workflows/contract-audit.yml`）：
 
@@ -192,7 +192,7 @@ perceive()   decide()   act()
 
 **注意**：`STRUCT-*` 只对 canonical 子类生效。当前 180 个 `players.py` 中：**1** 个在文件内声明
 canonical 类（`examples/AnchoringEffect/Rag/players.py`）；**4** 个是合规的**组合式**薄模块
-（从 `masim/agents/` 重导出 archetype，`AnchoringEffect/{Rule,LLM,RuleLLM}`、`TulipMania/Rule`）；
+（从 `agent_library/` 重导出 archetype，`AnchoringEffect/{Rule,LLM,RuleLLM}`、`TulipMania/Rule`）；
 **175** 个仍直接继承 `GeneralPlayer`（`LEGACY-BASE`）。因此在迁移完成前，`STRUCT-*` 的 0 findings
 对 **175 个 legacy 文件不构成证明** —— 审计脚本会打印这份迁移进度表。
 

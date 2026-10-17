@@ -19,8 +19,8 @@ import streamlit as st
 # ---------------------------------------------------------------------------
 # Asset paths (same constants used across the interface layer)
 # ---------------------------------------------------------------------------
-_PROJECT_ROOT = Path(__file__).resolve().parents[3]
-_ICON_ROOT = _PROJECT_ROOT / "masim" / "agents" / "defines" / "agent_images" / "icons"
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_ICON_ROOT = _PROJECT_ROOT / "agent_library" / "defines" / "agent_images" / "icons"
 
 # Bundled D3.js (offline-safe — avoids CDN dependency which may be blocked
 # on Chinese cloud / air-gapped servers).
@@ -90,7 +90,7 @@ def market_icon_uri(scenario_base: str) -> str:
 
     Delegates to :func:`config_loader.get_market_icon_path`, which reads
     the scenario's ``players.yml → market.archetype:`` field and maps
-    it to ``masim/agents/defines/agent_images/icons/market/{archetype}.png``.
+    it to ``agent_library/defines/agent_images/icons/market/{archetype}.png``.
 
     Callers wire the result into the topology renderer via
     ``icon_uris={"market": market_icon_uri(base), …}`` so the hub

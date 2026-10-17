@@ -65,8 +65,8 @@ from ..customized.config_writer import _INFRA_EXTRAS_KEYS
 from .team_gate import current_team
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-AGENT_POOL_ROOT = PROJECT_ROOT / "masim" / "agents" / "defines"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+AGENT_POOL_ROOT = PROJECT_ROOT / "agent_library" / "defines"
 IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
 ICON_ROOT = IMAGE_ROOT / "icons"
 # Market coordinator icons live one level under the participant-icon root.
@@ -775,7 +775,7 @@ def render_variant_choice() -> None:
                                 f"\u2014 {market_archetype_stem} \u2192",
                                 key=f"btn_view_archetype_{selected_base}",
                                 help=(
-                                    f"Open masim/agents/defines/market/"
+                                    f"Open agent_library/defines/market/"
                                     f"{market_archetype_stem}.md "
                                     "\u2014 shared coordinator profile bound "
                                     "to this scenario via players.yml "
@@ -2462,7 +2462,7 @@ def _canonical_archetype(player_id: str) -> str:
 def _show_agent_profile_dialog(agent: dict) -> None:
     """Modal that renders the full agent .md profile.
 
-    Loads the file from ``masim/agents/defines/{domain}/{player_id_kebab}.md``.
+    Loads the file from ``agent_library/defines/{domain}/{player_id_kebab}.md``.
     Supports both finance/ and opinion/ domains.
     Falls back to a caption when the profile file does not exist.
     """
@@ -2510,7 +2510,7 @@ def _show_agent_profile_dialog(agent: dict) -> None:
         st.markdown(md_path.read_text(encoding="utf-8"))
     else:
         st.caption(
-            f"No profile file found at masim/agents/defines/*/{ md_stem}.md."
+            f"No profile file found at agent_library/defines/*/{ md_stem}.md."
         )
 
 
@@ -2553,7 +2553,7 @@ def _show_market_archetype_dialog(scenario_base: str) -> None:
     Resolves the archetype stem via
     :func:`config_loader.get_market_archetype` (which reads
     ``players.yml -> market.archetype:``) and renders the corresponding
-    profile file at ``masim/agents/defines/market/{stem}.md``. This mirrors
+    profile file at ``agent_library/defines/market/{stem}.md``. This mirrors
     ``_show_agent_profile_dialog`` for players, giving the market
     coordinator first-class documentation drill-through.
     """
@@ -2586,11 +2586,11 @@ def _show_market_archetype_dialog(scenario_base: str) -> None:
     if not profile_path.exists():
         st.warning(
             f"Archetype profile missing at "
-            f"`masim/agents/defines/market/{stem}.md`. Add the profile "
+            f"`agent_library/defines/market/{stem}.md`. Add the profile "
             "following `masim/skills/market-design-skill.md`."
         )
         return
-    st.caption(f"Source: `masim/agents/defines/market/{profile_path.name}`")
+    st.caption(f"Source: `agent_library/defines/market/{profile_path.name}`")
     content = profile_path.read_text(encoding="utf-8")
     # Strip the leading H1 to avoid double-titles in the modal.
     lines = content.split("\n")
@@ -3158,7 +3158,7 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
     _prof = agent.get("profile_file", "")
     if _prof:
         try:
-            _prof_rel = str(Path(_prof).relative_to(Path(__file__).resolve().parents[3]))
+            _prof_rel = str(Path(_prof).relative_to(Path(__file__).resolve().parents[2]))
         except (ValueError, TypeError):
             _prof_rel = str(_prof)
     else:

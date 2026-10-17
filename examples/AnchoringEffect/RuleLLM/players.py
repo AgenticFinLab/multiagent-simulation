@@ -27,7 +27,7 @@ aliases below preserve those exact names.
 from __future__ import annotations
 
 from masim.agents import CanonicalLLMPlayer as RuleLLMInvestor
-from masim.agents import (
+from agent_library import (
     LLMAnchoredTrader as RuleLLMAnchoredTrader,
     LLMContrarianTrader as RuleLLMContrarianTrader,
     LLMDispositionTrader as RuleLLMDispositionTrader,

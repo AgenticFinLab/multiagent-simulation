@@ -9,9 +9,9 @@ import unittest
 from pathlib import Path
 
 from masim.agents._base import _apply_fill_and_emit_action, validate_archetype_extras
-from masim.agents.finance.anchored_trader import RuleAnchoredTrader
-from masim.agents.finance.noise_trader import RuleNoiseTrader
-from masim.agents.market.stock_standard_price_impact import MarketStockStandardPriceImpact
+from agent_library.finance.anchored_trader import RuleAnchoredTrader
+from agent_library.finance.noise_trader import RuleNoiseTrader
+from agent_library.market.stock_standard_price_impact import MarketStockStandardPriceImpact
 from masim.format.finalize import finalize_rule_order, require_positive_bid_price
 from masim.format.order import InvestorOrder
 from masim.format.state import StandardMarketState

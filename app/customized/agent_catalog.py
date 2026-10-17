@@ -92,7 +92,7 @@ def _iter_agent_modules() -> Iterable:
     """Yield each importable sub-module under :mod:`masim.agents`.
 
     Walks recursively into sub-packages (``finance/``, ``market/``,
-    ``opinion/``) so that modules like ``masim.agents.finance.noise_trader``
+    ``opinion/``) so that modules like ``agent_library.finance.noise_trader``
     are discovered correctly.
     """
     pkg = importlib.import_module(_AGENTS_PACKAGE)

@@ -133,7 +133,7 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
     from ..customized.config_writer import _localize_bundle_imports
 
     try:
-        _project_root = Path(__file__).resolve().parents[3]
+        _project_root = Path(__file__).resolve().parents[2]
 
         # Config path is uniform: configs/{scenario_name}/simulation.yml.
         config_path = _project_root / "configs" / scenario_name / "simulation.yml"

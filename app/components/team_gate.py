@@ -50,7 +50,7 @@ import streamlit as st
 # Internal: discover teams already on disk
 # ---------------------------------------------------------------------------
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[3]  # components → interface → masim → root
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # components → app → root
 _CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
 _EXPERIMENT_CUSTOMIZED_DIR = _PROJECT_ROOT / "EXPERIMENT" / "CUSTOMIZED_SIMULATION"
 # ``examples/CUSTOMIZED_SIMULATION`` is populated as a side-effect of

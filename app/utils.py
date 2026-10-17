@@ -11,7 +11,7 @@ def get_project_root() -> Path:
     Returns:
         Path to project root
     """
-    return Path(__file__).parent.parent.parent
+    return Path(__file__).parent.parent
 
 
 def ensure_dir(path: Path) -> Path:

@@ -79,7 +79,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "examples"
-AGENTS_DIR = REPO_ROOT / "masim" / "agents"
+AGENTS_DIR = REPO_ROOT / "agent_library"
 
 CANONICAL_BASES = {
     "CanonicalRulePlayer",
@@ -505,7 +505,7 @@ def iter_players_files(scenario_filter: Optional[List[str]]) -> Iterable[Path]:
 
 
 def iter_archetype_files() -> Iterable[Path]:
-    """Yield every reusable archetype module under ``masim/agents/<domain>/``.
+    """Yield every reusable archetype module under ``agent_library/<domain>/``.
 
     The archetype library (209 modules) is where the canonical contract is
     actually supposed to be honoured, so it must be audited too — previously
@@ -536,7 +536,7 @@ def classify_file(path: Path) -> str:
     * ``canonical`` — declares a ``Canonical*`` subclass inline (the base owns
       the lifecycle, so the STRUCT-* checks apply).
     * ``reuse`` — declares no player class at all and re-exports concrete
-      archetypes from ``masim/agents``. This is the intended composition form
+      archetypes from ``agent_library``. This is the intended composition form
       and is *migrated*: the contract lives in the archetype library.
     * ``legacy`` — declares its own ``GeneralPlayer`` subclass (pre-canonical).
     * ``other`` — none of the above.
@@ -553,7 +553,7 @@ def classify_file(path: Path) -> str:
 
     classes = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
     if not classes:
-        return "reuse" if "masim.agents" in text else "other"
+        return "reuse" if ("agent_library" in text or "masim.agents" in text) else "other"
 
     saw_legacy = False
     for node in classes:
@@ -701,7 +701,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         default="all",
         help=(
             "Which corpus to audit: scenario players.py files, the reusable "
-            "archetype library (masim/agents/{finance,market,opinion}), or both "
+            "archetype library (agent_library/{finance,market,opinion}), or both "
             "(default)"
         ),
     )

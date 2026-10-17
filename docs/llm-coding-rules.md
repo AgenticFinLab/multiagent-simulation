@@ -513,7 +513,7 @@ Before writing any code, ask:
 
 ## 11. MASim Framework Contract — Player Lifecycle
 
-The full contract lives in `docs/framework-contract.md`. This section codifies the coding rules that follow from that contract. Any scenario `players.py`, agent archetype under `masim/agents/`, or scenario base that touches the perceive/decide/act pipeline MUST obey them.
+The full contract lives in `docs/framework-contract.md`. This section codifies the coding rules that follow from that contract. Any scenario `players.py`, agent archetype under `agent_library/`, or scenario base that touches the perceive/decide/act pipeline MUST obey them.
 
 ### 11.1 Never override `act()` on canonical bases
 
@@ -552,7 +552,7 @@ def on_fill(self, action: str, quantity: float, bid_price: float) -> None:
     ...
 ```
 
-The tuple `(action, quantity, bid_price)` is already validated (`bid_price > 0` guaranteed for `buy`/`sell`), and the base has already mutated `self.state.custom_state["cash" | "position"]` by the time `on_fill` runs. Do not re-compute fills, do not re-mutate cash/position inside `on_fill`. Reference implementations: `masim/agents/finance/{disposition_trader,disposition_investor,endowed_holder,institutional_investor,long_term_investor}.py`.
+The tuple `(action, quantity, bid_price)` is already validated (`bid_price > 0` guaranteed for `buy`/`sell`), and the base has already mutated `self.state.custom_state["cash" | "position"]` by the time `on_fill` runs. Do not re-compute fills, do not re-mutate cash/position inside `on_fill`. Reference implementations: `agent_library/finance/{disposition_trader,disposition_investor,endowed_holder,institutional_investor,long_term_investor}.py`.
 
 ### 11.4 Never write a silent-fill fallback anywhere
 
@@ -571,7 +571,7 @@ New financial archetypes MUST inherit from `CanonicalRulePlayer` / `CanonicalLLM
 Filter frozensets and metric groupings MUST NOT hard-code kebab strategy strings. Import the canonical class-attribute:
 
 ```python
-from masim.agents.finance.momentum_trader import MomentumTrader
+from agent_library.finance.momentum_trader import MomentumTrader
 BIASED_STRATEGIES = frozenset({MomentumTrader.STRATEGY, ...})
 ```
 

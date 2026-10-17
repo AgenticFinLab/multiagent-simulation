@@ -31,7 +31,7 @@ import sys
 from typing import Dict, Iterable, List, Set, Tuple
 
 # Roots whose modules may import each other by absolute path.
-DEFAULT_ROOTS = ("examples", "masim", "scripts")
+DEFAULT_ROOTS = ("examples", "masim", "agent_library", "app", "scripts")
 
 
 class ModuleIndex:

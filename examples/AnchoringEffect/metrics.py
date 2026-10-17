@@ -76,7 +76,7 @@ from evaluation.finance.timeseries import _returns
 # in this module.
 # ---------------------------------------------------------------------------
 
-from masim.agents import (
+from agent_library import (
     RuleAnchoredTrader as _RuleAnchoredTrader,
     RuleContrarianTrader as _RuleContrarianTrader,
     RuleDispositionTrader as _RuleDispositionTrader,

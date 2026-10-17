@@ -1,8 +1,15 @@
 """Acceptance tests for the Agent part (canonical agent contract).
 
-``masim.agents`` exports four canonical bases (Rule / LLM / RAG / Market
-Coordinator) sharing ``GeneralPlayer`` + the per-agent RNG; archetypes fill
-only the sanctioned hooks and never override ``perceive``/``decide``/``act``.
+Two layers, and the split is the point:
+
+* ``masim.agents`` — the **platform templates**: four canonical bases
+  (Rule / LLM / RAG / Market Coordinator) sharing ``GeneralPlayer`` + the
+  per-agent RNG. The platform never imports a concrete archetype.
+* ``agent_library`` — the **concrete library**: 209 archetypes plus their
+  profiles. It imports the templates, never the other way around.
+
+Archetypes fill only the sanctioned hooks and never override
+``perceive``/``decide``/``act``.
 """
 
 from __future__ import annotations
@@ -13,7 +20,8 @@ from typing import Any, Dict, Iterator, Tuple
 
 from examples.uTests._helpers import PROJECT_ROOT, make_rule_agent
 
-_AGENTS_ROOT = PROJECT_ROOT / "masim" / "agents"
+_TEMPLATES_ROOT = PROJECT_ROOT / "masim" / "agents"
+_AGENTS_ROOT = PROJECT_ROOT / "agent_library"
 _ARCHETYPE_PARTS = ("finance", "market", "opinion")
 
 # The only archetypes allowed to override ``on_fill`` (docs/framework-contract.md
@@ -97,7 +105,7 @@ class TestCanonicalBases(unittest.TestCase):
     def test_registry_entries_pair_a_rule_and_an_llm_class_sharing_the_strategy(
         self,
     ) -> None:
-        import masim.agents as agents
+        import agent_library as agents
         from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
 
         self.assertGreater(len(agents.REGISTRY), 100)
@@ -112,20 +120,21 @@ class TestCanonicalBases(unittest.TestCase):
     def test_coordinator_registry_classes_derive_from_the_coordinator_base(
         self,
     ) -> None:
-        import masim.agents as agents
+        import agent_library as agents
+        from masim.agents import CanonicalMarketCoordinator
 
         self.assertTrue(agents.COORDINATOR_REGISTRY)
         for archetype, cls in agents.COORDINATOR_REGISTRY.items():
             with self.subTest(archetype=archetype):
                 self.assertTrue(
-                    issubclass(cls, agents.CanonicalMarketCoordinator)
+                    issubclass(cls, CanonicalMarketCoordinator)
                 )
                 self.assertEqual(cls.STRATEGY, archetype)
 
     def test_get_agent_and_get_coordinator_reject_unknown_names_and_engines(
         self,
     ) -> None:
-        import masim.agents as agents
+        import agent_library as agents
 
         with self.assertRaises(KeyError):
             agents.get_agent("no-such-archetype")

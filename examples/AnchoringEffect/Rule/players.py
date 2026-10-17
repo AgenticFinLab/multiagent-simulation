@@ -28,10 +28,8 @@ import" policy (see :mod:`masim.agents._base`,
 
 from __future__ import annotations
 
-from masim.agents import (
-    # Coordinator (rule-executed even for LLM-participant simulations)
+from agent_library import (
     MarketStockStandardPriceImpact as Market,
-    # Rule investor archetypes
     RuleAnchoredTrader as AnchoredTrader,
     RuleContrarianTrader as ContrarianTrader,
     RuleDispositionTrader as DispositionTrader,

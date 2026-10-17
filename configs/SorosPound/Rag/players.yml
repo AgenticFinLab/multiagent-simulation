@@ -22,7 +22,7 @@ knowledge:
     top_k: 5
 
 market:
-  archetype: fx-currency-peg-and-attack  # -> masim/agents/defines/market/fx-currency-peg-and-attack.md
+  archetype: fx-currency-peg-and-attack  # -> agent_library/defines/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.SorosPound.Rag.players:Market"
   num_instances: 1

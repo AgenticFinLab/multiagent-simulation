@@ -22,6 +22,7 @@ python -m compileall -q masim examples scripts tests   # syntax
 python scripts/check_module_imports.py                 # real imports (catches
                                                        # NameError in signatures)
 python scripts/check_example_reexports.py              # internal re-exports resolve
+python scripts/check_project_paths.py                  # project-root depths
 PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py"
 PYTHONPATH=. python -m unittest discover -s examples/uTests -t . -p "test_*.py"
 python scripts/audit_scenario_contract.py --scope archetypes --no-legacy-info
@@ -44,6 +45,11 @@ and raises `NameError` on first import. That is why the import sweep exists.
 
 ## Code conventions
 
+- **Layering (enforced by review, checked by the import sweep):**
+  `masim/` is the platform and must never import `agent_library/` or `app/`;
+  `agent_library/` imports the templates in `masim/agents/` and never `app/`;
+  `app/` may import both. New concrete archetypes go in `agent_library/` —
+  `masim/agents/` holds only the four canonical bases and their mixins.
 - `masim/platform/*/base.py` are **contracts only** (ABC + dataclass +
   annotations + docstrings, method bodies `...`). Behaviour goes in
   implementations. Changing a contract is a decision — record it in

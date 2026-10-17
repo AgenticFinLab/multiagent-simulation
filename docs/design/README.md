@@ -215,7 +215,7 @@ MASim 让大量异构 agent 在共享世界里**持续感知、决策、行动�
 | Round | 一次完整的层级遍历 | `masim/simulator/general.py:608` |
 | Bootstrap round | 本次进程执行的**第一轮**；level 0 免于等待前驱 | `masim/player/general.py:275` |
 | Canonical base | 四种契约基类（Rule/LLM/RAG/MarketCoordinator） | `masim/agents/_base.py` |
-| Archetype | 可复用 agent 实现（209 个），与 `defines/*.md` 档案 1:1 | `masim/agents/{finance,market,opinion}` |
+| Archetype | 可复用 agent 实现（209 个），与 `defines/*.md` 档案 1:1 | `agent_library/{finance,market,opinion}` |
 | Mechanism | 决策机制：Rule / LLM / RuleLLM / Rag | `configs/{Scenario}/{Mechanism}` |
 | Variant | 一个场景 × 一个机制 = 一个 `players.py` | `examples/{Scenario}/{Mechanism}` |
 | Wire format | `Info → Message → SimPacket` 的编码结果 | `masim/communication/` |

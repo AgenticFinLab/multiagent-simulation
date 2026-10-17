@@ -39,6 +39,7 @@ if str(REPO_ROOT) not in sys.path:
 
 # Packages whose module-scope imports are covered by requirements-test.txt.
 CORE_PREFIXES = (
+    "agent_library",
     "masim.agents",
     "masim.communication",
     "masim.format",

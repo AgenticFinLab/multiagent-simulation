@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Absolute project root — anchored to this source file's location so that
 # scenario discovery, experiment data, and example assets are found regardless
 # of the working directory from which Streamlit is launched.
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # app → project root
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]  # app → project root
 
 # Base directory for docs
 EXAMPLES_DIR = _PROJECT_ROOT / "examples"
@@ -1189,7 +1189,7 @@ def get_market_archetype(scenario_name: str) -> Optional[str]:
 
     Returns:
         A kebab-case archetype stem (matching a file under
-        ``masim/agents/defines/market/{stem}.md``) or ``None`` if the
+        ``agent_library/defines/market/{stem}.md``) or ``None`` if the
         scenario name is unknown and no players.yml can be parsed.
     """
     resolved = _resolve_display_key(scenario_name)
@@ -1216,7 +1216,7 @@ def get_market_archetype(scenario_name: str) -> Optional[str]:
 def get_market_icon_path(scenario_name: str) -> Optional[Path]:
     """Return the coordinator icon PNG for this scenario, if present on disk.
 
-    The path is ``masim/agents/defines/agent_images/icons/market/{stem}.png``
+    The path is ``agent_library/defines/agent_images/icons/market/{stem}.png``
     where ``{stem}`` is the archetype returned by :func:`get_market_archetype`.
 
     Returns ``None`` if either the archetype cannot be resolved or the PNG
@@ -1225,7 +1225,7 @@ def get_market_icon_path(scenario_name: str) -> Optional[Path]:
     stem = get_market_archetype(scenario_name)
     if not stem:
         return None
-    p = _PROJECT_ROOT / "masim" / "agents" / "defines" / "agent_images" / "icons" / "market" / f"{stem}.png"
+    p = _PROJECT_ROOT / "agent_library" / "defines" / "agent_images" / "icons" / "market" / f"{stem}.png"
     return p if p.exists() else None
 
 

@@ -1,6 +1,6 @@
 ---
 name: market-design-skill
-purpose: Format-locked, unified handbook for designing a single simulation MARKET COORDINATOR agent — the environment-side player that clears trades, forms prices, propagates information, or coordinates any other shared state variable. Produces self-contained specifications suitable for inclusion under masim/agents/defines/market/{market-type}-{coordinator-stem}.md across any simulation domain.
+purpose: Format-locked, unified handbook for designing a single simulation MARKET COORDINATOR agent — the environment-side player that clears trades, forms prices, propagates information, or coordinates any other shared state variable. Produces self-contained specifications suitable for inclusion under agent_library/defines/market/{market-type}-{coordinator-stem}.md across any simulation domain.
 status: canonical
 audience: Authors and reviewers of MARKET COORDINATOR specifications for multi-agent simulations. This handbook is a sibling of `agent-design-skill.md`; participant agents (investors, opinion holders, depositors, etc.) belong to that handbook. Coordinator / environment / matching-engine / broadcast-hub agents belong here.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
@@ -31,11 +31,11 @@ the Design Provenance block.
 
 - Participant agents (investors, depositors, opinion holders,
   bank managers, hedge funds, etc.) → follow `agent-design-skill.md`,
-  stored under `masim/agents/defines/{domain}/{stem}.md`.
+  stored under `agent_library/defines/{domain}/{stem}.md`.
 - Market coordinators (price-formation engines, opinion
   environments, rumour-propagation hubs, order-matching engines,
   reserve trackers, etc.) → follow THIS handbook, stored under
-  `masim/agents/defines/market/{market-type}-{coordinator-stem}.md`.
+  `agent_library/defines/market/{market-type}-{coordinator-stem}.md`.
 
 The two handbooks share the "agent-design DNA" (evidence provenance,
 canonical section order, cross-section traceability), but the market
@@ -112,13 +112,13 @@ the addition.
 For a stock-market coordinator with stem `standard-price-impact`:
 
 ```
-masim/agents/defines/market/stock-standard-price-impact.md
+agent_library/defines/market/stock-standard-price-impact.md
 ```
 
 For an opinion environment with stem `echo-chamber-clustering`:
 
 ```
-masim/agents/defines/market/opinion-echo-chamber-clustering.md
+agent_library/defines/market/opinion-echo-chamber-clustering.md
 ```
 
 The `{market-type-slug}-` prefix is **not optional**. The `stem`
@@ -823,7 +823,7 @@ A conformant profile MUST satisfy ALL of the following:
   in `config_loader.py` SHOULD be empty in a fully-migrated repo
   (kept only as a safety net for un-materialised customized copies).
 - The `archetype:` value MUST exactly match a file stem in
-  `masim/agents/defines/market/` — see §8.2 for the canonical set.
+  `agent_library/defines/market/` — see §8.2 for the canonical set.
 - The `Scenario Portability` row in every archetype profile (§4.2)
   MUST enumerate all scenarios whose `players.yml → archetype:`
   binds to that profile, with **Full ✅** or **Approximated ⚠**
@@ -833,7 +833,7 @@ A conformant profile MUST satisfy ALL of the following:
 
 **Structural completeness:**
 
-- [ ] File name is `masim/agents/defines/market/{market-type}-{stem}.md`
+- [ ] File name is `agent_library/defines/market/{market-type}-{stem}.md`
       and `{market-type}` is a canonical slug from §2.1
 - [ ] H1 is a sentence-cased role phrase, not a class identifier
 - [ ] §4.2 Summary has ≥8 rows in order, with `Market Type` as row 1
@@ -910,7 +910,7 @@ A conformant profile MUST satisfy ALL of the following:
 - [ ] Icon path is exactly `../agent_images/icons/market/{market-type}-{stem}.png`
 - [ ] PNG file exists on disk (or the icon-generation skill has been
       queued as a follow-up task)
-- [ ] `masim/agents/defines/agent_images/design.md` has a mapping row
+- [ ] `agent_library/defines/agent_images/design.md` has a mapping row
       for `market/{market-type}-{stem}.md` → `market/{market-type}-{stem}.png`
 
 ## 8. Scenario Binding — the `archetype:` field **(MANDATORY)**
@@ -933,7 +933,7 @@ in all three:
 ```yaml
 # Pattern 1 — standard scenarios (single canonical coordinator key)
 market:
-  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> agent_library/defines/market/stock-standard-price-impact.md
   scale: ...
   price_impact: ...
 
@@ -943,13 +943,13 @@ market:
 # variants exist because participant reasoning depth changes per
 # variant, but the archetype binding is identical in every variant.
 rule_opinion_environment:      # (or llm_opinion_environment:, etc.)
-  archetype: opinion-echo-chamber-clustering  # -> masim/agents/defines/market/opinion-echo-chamber-clustering.md
+  archetype: opinion-echo-chamber-clustering  # -> agent_library/defines/market/opinion-echo-chamber-clustering.md
   ...
 
 # Pattern 3 — information-domain scenarios (RumorSpread family)
 # Same variant convention: `{variant}_information_environment:`.
 rule_information_environment:  # (or llm_information_environment:, etc.)
-  archetype: information-sis-contagion  # -> masim/agents/defines/market/information-sis-contagion.md
+  archetype: information-sis-contagion  # -> agent_library/defines/market/information-sis-contagion.md
   ...
 ```
 
@@ -960,7 +960,7 @@ scaffolding evolve without requiring changes to the archetype
 binding contract. See `_find_coordinator_block()` in
 `config_loader.py`.
 
-The trailing comment `# -> masim/agents/defines/market/{stem}.md` is
+The trailing comment `# -> agent_library/defines/market/{stem}.md` is
 **recommended, not required**; the loader ignores it. It exists so
 that a reader scanning `players.yml` can jump to the profile
 without opening the config loader.
@@ -968,7 +968,7 @@ without opening the config loader.
 ### 8.2 Field format rules
 
 - **Value type**: string, MUST equal the archetype file stem — the
-  file name at `masim/agents/defines/market/{value}.md` without the
+  file name at `agent_library/defines/market/{value}.md` without the
   `.md` extension.
 - **Canonical set** (9 archetypes as of 2026-07-17):
   `stock-standard-price-impact`,
@@ -1027,7 +1027,7 @@ The exposed loader functions are:
 - **`app/components/agent_market.py`** — the "View the
   market coordinator archetype" button opens
   `_show_market_archetype_dialog()`, which renders
-  `masim/agents/defines/market/{stem}.md` in a Streamlit dialog, with the
+  `agent_library/defines/market/{stem}.md` in a Streamlit dialog, with the
   icon as header, mirroring the "View the scenario definition"
   drill-through for player agents.
 
@@ -1059,7 +1059,7 @@ For each variant `players.yml` under `configs/`:
    `^\w+_information_environment:`).
 2. Look up the scenario stem → archetype stem in the mapping
    table maintained in `market-icon-generation-skill.md`.
-3. Add `archetype: {stem}  # -> masim/agents/defines/market/{stem}.md`
+3. Add `archetype: {stem}  # -> agent_library/defines/market/{stem}.md`
    as the first child of the coordinator block, updating in
    place if the field already exists.
 
@@ -1071,7 +1071,7 @@ Add these rules to §6:
   variant's `players.yml`; the `_ARCHETYPE_FALLBACK` table SHOULD
   be empty in a fully-migrated repo.
 - The `archetype:` value MUST exactly match a file stem in
-  `masim/agents/defines/market/`.
+  `agent_library/defines/market/`.
 - The `Scenario Portability` row in every archetype profile MUST
   enumerate all scenarios whose `players.yml → archetype:` binds
   to that profile, with Full/Approximated markers.

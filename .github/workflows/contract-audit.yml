@@ -29,7 +29,7 @@ jobs:
           PYTHONPATH=. python scripts/audit_scenario_contract.py
           --scope scenarios --scenario AnchoringEffect --no-legacy-info
 
-      - name: "GATE: reusable archetype library (masim/agents)"
+      - name: "GATE: reusable archetype library (agent_library)"
         run: >-
           PYTHONPATH=. python scripts/audit_scenario_contract.py
           --scope archetypes --no-legacy-info
@@ -102,6 +102,8 @@ jobs:
         run: python scripts/check_module_imports.py
       - name: "GATE: internal re-exports resolve (examples/ shims import from siblings)"
         run: python scripts/check_example_reexports.py
+      - name: "GATE: project-root derivations resolve to the repository"
+        run: python scripts/check_project_paths.py
 
       - name: Run unit tests
         run: PYTHONPATH=. python -m unittest discover -s tests -t tests -p "test_*.py" -v
