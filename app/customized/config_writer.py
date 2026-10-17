@@ -1018,7 +1018,7 @@ def write_default_scenario_bundle(
     used to emit is explicitly rejected by the current architecture — its
     folder name does not match ``_BUNDLE_NAME_RE`` (``variant`` is not a
     hex-8 project id), so team-scanning helpers in
-    :mod:`masim.interface.components.team_gate` cannot see it, and
+    :mod:`app.components.team_gate` cannot see it, and
     sidebar/analysis decoders will misread it as a display key.
 
     The function is kept as a stub only so accidental re-imports fail
@@ -1056,7 +1056,7 @@ def write_default_scenario_bundle(
     # Team-namespace the bundle folder so concurrent teams cannot clobber
     # each other's ``(scenario, variant, rounds)`` bundle.  Uses the same
     # ``team-{slug}-`` literal marker as
-    # :mod:`masim.interface.customized.team_namespace` so downstream
+    # :mod:`app.customized.team_namespace` so downstream
     # decoders (sidebar, ``_resolve_display_key``) recognise it.
     if team_name:
         cid = f"team-{team_name}-{base_cid}"
@@ -1787,7 +1787,7 @@ def _render_agent_block(
         )
 
     comment = (
-        f"# Class: {class_path}  (canonical, resolved via masim.interface.customized.agent_catalog)\n"
+        f"# Class: {class_path}  (canonical, resolved via app.customized.agent_catalog)\n"
         f"# Engine: {selection.engine}"
     )
 

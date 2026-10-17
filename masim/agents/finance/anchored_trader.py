@@ -4,7 +4,7 @@ Canonical implementation of the ``anchored-trader`` archetype documented in
 ``masim/agents/defines/finance/anchored-trader.md``. The archetype identifier
 (``STRATEGY = "anchored-trader"``) matches the AGENT_POOL profile filename
 stem verbatim and is the single source of truth used by
-:mod:`masim.interface.customized.agent_catalog`, generated ``players.yml``
+:mod:`app.customized.agent_catalog`, generated ``players.yml``
 files, and the marketplace UI. Rule and LLM siblings share the same STRATEGY
 so they are paired into one ``AgentEntry``.
 

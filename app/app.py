@@ -14,17 +14,17 @@ import streamlit as st
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from masim.interface.config_loader import (
+from app.config_loader import (
     discover_scenarios,
     get_scenario_info,
     _configs_path,
 )
-from masim.interface.data_loader import has_experiment_data, load_rounds
-from masim.interface.components.sidebar import render_sidebar
-from masim.interface.components.analysis_view import render_analysis_page
-from masim.interface.components.reasoning_view import render_reasoning_page
-from masim.interface.components.docs_view import render_docs_page
-from masim.interface.components.agent_market import (
+from app.data_loader import has_experiment_data, load_rounds
+from app.components.sidebar import render_sidebar
+from app.components.analysis_view import render_analysis_page
+from app.components.reasoning_view import render_reasoning_page
+from app.components.docs_view import render_docs_page
+from app.components.agent_market import (
     render_back_to_stage1_bar,
     render_customize,
     render_default_config,
@@ -32,15 +32,15 @@ from masim.interface.components.agent_market import (
     render_selected_market_strip,
     render_variant_choice,
 )
-from masim.interface.components.welcome import render_welcome
-from masim.interface.components.team_gate import (
+from app.components.welcome import render_welcome
+from app.components.team_gate import (
     TEAM_NAME_KEY,
     bootstrap_team_from_query,
     current_team,
     render_team_gate,
 )
-from masim.interface.components.online_badge import render_online_badge
-from masim.interface.locale import t
+from app.components.online_badge import render_online_badge
+from app.locale import t
 
 # Page configuration
 st.set_page_config(
@@ -417,8 +417,8 @@ def _render_investor_activity(round_data, scenario_name: str):
         round_data: RoundData from data_loader for the round to display.
         scenario_name: Active scenario key (to resolve the full roster).
     """
-    from masim.interface.config_loader import get_agent_roster
-    from masim.interface.data_loader import ReplayAgentAction
+    from app.config_loader import get_agent_roster
+    from app.data_loader import ReplayAgentAction
 
     rnd = round_data.round_num
     st.subheader(f"📈 Investor Activity — Round {rnd}")
@@ -1019,7 +1019,7 @@ def _render_action_buttons(scenario_name: str):
     Args:
         scenario_name: Currently selected scenario.
     """
-    from masim.interface.config_loader import get_analysis_freshness
+    from app.config_loader import get_analysis_freshness
 
     info = get_scenario_info(scenario_name)
     data_exists = has_experiment_data(scenario_name)
@@ -1205,8 +1205,8 @@ def _render_action_buttons(scenario_name: str):
 
     # Show saved data round count when experiment data exists on disk.
     if data_exists and not st.session_state.simulation_running:
-        from masim.interface.data_loader import count_experiment_rounds
-        from masim.interface.config_loader import _experiment_path, _dir_latest_mtime
+        from app.data_loader import count_experiment_rounds
+        from app.config_loader import _experiment_path, _dir_latest_mtime
 
         saved_rounds = count_experiment_rounds(scenario_name)
         exp_path = _experiment_path(scenario_name)
@@ -1479,13 +1479,13 @@ def _run_simulation_worker(
     progress: dict,
     scenario_name: str,
 ) -> None:
-    """Supervise ``masim.interface.simulation_worker`` as a child process."""
+    """Supervise ``app.simulation_worker`` as a child process."""
     import tempfile
 
     command = [
         sys.executable,
         "-m",
-        "masim.interface.simulation_worker",
+        "app.simulation_worker",
         "--config",
         str(config_path),
     ]

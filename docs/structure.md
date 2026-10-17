@@ -85,7 +85,7 @@ multiagent-simulation/
 | `masim/knowledge` | 文档加载、向量索引、RAG | `KnowledgeManager` |
 | `evaluation` | 金融指标、验证、可视化 | `finance/*` |
 | `masim/format` | prompt / 订单 schema / 最终化 | `order.py` / `finalize.py` |
-| `masim/interface` | Streamlit 回放与分析 | `app.py` |
+| `app` | Streamlit 回放与分析 | `app.py` |
 | `masim/execution` | **执行策略**（默认 `SelfFillModel`、示例 `MarketPriceFillModel`） | `FillModel` |
 | `masim/player/portfolio.py` | **账本唯一变更入口** | `Portfolio.apply_fill()` |
 | `masim/simulator/metrics.py` | **规模化观测**（阶段耗时/RPC/消息/扇出/内存） | `RunMetrics` / `monitoring/run_metrics.json` |
@@ -111,7 +111,7 @@ multiagent-simulation/
 
 - 产物：`EXPERIMENT/{Scenario}/{Mechanism}/`（records/communication/monitoring/analysis）。**现状**：`checkpoints/` 与 `logs/` 虽被文档记录，但代码从未创建（`auto_checkpoint` 不被任何代码读取）；`simulation-results/` 发布包**不存在**；`EXPERIMENT/` 目前**只有 4/45 个场景**留有产物。读取用 `masim.utils.load_results()`。
 - 「目标（未落地）」：`simulation-results/` 作为统一发布包，待产物流水线落地后补齐。
-- 运行：`python examples/{Scenario}/{Mech}/run_*.py -c configs/{Scenario}/{Mech}/simulation.yml`；界面 `streamlit run masim/interface/app.py`。
+- 运行：`python examples/{Scenario}/{Mech}/run_*.py -c configs/{Scenario}/{Mech}/simulation.yml`；界面 `streamlit run app/app.py`。
   - **续跑策略（fail-loud）**：`setting.record_path` 中若已有完成轮次，默认**拒绝启动**并提示二选一——`--resume`（从已完成轮次 +1 继续；**agent 状态按配置重置**，不从磁盘恢复）或 `--fresh`（删除上一轮的 `records/` `communication/` `monitoring/` `checkpoints/` 后从第 1 轮重跑）。两者互斥。
   - **产物完整性**：per-agent 记录（`records/<player>/{messages,turns}/`）与 wire 级记录（`communication/`）统一改用「轮次 + 轮内序号」键 `msg_r{round:06d}_{seq:06d}` / `turn_r{round:06d}_{seq:06d}`，不再使用秒级墙钟键。旧键会让同一 agent 在同一秒内的多条记录互相覆盖（`BlockBasedStoreManager` 的重复键语义是 update，不是 add）；序号键同时保证 `--resume` 的新进程不会覆盖上一轮的记录。
   - **入向轮次标注**：per-agent 入向记录使用**消息自身的**轮次（`Message.extras["round_num"]`），而不是接收者的 `current_round`。level>0 的 agent 在其本轮 `operate()` 之前就收到广播，旧实现会把入向记录标成上一轮（首轮标成 round 0）。

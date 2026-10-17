@@ -40,7 +40,7 @@ from typing import Any, Dict, List, Optional
 import streamlit as st
 
 # Import path helper for nested scenario support
-from masim.interface.config_loader import _experiment_path
+from app.config_loader import _experiment_path
 
 # Canonical action enum — used to normalise log-derived action_str
 from masim.format import BUY, SELL, HOLD

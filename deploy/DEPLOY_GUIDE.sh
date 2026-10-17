@@ -86,8 +86,8 @@ echo ""
 
 # 关键文件验证
 echo "--- 验证关键文件 ---"
-[ -f masim/interface/app.py ] && echo "  ✓ app.py" || echo "  ✗ app.py 缺失!"
-[ -f masim/interface/components/online_badge.py ] && echo "  ✓ online_badge.py" || echo "  ✗ online_badge.py 缺失!"
+[ -f app/app.py ] && echo "  ✓ app.py" || echo "  ✗ app.py 缺失!"
+[ -f app/components/online_badge.py ] && echo "  ✓ online_badge.py" || echo "  ✗ online_badge.py 缺失!"
 [ -f deploy/masim-nginx.conf ] && echo "  ✓ masim-nginx.conf" || echo "  ✗ nginx配置缺失!"
 [ -f deploy/masim@.service ] && echo "  ✓ masim@.service" || echo "  ✗ service文件缺失!"
 

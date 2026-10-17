@@ -24,7 +24,7 @@ Usage
 
    ```bash
    cd /path/to/multiagent-simulation
-   streamlit run masim/interface/app.py
+   streamlit run app/app.py
    ```
    Then select "LiquidityDryupRag" from the scenario dropdown.
 

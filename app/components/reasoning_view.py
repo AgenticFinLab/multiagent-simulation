@@ -8,12 +8,12 @@ formula-based decisions).
 
 import streamlit as st
 
-from masim.interface.config_loader import (
+from app.config_loader import (
     get_agent_roster,
     scenario_display_name,
 )
-from masim.interface.data_loader import load_rounds, ReplayAgentAction
-from masim.interface.locale import t
+from app.data_loader import load_rounds, ReplayAgentAction
+from app.locale import t
 
 
 # ---------------------------------------------------------------------------

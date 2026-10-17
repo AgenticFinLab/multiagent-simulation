@@ -576,7 +576,7 @@ class CanonicalRulePlayer(MarketPerceptionMixin, BookkeepingMixin, SeededRngMixi
     from ``self.config.extras`` once on the first ``perceive`` call.
 
     Class-level metadata consumed by the customized-simulation discovery layer
-    (``masim.interface.customized.agent_catalog``):
+    (``app.customized.agent_catalog``):
       * ``STRATEGY`` — archetype identifier; must match the LLM sibling.
       * ``DISPLAY_NAME`` — UI label shown in the marketplace card.
       * ``SUMMARY`` — one-line description shown under the card title.

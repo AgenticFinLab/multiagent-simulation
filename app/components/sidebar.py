@@ -247,8 +247,8 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         description = info.get("description", "")
         agent_type = "LLM-based" if info.get("is_llm") else "Rule-based"
 
-        from masim.interface.data_loader import has_experiment_data
-        from masim.interface.config_loader import get_analysis_path
+        from app.data_loader import has_experiment_data
+        from app.config_loader import get_analysis_path
 
         data_exists = has_experiment_data(selected_scenario)
         analysis_path = get_analysis_path(selected_scenario)

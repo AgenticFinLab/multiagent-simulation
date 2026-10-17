@@ -3,10 +3,10 @@
 Provides the t() function for translating UI strings. All UI text should
 use t("key.path") instead of hardcoded strings.
 
-Locale files are stored in masim/interface/locale/{locale}.yml
+Locale files are stored in app/locale/{locale}.yml
 
 Usage:
-    from masim.interface.locale import t
+    from app.locale import t
 
     st.title(t("sidebar.title"))  # Returns "MASIM 仿真器" for zh_CN
     st.button(t("simulation.start"))  # Returns "▶ 开始仿真" for zh_CN

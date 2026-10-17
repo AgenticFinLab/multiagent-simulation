@@ -410,7 +410,7 @@ python examples/HerdEffect/Rule/run_herd.py -c configs/HerdEffect/Rule/simulatio
 python examples/HerdEffect/Rule/analysis.py -c configs/HerdEffect/Rule/simulation.yml
 
 # 界面
-streamlit run masim/interface/app.py
+streamlit run app/app.py
 
 # 质量门禁
 python scripts/check_module_imports.py                       # 真导入（抓签名 NameError）

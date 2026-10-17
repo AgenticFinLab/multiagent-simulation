@@ -988,7 +988,7 @@ without opening the config loader.
   once per coordinator block. Standard scenarios have exactly one
   coordinator, so exactly one `archetype:` key.
 
-### 8.3 Resolution semantics (implemented in `masim/interface/config_loader.py`)
+### 8.3 Resolution semantics (implemented in `app/config_loader.py`)
 
 The runtime resolves an archetype in three tiers, in order:
 
@@ -1021,10 +1021,10 @@ The exposed loader functions are:
 
 ### 8.4 UI consumption
 
-- **`masim/interface/components/sidebar.py`** — topology preview
+- **`app/components/sidebar.py`** — topology preview
   renders the archetype icon as the hub node (falls back to a gold
   FancyBboxPatch if the PNG is absent).
-- **`masim/interface/components/agent_market.py`** — the "View the
+- **`app/components/agent_market.py`** — the "View the
   market coordinator archetype" button opens
   `_show_market_archetype_dialog()`, which renders
   `masim/agents/defines/market/{stem}.md` in a Streamlit dialog, with the

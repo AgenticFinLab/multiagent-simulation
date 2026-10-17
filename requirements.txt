@@ -43,8 +43,8 @@ requests
 matplotlib
 networkx
 
-# ── Web interface (masim/interface) ────────────────────────────────────────
-# `altair` is used directly by masim/interface/app.py; it is also a Streamlit
+# ── Web interface (app) ────────────────────────────────────────
+# `altair` is used directly by app/app.py; it is also a Streamlit
 # transitive dependency, so it is pinned here only for explicitness.
 streamlit>=1.28
 altair

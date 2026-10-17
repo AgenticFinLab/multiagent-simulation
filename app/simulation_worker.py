@@ -1,4 +1,4 @@
-"""Simulation worker process — run via ``python -m masim.interface.simulation_worker``.
+"""Simulation worker process — run via ``python -m app.simulation_worker``.
 
 This module is spawned as a child process by the Streamlit UI (app.py).
 It communicates progress back to the parent via structured lines on stdout:
@@ -26,7 +26,7 @@ def _emit(event: dict) -> None:
 
 
 async def _run(config_path: str) -> None:
-    from masim.interface.simulation_runner import SimulationRunner
+    from app.simulation_runner import SimulationRunner
 
     runner = SimulationRunner(config_path)
 

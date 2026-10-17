@@ -53,7 +53,7 @@ class StandardMarketState:
     scenario does not provide them; agents that depend on them must declare
     that dependency on their canonical Rule class via the
     ``REQUIRES_FEATURES`` class attribute (consumed by
-    :mod:`masim.interface.customized.agent_catalog`).
+    :mod:`app.customized.agent_catalog`).
     """
 
     # --- core market signal (every scenario broadcasts these) ---------------

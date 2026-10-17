@@ -6,7 +6,7 @@ order flow; neither converges nor diverges from fundamental on average.
 
 The archetype identifier (``STRATEGY = "noise-trader"``) matches the
 AGENT_POOL profile filename stem verbatim and is the single source of truth
-used by :mod:`masim.interface.customized.agent_catalog`, generated
+used by :mod:`app.customized.agent_catalog`, generated
 ``players.yml`` files, and the marketplace UI. Rule and LLM siblings MUST
 share the same STRATEGY so ``load_agent_catalog`` pairs them into one
 ``AgentEntry``.

@@ -419,7 +419,7 @@ configs/{scenario}/{variant}/players.yml
         └── archetype: {stem}                  ← declared by scenario author
                 │
                 ▼
-masim/interface/config_loader.py
+app/config_loader.py
     └── get_market_archetype(scenario_name)    → {stem}
     └── get_market_icon_path(scenario_name)    → masim/agents/defines/agent_images/icons/market/{stem}.png
                 │
@@ -455,11 +455,11 @@ UI consumers
 - `market-design-skill.md` §8 — full `archetype:` field contract:
   location, format, resolution semantics, UI consumption, migration
   workflow.
-- `masim/interface/config_loader.py` — implementations of
+- `app/config_loader.py` — implementations of
   `get_market_archetype()`, `get_market_icon_path()`,
   `get_market_type()`, `_ARCHETYPE_FALLBACK`, `_ARCHETYPE_MARKET_TYPE`.
-- `masim/interface/components/sidebar.py` — hub node rendering.
-- `masim/interface/components/agent_market.py` —
+- `app/components/sidebar.py` — hub node rendering.
+- `app/components/agent_market.py` —
   `_show_market_archetype_dialog()` drill-through.
 
 ## Status

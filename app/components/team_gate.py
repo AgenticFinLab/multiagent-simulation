@@ -55,7 +55,7 @@ _CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
 _EXPERIMENT_CUSTOMIZED_DIR = _PROJECT_ROOT / "EXPERIMENT" / "CUSTOMIZED_SIMULATION"
 # ``examples/CUSTOMIZED_SIMULATION`` is populated as a side-effect of
 # ``initialize_customized_folder`` / ``copy_default_scenario_bundle``
-# (both live in ``masim/interface/customized/config_writer.py``) — every
+# (both live in ``app/customized/config_writer.py``) — every
 # customize-bundle snapshot has a matching subtree here.  Must be included
 # in team deletion, otherwise soft-delete leaves orphan snapshots behind.
 _EXAMPLES_CUSTOMIZED_DIR = _PROJECT_ROOT / "examples" / "CUSTOMIZED_SIMULATION"

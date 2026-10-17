@@ -19,7 +19,7 @@ Bundle folder-name convention
 * Legacy:      ``{project_slug}-{project_id:8hex}-{scenario}``
 
 The ``team-`` prefix is a **literal fixed marker**.  The team segment
-itself is validated at :mod:`masim.interface.components.team_gate` to
+itself is validated at :mod:`app.components.team_gate` to
 match ``[A-Za-z0-9_]+`` — critically, hyphens are excluded there so the
 parser here can rely on the FIRST hyphen after ``team-`` marking the
 end of the team segment, giving a fully unambiguous decode.

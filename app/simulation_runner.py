@@ -10,7 +10,7 @@ Workflows
 
    ```python
    import asyncio
-   from masim.interface.simulation_runner import SimulationRunner
+   from app.simulation_runner import SimulationRunner
 
    async def main():
        runner = SimulationRunner.from_scenario("AssetBubble", variant="Rule")
@@ -26,8 +26,8 @@ Workflows
 2. **Customized mode** — pick agents from AGENT_POOL, generate a bundle, run:
 
    ```python
-   from masim.interface.simulation_runner import SimulationRunner
-   from masim.interface.customized import CustomizedAgentSelection
+   from app.simulation_runner import SimulationRunner
+   from app.customized import CustomizedAgentSelection
 
    selections = [
        CustomizedAgentSelection(
@@ -48,7 +48,7 @@ Workflows
 
    ```bash
    cd /path/to/multiagent-simulation
-   streamlit run masim/interface/app.py
+   streamlit run app/app.py
    ```
 
    Then:
@@ -59,7 +59,7 @@ Workflows
 4. **Discovery helpers** (standalone, no Streamlit needed):
 
    ```python
-   from masim.interface.simulation_runner import (
+   from app.simulation_runner import (
        discover_available_scenarios,
        discover_variants,
        list_agent_pool,
@@ -78,8 +78,8 @@ Classes
 
 Integration
 -----------
-- Used by: masim/interface/app.py (Streamlit web UI)
-- Depends on: masim/simulator/general.py, masim/interface/customized/
+- Used by: app/app.py (Streamlit web UI)
+- Depends on: masim/simulator/general.py, app/customized/
 - Progress callbacks enable real-time UI updates in Streamlit
 """
 
@@ -289,7 +289,7 @@ class SimulationRunner:
         """Customized mode: build a bundle from AGENT_POOL selections, then run.
 
         Generates a self-contained simulation bundle via
-        :func:`masim.interface.customized.write_customized_bundle`, then
+        :func:`app.customized.write_customized_bundle`, then
         returns a runner pointing at the generated config.
 
         Args:
@@ -305,7 +305,7 @@ class SimulationRunner:
             ValueError: Roster is incompatible with the chosen scenario.
             FileNotFoundError: Base scenario config is missing.
         """
-        from masim.interface.customized import write_customized_bundle
+        from app.customized import write_customized_bundle
 
         result = write_customized_bundle(
             selections=agent_selections,

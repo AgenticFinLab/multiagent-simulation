@@ -803,7 +803,7 @@ def render_variant_choice() -> None:
             # what's inside without opening it.
             if player_agents:
                 # NOTE: use a distinct local name so we don't shadow the
-                # imported ``total_instances`` helper (masim.interface.
+                # imported ``total_instances`` helper (app.
                 # customized.roster.total_instances) inside this scope.
                 # Shadowing was harmless in practice — no other call sites
                 # here need the helper — but it made static readers assume
@@ -2143,7 +2143,7 @@ def _replace_persona_body(
 # NOTE: The former _bundle_sys_message_ref helper was removed. Bundle-local
 # sys_message / user_message references are now composed once at bundle
 # creation time inside
-# ``masim.interface.customized.config_writer._retarget_scenario_references``.
+# ``app.customized.config_writer._retarget_scenario_references``.
 # There is no longer a "compose the retarget at Save time" flow — Save only
 # rewrites the persona body inside the bundle's own prompts.py.
 

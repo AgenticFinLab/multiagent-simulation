@@ -60,7 +60,7 @@ Rule 引擎不需要 API Key，可跳过此步。
 
 ```bash
 cd multiagent-simulation
-streamlit run masim/interface/app.py
+streamlit run app/app.py
 ```
 
 浏览器自动打开 `http://localhost:8501`，即可使用。
@@ -73,4 +73,4 @@ streamlit run masim/interface/app.py
 |------|------|
 | `No module named 'lmbase'` | 先装 lmbase：`pip install ./lmbase` |
 | torch 下载 2GB | 预装 CPU wheel：`pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu` |
-| 拓扑图不显示 | 检查 `masim/interface/assets/d3.v7.min.js` 存在（已内置，无需外网） |
+| 拓扑图不显示 | 检查 `app/assets/d3.v7.min.js` 存在（已内置，无需外网） |

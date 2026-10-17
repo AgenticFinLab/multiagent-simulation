@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Absolute project root — anchored to this source file's location so that
 # scenario discovery, experiment data, and example assets are found regardless
 # of the working directory from which Streamlit is launched.
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # masim/interface → project root
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # app → project root
 
 # Base directory for docs
 EXAMPLES_DIR = _PROJECT_ROOT / "examples"

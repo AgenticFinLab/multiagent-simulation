@@ -53,7 +53,7 @@ CORE_PREFIXES = (
 # Packages that additionally need streamlit / llama-index (requirements.txt).
 OPTIONAL_PREFIXES = (
     "evaluation",
-    "masim.interface",
+    "app",
     "masim.knowledge",
 )
 
@@ -76,7 +76,7 @@ def main(argv: List[str] | None = None) -> int:
         "--all",
         action="store_true",
         help=(
-            "Also import evaluation / masim.interface / masim.knowledge; "
+            "Also import evaluation / app / masim.knowledge; "
             "requires the full runtime environment (streamlit, llama-index)."
         ),
     )
